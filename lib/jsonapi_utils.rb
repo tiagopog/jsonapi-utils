@@ -1,5 +1,7 @@
 require "jsonapi_utils/version"
 
+# TODO:
+# 1. Refactor and separate into submodules
 module JsonapiUtils
   extend ActiveSupport::Concern
 
@@ -7,6 +9,8 @@ module JsonapiUtils
     helper_method :jsonapi_serialize, :jsonapi_serialize_collection
   end
 
+  # TODO:
+  # 1. Make it work with nil values;
   def jsonapi_render(options)
     if options.has_key?(:json)
       response_body = jsonapi_serialize(options[:json], options[:options] || {})
@@ -81,10 +85,15 @@ module JsonapiUtils
     @request.resource_klass.new(record)
   end
 
+  # TODO:
+  # 1. Make it work with OffsetPaginator;
   def paginator(params)
     PagedPaginator.new(ActionController::Parameters.new(params[:page]))
   end
 
+  # TODO:
+  # 1. Make it work for a single Hash;
+  # 2. Change the primary key (for instance: uuid).
   def fix_when_hash(records, options)
     return [] unless options[:model]
     records.map { |hash| options[:model].new(hash) }
