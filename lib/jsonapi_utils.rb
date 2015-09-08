@@ -6,7 +6,7 @@ module JsonapiUtils
   extend ActiveSupport::Concern
 
   include do
-    helper_method :jsonapi_serialize, :jsonapi_serialize_collection
+    helper_method :jsonapi_serialize
   end
 
   # TODO:
