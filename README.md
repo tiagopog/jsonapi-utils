@@ -2,7 +2,15 @@
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jsonapi_utils`. To experiment with that code, run `bin/console` for an interactive prompt.
 
-TODO: Delete this and the text above, and describe your gem
+Required doc:
+
+* Describe something about the awesome `jsonapi-resources` gem
+* Describe how it's easy to serialize JSON API-based responses using the `jsonapi_utils` gem
+* JsonapiUtils#jsonapi_render (show options like `json`, `resource`, `model`, `scope` and `count`)
+* JsonapiUtils#jsonapi_serialize
+* Example of a model
+* Example of a resource
+* Example of a base controller and another whatever controller
 
 ## Installation
 

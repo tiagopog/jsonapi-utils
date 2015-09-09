@@ -1,7 +1,8 @@
 require "jsonapi_utils/version"
 
 # TODO:
-# 1. Refactor and separate into submodules
+# 1. Refactor and separate into submodules;
+# 2. Include 'version' field in the meta node.
 module JsonapiUtils
   extend ActiveSupport::Concern
 
