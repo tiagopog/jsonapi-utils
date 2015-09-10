@@ -8,11 +8,9 @@ module JsonapiUtils
   extend ActiveSupport::Concern
 
   include do
-    helper_method :jsonapi_serialize
+    helper_method :jsonapi_serialize, :jsonapi_serialize_collection
   end
 
-  # TODO:
-  # 1. Make it work with nil values;
   def jsonapi_render(options)
     if options.has_key?(:json)
       response_body = jsonapi_serialize(options[:json], options[:options] || {})
@@ -26,14 +24,13 @@ module JsonapiUtils
 
     if records.respond_to?(:to_ary)
       records = fix_when_hash(records, options) if records.all? { |e| e.is_a?(Hash) }
-      @resources = build_collection(records)
+      @resources = build_collection(records, options)
       results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
     else
-      @resource = turn_into_resource(records)
+      @resource = turn_into_resource(records, options)
       results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
     end
-
-    create_response_document(results).contents
+    create_response_document(results, options).contents
   end
 
   def jsonapi_error(exception)
@@ -76,26 +73,25 @@ module JsonapiUtils
   end
 
 
-  def build_collection(records)
+  def build_collection(records, options = {})
     return [] unless records.present?
     paginator(@request.params).apply(records, nil).map do |record|
-      turn_into_resource(record)
+      turn_into_resource(record, options)
     end
   end
 
-  def turn_into_resource(record)
-    @request.resource_klass.new(record)
+  def turn_into_resource(record, options = {})
+    if options[:resource]
+      options[:resource].new(record)
+    else
+      @request.resource_klass.new(record)
+    end
   end
 
-  # TODO:
-  # 1. Make it work with OffsetPaginator;
   def paginator(params)
     PagedPaginator.new(ActionController::Parameters.new(params[:page]))
   end
 
-  # TODO:
-  # 1. Make it work for a single Hash;
-  # 2. Change the primary key (for instance: uuid).
   def fix_when_hash(records, options)
     return [] unless options[:model]
     records.map { |hash| options[:model].new(hash) }
