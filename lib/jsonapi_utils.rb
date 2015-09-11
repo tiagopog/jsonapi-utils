@@ -8,7 +8,7 @@ module JsonapiUtils
   extend ActiveSupport::Concern
 
   include do
-    helper_method :jsonapi_serialize, :jsonapi_serialize_collection
+    helper_method :jsonapi_serialize
   end
 
   def jsonapi_render(options)
@@ -30,7 +30,7 @@ module JsonapiUtils
       @resource = turn_into_resource(records, options)
       results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
     end
-    create_response_document(results, options).contents
+    create_response_document(results).contents
   end
 
   def jsonapi_error(exception)
