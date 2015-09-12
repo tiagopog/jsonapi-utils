@@ -13,5 +13,6 @@
 *.o
 *.a
 *.gem
+.DS_Store
 mkmf.log
 
