@@ -1,11 +1,11 @@
 # JSONAPI::Utils
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jsonapi_utils`. To experiment with that code, run `bin/console` for an interactive prompt.
+Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jsonapi-utils`. To experiment with that code, run `bin/console` for an interactive prompt.
 
 Required doc:
 
 * Describe something about the awesome `jsonapi-resources` gem
-* Describe how it's easy to serialize JSON API-based responses using the `jsonapi_utils` gem
+* Describe how it's easy to serialize JSON API-based responses using the `jsonapi-utils` gem
 * JSONAPI::Utils#jsonapi_render (show options like `json`, `resource`, `model`, `scope` and `count`)
 * JSONAPI::Utils#jsonapi_serialize
 * Example of a model
@@ -17,7 +17,7 @@ Required doc:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi_utils'
+gem 'jsonapi-utils'
 ```
 
 And then execute:
@@ -26,7 +26,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install jsonapi_utils
+    $ gem install jsonapi-utils
 
 ## Usage
 
@@ -40,7 +40,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jsonapi_utils. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jsonapi-utils. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
 
 
 ## License
