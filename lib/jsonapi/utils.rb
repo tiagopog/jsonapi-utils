@@ -10,23 +10,33 @@ module JSONAPI
 
     def jsonapi_render(options)
       if options.has_key?(:json)
-        response_body = jsonapi_serialize(options[:json], options[:options] || {})
-        render json: response_body, status: (options[:status] || :ok)
+        response = build_response(options)
+        render json: response[:body], status: options[:status] || response[:status] || :ok
       end
     end
 
     def jsonapi_serialize(records, options = {})
-      fix_request_options(params, records)
+      # TODO: give the option to return null or error when nil
+      # return build_nil if records.nil?
       results = JSONAPI::OperationResults.new
 
-      if records.respond_to?(:to_ary)
-        records = fix_when_hash(records, options) if records.all? { |e| e.is_a?(Hash) }
-        @resources = build_collection(records, options)
-        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
+      if records.nil?
+        # TODO: replace 1, in the following line, with the record id
+        record_not_found = JSONAPI::Exceptions::RecordNotFound.new(1)
+        results.add_result(JSONAPI::ErrorsOperationResult.new(record_not_found.errors[0].code, record_not_found.errors))
       else
-        @resource = turn_into_resource(records, options)
-        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
+        fix_request_options(params, records)
+
+        if records.respond_to?(:to_ary)
+          records = fix_when_hash(records, options) if records.all? { |e| e.is_a?(Hash) }
+          @resources = build_collection(records, options)
+          results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
+        else
+          @resource = turn_into_resource(records, options)
+          results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
+        end
       end
+
       create_response_document(results).contents
     end
 
@@ -35,6 +45,17 @@ module JSONAPI
     end
 
     private
+
+    def build_response(options)
+      {
+        body: jsonapi_serialize(options[:json], options[:options] || {}),
+        status: options[:json].nil? ? :not_found : :ok
+      }
+    end
+
+    def build_nil
+      { data: nil }
+    end
 
     def fix_request_options(params, records)
       return if request.method !~ /get/i ||
