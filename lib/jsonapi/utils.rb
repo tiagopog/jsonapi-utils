@@ -62,31 +62,38 @@ module JSONAPI
       @paginator ||= paginator(params)
       if @paginator && JSONAPI.configuration.top_level_links_include_pagination
         options = {}
-        options[:record_count] = count_records(@resources, options) if @paginator.class.requires_record_count
+        @paginator.class.requires_record_count &&
+          options[:record_count] = count_records(@resources, options)
         return @paginator.links_page_params(options)
       else
         return {}
       end
     end
 
-
     def build_collection(records, options = {})
-      return [] unless records.present?
-      paginator(@request.params).apply(records, nil).map do |record|
-        turn_into_resource(record, options)
-      end
+      return [] if records.nil? || records.empty?
+      JSONAPI.configuration.default_paginator == :none ||
+        records = paginator(@request.params).apply(records, nil)
+      records.map { |record| turn_into_resource(record, options) }
     end
 
     def turn_into_resource(record, options = {})
       if options[:resource]
-        options[:resource].new(record)
+        options[:resource].to_s.constantize.new(record)
       else
         @request.resource_klass.new(record)
       end
     end
 
     def paginator(params)
-      PagedPaginator.new(ActionController::Parameters.new(params[:page]))
+      page_params = ActionController::Parameters.new(params[:page])
+
+      @paginator ||=
+        if JSONAPI.configuration.default_paginator == :paged
+          PagedPaginator.new(page_params)
+        elsif JSONAPI.configuration.default_paginator == :offset
+          OffsetPaginator.new(page_params)
+        end
     end
 
     def fix_when_hash(records, options)
