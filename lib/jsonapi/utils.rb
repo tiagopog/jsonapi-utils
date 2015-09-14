@@ -15,14 +15,21 @@ module JSONAPI
       end
     end
 
+    def jsonapi_render_not_found
+      jsonapi_render json: nil
+    end
+
+    def jsonapi_render_not_found_with_null
+      jsonapi_render json: nil, options: { allow_null: true }
+    end
+
     def jsonapi_serialize(records, options = {})
-      # TODO: give the option to return null or error when nil
-      # return build_nil if records.nil?
+      return build_nil if records.nil? && options[:allow_null]
       results = JSONAPI::OperationResults.new
 
       if records.nil?
-        # TODO: replace 1, in the following line, with the record id
-        record_not_found = JSONAPI::Exceptions::RecordNotFound.new(1)
+        id = extract_ids(@request.params).first
+        record_not_found = JSONAPI::Exceptions::RecordNotFound.new(id)
         results.add_result(JSONAPI::ErrorsOperationResult.new(record_not_found.errors[0].code, record_not_found.errors))
       else
         fix_request_options(params, records)
@@ -49,12 +56,17 @@ module JSONAPI
     def build_response(options)
       {
         body: jsonapi_serialize(options[:json], options[:options] || {}),
-        status: options[:json].nil? ? :not_found : :ok
+        status: options[:json].nil? && !options[:allow_null] ? :not_found : :ok
       }
     end
 
     def build_nil
       { data: nil }
+    end
+
+    def extract_ids(hash)
+      ids = hash.keys.select { |e| e =~ /id$/i }
+      ids.map { |e| hash[e] }
     end
 
     def fix_request_options(params, records)

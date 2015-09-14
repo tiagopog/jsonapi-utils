@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["tiagopog@gmail.com", "douglas@beautydate.com.br"]
 
   spec.summary       = %q{Full-featured JSON API serialization in a simple way}
-  spec.description   = %q{A Rails-style way to get your API's data serialized, following the standards set by JSON API's specs (http://jsosapi.org)}
+  spec.description   = %q{A Rails-way to get your API's data serialized following the JSON API's specs (http://jsosapi.org)}
   spec.homepage      = "https://github.com/b2beauty/jsonapi-utils"
   spec.license       = "MIT"
 
