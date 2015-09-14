@@ -28,7 +28,7 @@ module JSONAPI
       results = JSONAPI::OperationResults.new
 
       if records.nil?
-        id = extract_ids(@request.params).first
+        id = extract_ids(@request.params)
         record_not_found = JSONAPI::Exceptions::RecordNotFound.new(id)
         results.add_result(JSONAPI::ErrorsOperationResult.new(record_not_found.errors[0].code, record_not_found.errors))
       else
@@ -65,8 +65,8 @@ module JSONAPI
     end
 
     def extract_ids(hash)
-      ids = hash.keys.select { |e| e =~ /id$/i }
-      ids.map { |e| hash[e] }
+      ids = hash.keys.select { |e| e =~ /id$/i }.map { |e| hash[e] }
+      ids.first rescue '(id not identified)'
     end
 
     def fix_request_options(params, records)
