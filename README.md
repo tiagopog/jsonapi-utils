@@ -1,6 +1,8 @@
 # JSONAPI::Utils
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jsonapi-utils`. To experiment with that code, run `bin/console` for an interactive prompt.
+JSON::Utils is a simple way to get a full-featured [JSON API](jsonapi.org) serialization in your
+controller's responses. This gem combine some functionalities from the awesome gem
+[jsonapi-resources](https://github.com/cerebris/jsonapi-resources) into a Rails-native way to render data.
 
 Required doc:
 
@@ -22,15 +24,13 @@ gem 'jsonapi-utils'
 
 And then execute:
 
+```shell
     $ bundle
-
-Or install it yourself as:
-
-    $ gem install jsonapi-utils
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+TODO
 
 ## Development
 

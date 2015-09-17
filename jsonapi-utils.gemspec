@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["tiagopog@gmail.com", "douglas@beautydate.com.br"]
 
   spec.summary       = %q{Full-featured JSON API serialization in a simple way}
-  spec.description   = %q{A Rails-way to get your API's data serialized following the JSON API's specs (http://jsosapi.org)}
+  spec.description   = %q{A Rails way to get your API's data serialized following the JSON API's specs (http://jsosapi.org)}
   spec.homepage      = "https://github.com/b2beauty/jsonapi-utils"
   spec.license       = "MIT"
 
@@ -18,6 +18,8 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
+
+  spec.add_runtime_dependency "~> 0.5.7"
 
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
