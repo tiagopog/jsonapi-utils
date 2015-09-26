@@ -94,7 +94,8 @@ class BaseController < JSONAPI::ResourceController
 end
 ```
 
-For this example, let's get focused only on read actions:
+For this example, let's get focused only on read actions. After including `JSONAPI::Utils` we can use the `jsonapi_render` method
+in order to generate responses which follow the JSON API's standards.
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -186,9 +187,11 @@ JSONAPI.configure do |config|
 end
 ```
 
+You may want a different configuration for your API. For more information check [this](https://github.com/cerebris/jsonapi-resources/#configuration).
+
 ### Requests
 
-# TODO: show some examples of requests here
+TODO: show some examples of requests here
 
 ## Development
 
