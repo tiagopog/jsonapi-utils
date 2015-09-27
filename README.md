@@ -4,16 +4,6 @@ JSON::Utils is a simple way to get a full-featured [JSON API](jsonapi.org) seria
 controller's responses. This gem combine some functionalities from the awesome gem
 [jsonapi-resources](https://github.com/cerebris/jsonapi-resources) into a Rails-native way to render data.
 
-Required doc:
-
-* Describe something about the awesome `jsonapi-resources` gem
-* Describe how it's easy to serialize JSON API-based responses using the `jsonapi-utils` gem
-* JSONAPI::Utils#jsonapi_render (show options like `json`, `resource`, `model`, `scope` and `count`)
-* JSONAPI::Utils#jsonapi_serialize
-* Example of a model
-* Example of a resource
-* Example of a base controller and another whatever controller
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -27,6 +17,28 @@ And then execute:
 ```shell
 $ bundle
 ```
+
+## Macros
+
+* `jsonapi_render`: it works like ActionController's `render` method, receiving model objects and
+rendering them into JSON API's data format.
+
+* `jsonapi_serialize`: in the backstage, it's the method that actually parsers model objects or hashes and builds JSON data.
+It can be called anywhere in controllers, concerns etc.
+
+Those macros accept the following options:
+
+* `resource`: explicitly points the resource to be used in the serialization. By default, `jsonapi-utils` will
+select resources by inferencing from controller's name.
+
+* `count`: explicitly points the total count of records for the request, in order to build a proper pagination. By default, `jsonapi-utils` will
+count the total number of records for a given resource.
+
+* `model`: model that will be used to parse data in case `jsonapi-utils` fails to build JSON from hashes.
+
+* `scope`: model scope that will be used to parse data in case `jsonapi-utils` fails to build JSON from hashes.
+
+Check some examples in the (Requests)[#requests] topic.
 
 ## Usage
 
