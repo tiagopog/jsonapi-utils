@@ -182,9 +182,12 @@ As you might have seen in BaseController this line will handle all errors relate
 rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
 ```
 
-It will produce the following error payload:
+The `jsonapi_render_not_found` method will produce the following error payload:
 
 ```json
+HTTP/1.1 404 Not found
+Content-Type: application/vnd.api+json
+
 {
   "errors": [
     {
@@ -200,6 +203,19 @@ It will produce the following error payload:
   ]
 }
 ```
+
+In case you prefer rendering not found resources with null data and `200 OK` status code, you can use `jsonapi_render_not_found_with_null` to produce:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "data": null
+}
+```
+
+If you need to create custom error message, check [this](https://github.com/cerebris/jsonapi-resources#error-codes).
 
 ### Initializer
 
@@ -245,8 +261,8 @@ Here's some examples of requests – based on those sample [controllers](#routes
 
 * [Collection](#collection)
 * [Collection (options)](#collection-options)
-* [Record](#record)
-* [Record (options)](#record-options)
+* [Single record](#single-record)
+* [Record (options)](#single-record-options)
 * [Relationships (identifier objects)](#relationships-identifier-objects)
 * [Nested resources](#nested-resources)
 
@@ -387,9 +403,18 @@ Content-Type: application/vnd.api+json
 
 #### Single record
 
+Request:
+
 ```
 GET /users/1 HTTP/1.1
 Accept: application/vnd.api+json
+```
+
+Response:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
 
 {
   "data": {
@@ -418,9 +443,18 @@ Accept: application/vnd.api+json
 
 #### Single record (options)
 
+Request:
+
 ```
 GET /users/1?include=posts&fields[users]=full_name,posts&fields[posts]=title HTTP/1.1
 Accept: application/vnd.api+json
+```
+
+Response:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
 
 {
   "data": {
@@ -462,11 +496,20 @@ Accept: application/vnd.api+json
 }
 ```
 
-#### Relantionships (identifier objects)
+#### Relationships (identifier objects)
+
+Request:
 
 ```
 GET /users/1/relationships/posts HTTP/1.1
 Accept: application/vnd.api+json
+```
+
+Response:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
 
 {
   "links": {
@@ -484,9 +527,18 @@ Accept: application/vnd.api+json
 
 #### Nested resources
 
+Request:
+
 ```
 GET /users/1/posts HTTP/1.1
 Accept: application/vnd.api+json
+```
+
+Response:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
 
 {
   "data": [
