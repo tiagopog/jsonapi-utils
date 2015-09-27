@@ -287,7 +287,7 @@ Content-Type: application/vnd.api+json
       "id": "1",
       "type": "users",
       "links": {
-        "self": "http://api.myawesomeblog.com/users/1"
+        "self": "http://api.myblog.com/users/1"
       },
       "attributes": {
         "first_name": "Tiago",
@@ -298,8 +298,8 @@ Content-Type: application/vnd.api+json
       "relationships": {
         "posts": {
           "links": {
-            "self": "http://api.myawesomeblog.com/users/1/relationships/posts",
-            "related": "http://api.myawesomeblog.com/users/1/posts"
+            "self": "http://api.myblog.com/users/1/relationships/posts",
+            "related": "http://api.myblog.com/users/1/posts"
           }
         }
       }
@@ -308,7 +308,7 @@ Content-Type: application/vnd.api+json
       "id": "2",
       "type": "users",
       "links": {
-        "self": "http://api.myawesomeblog.com/users/2"
+        "self": "http://api.myblog.com/users/2"
       },
       "attributes": {
         "first_name": "Douglas",
@@ -319,8 +319,8 @@ Content-Type: application/vnd.api+json
       "relationships": {
         "posts": {
           "links": {
-            "self": "http://api.myawesomeblog.com/users/2/relationships/posts",
-            "related": "http://api.myawesomeblog.com/users/2/posts"
+            "self": "http://api.myblog.com/users/2/relationships/posts",
+            "related": "http://api.myblog.com/users/2/posts"
           }
         }
       }
@@ -330,8 +330,8 @@ Content-Type: application/vnd.api+json
     "record_count": 2
   },
   "links": {
-    "first": "http://api.myawesomeblog.com/users?page%5Bnumber%5D=1&page%5Bsize%5D=10",
-    "last": "http://api.myawesomeblog.com/users?page%5Bnumber%5D=1&page%5Bsize%5D=10"
+    "first": "http://api.myblog.com/users?page%5Bnumber%5D=1&page%5Bsize%5D=10",
+    "last": "http://api.myblog.com/users?page%5Bnumber%5D=1&page%5Bsize%5D=10"
   }
 }
 ```
@@ -357,7 +357,7 @@ Content-Type: application/vnd.api+json
       "id": "1",
       "type": "users",
       "links": {
-        "self": "http://localhost:3000/users/1"
+        "self": "http://api.myblog.com/users/1"
       },
       "attributes": {
         "full_name": "Tiago Guedes"
@@ -365,8 +365,8 @@ Content-Type: application/vnd.api+json
       "relationships": {
         "posts": {
           "links": {
-            "self": "http://localhost:3000/users/1/relationships/posts",
-            "related": "http://localhost:3000/users/1/posts"
+            "self": "http://api.myblog.com/users/1/relationships/posts",
+            "related": "http://api.myblog.com/users/1/posts"
           },
           "data": [
             {
@@ -383,7 +383,7 @@ Content-Type: application/vnd.api+json
       "id": "1",
       "type": "posts",
       "links": {
-        "self": "http://localhost:3000/posts/1"
+        "self": "http://api.myblog.com/posts/1"
       },
       "attributes": {
         "title": "An awesome post"
@@ -394,9 +394,9 @@ Content-Type: application/vnd.api+json
     "record_count": 2
   },
   "links": {
-    "first": "http://localhost:3000/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=1&page%5Bsize%5D=1",
-    "next": "http://localhost:3000/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1",
-    "last": "http://localhost:3000/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1"
+    "first": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=1&page%5Bsize%5D=1",
+    "next": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1",
+    "last": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1"
   }
 }
 ```
@@ -421,7 +421,7 @@ Content-Type: application/vnd.api+json
     "id": "1",
     "type": "users",
     "links": {
-      "self": "http://localhost:3000/users/1"
+      "self": "http://api.myblog.com/users/1"
     },
     "attributes": {
       "first_name": "Tiago",
@@ -432,8 +432,8 @@ Content-Type: application/vnd.api+json
     "relationships": {
       "posts": {
         "links": {
-          "self": "http://localhost:3000/users/1/relationships/posts",
-          "related": "http://localhost:3000/users/1/posts"
+          "self": "http://api.myblog.com/users/1/relationships/posts",
+          "related": "http://api.myblog.com/users/1/posts"
         }
       }
     }
@@ -461,7 +461,7 @@ Content-Type: application/vnd.api+json
     "id": "1",
     "type": "users",
     "links": {
-      "self": "http://localhost:3000/users/1"
+      "self": "http://api.myblog.com/users/1"
     },
     "attributes": {
       "full_name": "Tiago Guedes"
@@ -469,8 +469,8 @@ Content-Type: application/vnd.api+json
     "relationships": {
       "posts": {
         "links": {
-          "self": "http://localhost:3000/users/1/relationships/posts",
-          "related": "http://localhost:3000/users/1/posts"
+          "self": "http://api.myblog.com/users/1/relationships/posts",
+          "related": "http://api.myblog.com/users/1/posts"
         },
         "data": [
           {
@@ -486,7 +486,7 @@ Content-Type: application/vnd.api+json
       "id": "1",
       "type": "posts",
       "links": {
-        "self": "http://localhost:3000/posts/1"
+        "self": "http://api.myblog.com/posts/1"
       },
       "attributes": {
         "title": "An awesome post"
@@ -513,8 +513,8 @@ Content-Type: application/vnd.api+json
 
 {
   "links": {
-    "self": "http://localhost:3000/users/1/relationships/posts",
-    "related": "http://localhost:3000/users/1/posts"
+    "self": "http://api.myblog.com/users/1/relationships/posts",
+    "related": "http://api.myblog.com/users/1/posts"
   },
   "data": [
     {
@@ -546,7 +546,7 @@ Content-Type: application/vnd.api+json
       "id": "1",
       "type": "posts",
       "links": {
-        "self": "http://localhost:3000/posts/1"
+        "self": "http://api.myblog.com/posts/1"
       },
       "attributes": {
         "title": "An awesome post",
@@ -555,8 +555,8 @@ Content-Type: application/vnd.api+json
       "relationships": {
         "author": {
           "links": {
-            "self": "http://localhost:3000/posts/1/relationships/author",
-            "related": "http://localhost:3000/posts/1/author"
+            "self": "http://api.myblog.com/posts/1/relationships/author",
+            "related": "http://api.myblog.com/posts/1/author"
           }
         }
       }
@@ -566,8 +566,8 @@ Content-Type: application/vnd.api+json
     "record_count": 1
   },
   "links": {
-    "first": "http://localhost:3000/posts?page%5Bnumber%5D=1&page%5Bsize%5D=10",
-    "last": "http://localhost:3000/posts?page%5Bnumber%5D=1&page%5Bsize%5D=10"
+    "first": "http://api.myblog.com/posts?page%5Bnumber%5D=1&page%5Bsize%5D=10",
+    "last": "http://api.myblog.com/posts?page%5Bnumber%5D=1&page%5Bsize%5D=10"
   }
 }
 ```
