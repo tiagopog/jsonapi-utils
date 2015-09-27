@@ -1,8 +1,8 @@
 # JSONAPI::Utils
 
 JSON::Utils is a simple way to get a full-featured [JSON API](jsonapi.org) serialization in your
-controller's responses. This gem combine some functionalities from the awesome gem
-[jsonapi-resources](https://github.com/cerebris/jsonapi-resources) into a Rails-native way to render data.
+controller's responses. This gem works on top of the awesome gem [jsonapi-resources](https://github.com/cerebris/jsonapi-resources),
+bringing to controllers a Rails-native way to render data.
 
 ## Installation
 
@@ -28,17 +28,17 @@ It can be called anywhere in controllers, concerns etc.
 
 Those macros accept the following options:
 
-* `resource`: explicitly points the resource to be used in the serialization. By default, `jsonapi-utils` will
+* `resource`: explicitly points the resource to be used in the serialization. By default, JSONAPI::Utils will
 select resources by inferencing from controller's name.
 
-* `count`: explicitly points the total count of records for the request, in order to build a proper pagination. By default, `jsonapi-utils` will
+* `count`: explicitly points the total count of records for the request, in order to build a proper pagination. By default, JSONAPI::Utils will
 count the total number of records for a given resource.
 
-* `model`: model that will be used to parse data in case `jsonapi-utils` fails to build JSON from hashes.
+* `model`: model that will be used to parse data in case JSONAPI::Utils fails to build JSON from hashes.
 
-* `scope`: model scope that will be used to parse data in case `jsonapi-utils` fails to build JSON from hashes.
+* `scope`: model scope that will be used to parse data in case JSONAPI::Utils fails to build JSON from hashes.
 
-Check some examples in the (Requests)[#requests] topic.
+Check some examples in the [Routes & Controllers](#routes--controllers) topic.
 
 ## Usage
 
@@ -163,6 +163,12 @@ class PostsController < BaseController
 end
 ```
 
+When using hashes you might use some options like:
+
+```ruby
+# TODO
+```
+
 ### Initializer
 
 In order to enable a proper pagination, record count etc, let's define an initializer such as:
@@ -201,9 +207,94 @@ end
 
 You may want a different configuration for your API. For more information check [this](https://github.com/cerebris/jsonapi-resources/#configuration).
 
-### Requests
+### Requests & Responses
 
-TODO: show some examples of requests here
+Here's some examples of requests – based on those sample [controllers](#routes--controllers) – and their respective JSON responses.
+
+#### Collection
+
+Request:
+
+```
+GET /users HTTP/1.1
+Accept: application/vnd.api+json
+```
+
+Response:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "users",
+      "links": {
+        "self": "http://api.myawesomeblog.com/users/1"
+      },
+      "attributes": {
+        "first_name": "Tiago",
+        "last_name": "Guedes",
+        "full_name": "Tiago Guedes",
+        "birthday": null
+      },
+      "relationships": {
+        "posts": {
+          "links": {
+            "self": "http://api.myawesomeblog.com/users/1/relationships/posts",
+            "related": "http://api.myawesomeblog.com/users/1/posts"
+          }
+        }
+      }
+    },
+    {
+      "id": "2",
+      "type": "users",
+      "links": {
+        "self": "http://api.myawesomeblog.com/users/2"
+      },
+      "attributes": {
+        "first_name": "Douglas",
+        "last_name": "André",
+        "full_name": "Douglas André",
+        "birthday": null
+      },
+      "relationships": {
+        "posts": {
+          "links": {
+            "self": "http://api.myawesomeblog.com/users/2/relationships/posts",
+            "related": "http://api.myawesomeblog.com/users/2/posts"
+          }
+        }
+      }
+    }
+  ],
+  "meta": {
+    "record_count": 2
+  },
+  "links": {
+    "first": "http://api.myawesomeblog.com/users?page%5Bnumber%5D=1&page%5Bsize%5D=10",
+    "last": "http://api.myawesomeblog.com/users?page%5Bnumber%5D=1&page%5Bsize%5D=10"
+  }
+}
+```
+
+#### Collection (options)
+
+TODO
+
+#### Single record
+
+```
+GET /users/1 HTTP/1.1
+Accept: application/vnd.api+json
+```
+
+#### Single record (options)
+
+TODO
 
 ## Development
 
