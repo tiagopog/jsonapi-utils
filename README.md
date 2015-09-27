@@ -6,9 +6,10 @@ bringing to controllers a Rails-native way to render data.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add these lines to your application's Gemfile:
 
 ```ruby
+gem 'jsonapi-resources', '~> 0.5.7'
 gem 'jsonapi-utils'
 ```
 
@@ -26,19 +27,25 @@ rendering them into JSON API's data format.
 * `jsonapi_serialize`: in the backstage, it's the method that actually parsers model objects or hashes and builds JSON data.
 It can be called anywhere in controllers, concerns etc.
 
+## Options
+
 Those macros accept the following options:
 
 * `resource`: explicitly points the resource to be used in the serialization. By default, JSONAPI::Utils will
 select resources by inferencing from controller's name.
 
+```ruby
+# If in UsersController for some reason it needs to render a different resource:
+jsonapi_render json: Post.all, options: { resource: PostResource }
+```
+
 * `count`: explicitly points the total count of records for the request, in order to build a proper pagination. By default, JSONAPI::Utils will
 count the total number of records for a given resource.
 
-* `model`: model that will be used to parse data in case JSONAPI::Utils fails to build JSON from hashes.
-
-* `scope`: model scope that will be used to parse data in case JSONAPI::Utils fails to build JSON from hashes.
-
-Check some examples in the [Routes & Controllers](#routes--controllers) topic.
+```ruby
+users = User.all
+jsonapi_render json: users, options: { count: users.size }
+```
 
 ## Usage
 
@@ -86,12 +93,13 @@ end
 
 ### Routes & Controllers
 
-Let's define our routes using the `jsonapi_resources` macro provied by the `jsonapi-resources` gem:
+Let's define our routes using the `jsonapi_resources` and `jsonapi_links` macros provied by the `jsonapi-resources` gem:
 
 ```ruby
 Rails.application.routes.draw do
   jsonapi_resources :users do
     jsonapi_resources :posts
+    jsonapi_links :posts
   end
 end
 ```
@@ -103,6 +111,7 @@ And a base controller to include the features from `jsonapi-resources` and `json
 class BaseController < JSONAPI::ResourceController
   include JSONAPI::Utils
   protect_from_forgery with: :null_session
+  rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
 end
 ```
 
@@ -163,10 +172,33 @@ class PostsController < BaseController
 end
 ```
 
-When using hashes you might use some options like:
+### Erros
+
+#### Not found
+
+As you might have seen in BaseController this line will handle all errors related to not found resources:
 
 ```ruby
-# TODO
+rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
+```
+
+It will produce the following error payload:
+
+```json
+{
+  "errors": [
+    {
+      "title": "Record not found",
+      "detail": "The record identified by 3 could not be found.",
+      "id": null,
+      "href": null,
+      "code": 404,
+      "source": null,
+      "links": null,
+      "status": "not_found"
+    }
+  ]
+}
 ```
 
 ### Initializer
@@ -210,6 +242,13 @@ You may want a different configuration for your API. For more information check 
 ### Requests & Responses
 
 Here's some examples of requests – based on those sample [controllers](#routes--controllers) – and their respective JSON responses.
+
+* [Collection](#collection)
+* [Collection (options)](#collection-options)
+* [Record](#record)
+* [Record (options)](#record-options)
+* [Relationships (identifier objects)](#relationships-identifier-objects)
+* [Nested resources](#nested-resources)
 
 #### Collection
 
@@ -283,18 +322,203 @@ Content-Type: application/vnd.api+json
 
 #### Collection (options)
 
-TODO
+Request:
+
+```
+GET /users?include=posts&fields[users]=full_name,posts&fields[posts]=title&page[number]=1&page[size]=1 HTTP/1.1
+Accept: application/vnd.api+json
+```
+
+Response:
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/vnd.api+json
+
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "users",
+      "links": {
+        "self": "http://localhost:3000/users/1"
+      },
+      "attributes": {
+        "full_name": "Tiago Guedes"
+      },
+      "relationships": {
+        "posts": {
+          "links": {
+            "self": "http://localhost:3000/users/1/relationships/posts",
+            "related": "http://localhost:3000/users/1/posts"
+          },
+          "data": [
+            {
+              "type": "posts",
+              "id": "1"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "1",
+      "type": "posts",
+      "links": {
+        "self": "http://localhost:3000/posts/1"
+      },
+      "attributes": {
+        "title": "An awesome post"
+      }
+    }
+  ],
+  "meta": {
+    "record_count": 2
+  },
+  "links": {
+    "first": "http://localhost:3000/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=1&page%5Bsize%5D=1",
+    "next": "http://localhost:3000/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1",
+    "last": "http://localhost:3000/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1"
+  }
+}
+```
 
 #### Single record
 
 ```
 GET /users/1 HTTP/1.1
 Accept: application/vnd.api+json
+
+{
+  "data": {
+    "id": "1",
+    "type": "users",
+    "links": {
+      "self": "http://localhost:3000/users/1"
+    },
+    "attributes": {
+      "first_name": "Tiago",
+      "last_name": "Guedes",
+      "full_name": "Tiago Guedes",
+      "birthday": null
+    },
+    "relationships": {
+      "posts": {
+        "links": {
+          "self": "http://localhost:3000/users/1/relationships/posts",
+          "related": "http://localhost:3000/users/1/posts"
+        }
+      }
+    }
+  }
+}
 ```
 
 #### Single record (options)
 
-TODO
+```
+GET /users/1?include=posts&fields[users]=full_name,posts&fields[posts]=title HTTP/1.1
+Accept: application/vnd.api+json
+
+{
+  "data": {
+    "id": "1",
+    "type": "users",
+    "links": {
+      "self": "http://localhost:3000/users/1"
+    },
+    "attributes": {
+      "full_name": "Tiago Guedes"
+    },
+    "relationships": {
+      "posts": {
+        "links": {
+          "self": "http://localhost:3000/users/1/relationships/posts",
+          "related": "http://localhost:3000/users/1/posts"
+        },
+        "data": [
+          {
+            "type": "posts",
+            "id": "1"
+          }
+        ]
+      }
+    }
+  },
+  "included": [
+    {
+      "id": "1",
+      "type": "posts",
+      "links": {
+        "self": "http://localhost:3000/posts/1"
+      },
+      "attributes": {
+        "title": "An awesome post"
+      }
+    }
+  ]
+}
+```
+
+#### Relantionships (identifier objects)
+
+```
+GET /users/1/relationships/posts HTTP/1.1
+Accept: application/vnd.api+json
+
+{
+  "links": {
+    "self": "http://localhost:3000/users/1/relationships/posts",
+    "related": "http://localhost:3000/users/1/posts"
+  },
+  "data": [
+    {
+      "type": "posts",
+      "id": "1"
+    }
+  ]
+}
+```
+
+#### Nested resources
+
+```
+GET /users/1/posts HTTP/1.1
+Accept: application/vnd.api+json
+
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "posts",
+      "links": {
+        "self": "http://localhost:3000/posts/1"
+      },
+      "attributes": {
+        "title": "An awesome post",
+        "body": "Lorem ipsum dolot sit amet"
+      },
+      "relationships": {
+        "author": {
+          "links": {
+            "self": "http://localhost:3000/posts/1/relationships/author",
+            "related": "http://localhost:3000/posts/1/author"
+          }
+        }
+      }
+    }
+  ],
+  "meta": {
+    "record_count": 1
+  },
+  "links": {
+    "first": "http://localhost:3000/posts?page%5Bnumber%5D=1&page%5Bsize%5D=10",
+    "last": "http://localhost:3000/posts?page%5Bnumber%5D=1&page%5Bsize%5D=10"
+  }
+}
+```
 
 ## Development
 

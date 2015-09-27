@@ -1,4 +1,4 @@
-require "jsonapi/utils/version"
+require 'jsonapi/utils/version'
 
 module JSONAPI
   module Utils
