@@ -35,7 +35,7 @@ module JSONAPI
         fix_request_options(params, records)
 
         if records.respond_to?(:to_ary)
-          records = fix_when_hash(records, options) if records.all? { |e| e.is_a?(Hash) }
+          records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
           @resources = build_collection(records, options)
           results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
         else
@@ -75,6 +75,10 @@ module JSONAPI
                 %w(index show create update destroy).include?(params[:action])
       action = records.respond_to?(:to_ary) ? 'index' : 'show'
       @request.send("setup_#{action}_action", params)
+    end
+
+    def needs_to_be_fixed?(records)
+      records.is_a?(Array) && records.all? { |e| e.is_a?(Hash) }
     end
 
     def result_options(options)

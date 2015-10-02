@@ -44,7 +44,7 @@ count the total number of records for a given resource.
 
 ```ruby
 users = User.all
-jsonapi_render json: users, options: { count: users.size }
+jsonapi_render json: users, options: { count: users.count }
 ```
 
 ## Usage
@@ -125,8 +125,7 @@ class UsersController < BaseController
 
   # GET /users
   def index
-    users = User.all
-    jsonapi_render json: users, options: { count: users.size }
+    jsonapi_render json: User.all
   end
 
   # GET /users/:id
@@ -152,7 +151,8 @@ class PostsController < BaseController
 
   # GET /users/:user_id/posts
   def index
-    jsonapi_render json: @user.posts, options: { count: @user.posts.size }
+    posts = @user.posts.enabled
+    jsonapi_render json: posts, options: { count: posts.count }
   end
 
   # GET /users/:user_id/posts/:id
