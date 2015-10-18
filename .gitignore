@@ -7,6 +7,8 @@
 /pkg/
 /spec/reports/
 /tmp/
+/log/
+*.log
 *.bundle
 *.so
 *.sw*
@@ -14,5 +16,5 @@
 *.a
 *.gem
 .DS_Store
-mkmf.log
+test_db
 
