@@ -1,8 +1,9 @@
 require 'jsonapi/utils/version'
+require 'active_support/concern'
 
 module JSONAPI
   module Utils
-    extend ActiveSupport::Concern
+    extend ::ActiveSupport::Concern
 
     include do
       helper_method :jsonapi_serialize
