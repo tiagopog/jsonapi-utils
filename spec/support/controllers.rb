@@ -5,9 +5,9 @@ class BaseController < JSONAPI::ResourceController
 end
 
 class PostsController < BaseController
-  # GET /posts
+  # GET /users/:id/posts
   def index
-    @posts = Post.all
+    @posts = User.find(param[:id]).posts
     jsonapi_render json: @posts, options: { count: @posts.count }
   end
 

@@ -1,7 +1,6 @@
-# $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-
 require 'rails/all'
 require 'rails/test_help'
+require 'rspec/rails'
 require 'jsonapi-resources'
 require 'jsonapi/utils'
 require 'factory_girl'
@@ -17,14 +16,6 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
   end
-
-  # config.before(:each) do
-    # Force FactoryGirl sequences to be fully reset before each test run to simplify ID testing
-    # since we are not using a database or real fixtures. Inside of each test case, IDs will
-    # increment per type starting at 1.
-    # FactoryGirl.reload
-    # load 'support/factory.rb'
-  # end
 end
 
 Rails.env = 'test'
@@ -59,6 +50,8 @@ end
 
 TestApp.initialize!
 
+# Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
+require 'support/shared'
 require 'support/models'
 require 'support/factories'
 require 'support/resources'
@@ -73,7 +66,5 @@ JSONAPI.configuration.route_format = :dasherized_route
 TestApp.routes.draw do
   jsonapi_resources :users do
     jsonapi_resources :posts
-    jsonapi_links :posts
   end
 end
-
