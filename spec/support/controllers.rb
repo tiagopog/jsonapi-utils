@@ -31,3 +31,4 @@ class UsersController < BaseController
     jsonapi_render json: @user
   end
 end
+
