@@ -1,4 +1,5 @@
 require 'jsonapi/utils/version'
+require 'jsonapi/utils/exceptions'
 
 module JSONAPI
   module Utils
@@ -45,6 +46,14 @@ module JSONAPI
       end
 
       create_response_document(results).contents
+    end
+
+    def jsonapi_bad_request
+      jsonapi_error(::JSONAPI::Utils::Exceptions::BadRequest.new)
+    end
+
+    def jsonapi_internal_server_error
+      jsonapi_error(::JSONAPI::Utils::Exceptions::InternalServerError.new)
     end
 
     def jsonapi_error(exception)
