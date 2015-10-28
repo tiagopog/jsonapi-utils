@@ -11,67 +11,53 @@ module JSONAPI
 
     def jsonapi_render(options)
       if options.has_key?(:json)
-        response = build_response(options)
-        render json: response[:body], status: options[:status] || response[:status] || :ok
+        response = jsonapi_serialize(options[:json], options[:options] || {})
+        render json: response, status: options[:status] || :ok
       end
     end
 
+    def jsonapi_errors(exception)
+      JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors).as_json
+    end
+
+    def jsonapi_render_internal_server_error
+      errors = ::JSONAPI::Utils::Exceptions::InternalServerError.new
+      render json: jsonapi_errors(errors), status: 500
+    end
+
+    def jsonapi_render_bad_request
+      errors = ::JSONAPI::Utils::Exceptions::BadRequest.new
+      render json: jsonapi_errors(errors), status: 400
+    end
+
     def jsonapi_render_not_found
-      jsonapi_render json: nil
+      id = extract_ids(@request.params)
+      exception = JSONAPI::Exceptions::RecordNotFound.new(id)
+      render json: jsonapi_errors(exception), status: 404
     end
 
     def jsonapi_render_not_found_with_null
-      jsonapi_render json: nil, options: { allow_null: true }
+      render json: { data: nil }, status: 200
     end
 
     def jsonapi_serialize(records, options = {})
-      return build_nil if records.nil? && options[:allow_null]
       results = JSONAPI::OperationResults.new
 
-      if records.nil?
-        id = extract_ids(@request.params)
-        record_not_found = JSONAPI::Exceptions::RecordNotFound.new(id)
-        results.add_result(JSONAPI::ErrorsOperationResult.new(record_not_found.errors[0].code, record_not_found.errors))
-      else
-        fix_request_options(params, records)
+      fix_request_options(params, records)
 
-        if records.respond_to?(:to_ary)
-          records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
-          @resources = build_collection(records, options)
-          results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
-        else
-          @resource = turn_into_resource(records, options)
-          results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
-        end
+      if records.respond_to?(:to_ary)
+        records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
+        @resources = build_collection(records, options)
+        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
+      else
+        @resource = turn_into_resource(records, options)
+        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
       end
 
       create_response_document(results).contents
     end
 
-    def jsonapi_bad_request
-      jsonapi_error(::JSONAPI::Utils::Exceptions::BadRequest.new)
-    end
-
-    def jsonapi_internal_server_error
-      jsonapi_error(::JSONAPI::Utils::Exceptions::InternalServerError.new)
-    end
-
-    def jsonapi_error(exception)
-      JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors).as_json
-    end
-
     private
-
-    def build_response(options)
-      {
-        body: jsonapi_serialize(options[:json], options[:options] || {}),
-        status: options[:json].nil? && !options[:allow_null] ? :not_found : :ok
-      }
-    end
-
-    def build_nil
-      { data: nil }
-    end
 
     def extract_ids(hash)
       ids = hash.keys.select { |e| e =~ /id$/i }.map { |e| hash[e] }
