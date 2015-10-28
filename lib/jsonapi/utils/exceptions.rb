@@ -16,7 +16,7 @@ module JSONAPI
           [JSONAPI::Error.new(code: 400,
                               status: :bad_request,
                               title: 'Bad Request.',
-                              detail: "Sorry, but this request is not supported. Please, check the documentation, or the development team.")]
+                              detail: "Sorry, but this request is not supported.")]
         end
       end
 
@@ -32,7 +32,7 @@ module JSONAPI
           [JSONAPI::Error.new(code: 404,
                               status: :not_found,
                               title: 'Internal Server error.',
-                              detail: "Sorry, but an error ocurred during this request. Please, contact the development team.")]
+                              detail: "Sorry, but an error ocurred during this request.")]
         end
       end
 
