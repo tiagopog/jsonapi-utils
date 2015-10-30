@@ -16,24 +16,26 @@ module JSONAPI
       end
     end
 
-    def jsonapi_errors(exception)
-      JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors).as_json
+    def jsonapi_render_errors(exception)
+      error = jsonapi_format_errors(exception)
+      render json: { errors: error.errors }, status: error.code
+    end
+
+    def jsonapi_format_errors(exception)
+      JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors)
     end
 
     def jsonapi_render_internal_server_error
-      errors = ::JSONAPI::Utils::Exceptions::InternalServerError.new
-      render json: jsonapi_errors(errors), status: 500
+      jsonapi_render_errors(::JSONAPI::Utils::Exceptions::InternalServerError.new)
     end
 
     def jsonapi_render_bad_request
-      errors = ::JSONAPI::Utils::Exceptions::BadRequest.new
-      render json: jsonapi_errors(errors), status: 400
+      jsonapi_render_errors(::JSONAPI::Utils::Exceptions::BadRequest.new)
     end
 
     def jsonapi_render_not_found
       id = extract_ids(@request.params)
-      exception = JSONAPI::Exceptions::RecordNotFound.new(id)
-      render json: jsonapi_errors(exception), status: 404
+      jsonapi_render_errors(JSONAPI::Exceptions::RecordNotFound.new(id))
     end
 
     def jsonapi_render_not_found_with_null
