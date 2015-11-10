@@ -105,10 +105,10 @@ module JSONAPI
     end
 
     def build_collection(records, options = {})
-      return [] if records.nil? || records.empty?
-      JSONAPI.configuration.default_paginator == :none ||
+      unless JSONAPI.configuration.default_paginator == :none
         records = paginator(@request.params).apply(records, nil)
-      records.map { |record| turn_into_resource(record, options) }
+      end
+      records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
     def turn_into_resource(record, options = {})
