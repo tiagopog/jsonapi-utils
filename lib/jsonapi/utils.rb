@@ -26,11 +26,11 @@ module JSONAPI
     end
 
     def jsonapi_render_internal_server_error
-      Rails.env.development? || jsonapi_render_errors(::JSONAPI::Utils::Exceptions::InternalServerError.new)
+      jsonapi_render_errors(::JSONAPI::Utils::Exceptions::InternalServerError.new)
     end
 
     def jsonapi_render_bad_request
-      Rails.env.development? || jsonapi_render_errors(::JSONAPI::Utils::Exceptions::BadRequest.new)
+      jsonapi_render_errors(::JSONAPI::Utils::Exceptions::BadRequest.new)
     end
 
     def jsonapi_render_not_found
