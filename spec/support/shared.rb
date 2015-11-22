@@ -5,8 +5,9 @@ shared_examples_for 'request with error' do |options|
         it 'renders 400 response' do
           record = options[:record]
           params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
+          params.merge!(fields: { foo: 'name' })
 
-          get options[:action], params.merge(fields: { foo: 'name' }), headers
+          get options[:action], params, headers
 
           expect(response).to have_http_status 400
           expect(json['errors'][0]['title']).to eq('Invalid resource')
@@ -18,8 +19,9 @@ shared_examples_for 'request with error' do |options|
         it 'renders 400 response' do
           record = options[:record]
           params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
+          params.merge!(fields: { users: 'foo' })
 
-          get options[:action], params.merge(fields: { users: 'foo' }), headers
+          get options[:action], params, headers
 
           expect(response).to have_http_status 400
           expect(json['errors'][0]['title']).to eq('Invalid field')
@@ -32,8 +34,9 @@ shared_examples_for 'request with error' do |options|
       it 'renders 400 response' do
         record = options[:record]
         params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
+        params.merge!(include: 'foo')
 
-        get options[:action], params.merge(include: 'foo'), headers
+        get options[:action], params, headers
 
         expect(response).to have_http_status 400
         expect(json['errors'][0]['title']).to eq('Invalid field')
@@ -41,12 +44,27 @@ shared_examples_for 'request with error' do |options|
       end
     end
 
+    context 'when error is in "filter"' do
+      it 'renders 400 response' do
+        record = options[:record]
+        params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
+        params.merge!({ filter: { foo: 'bar' } })
+
+        get options[:action], params, headers
+
+        expect(response).to have_http_status 400
+        expect(json['errors'][0]['title']).to eq('Filter not allowed')
+        expect(json['errors'][0]['code']).to eq(102)
+      end
+    end
+
     context 'when error is in "sort"' do
       it 'renders 400 response' do
         record = options[:record]
         params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
+        params.merge!(sort: 'foo')
 
-        get options[:action], params.merge(sort: 'foo'), headers
+        get options[:action], params, headers
 
         expect(response).to have_http_status 400
         expect(json['errors'][0]['title']).to eq('Invalid sort criteria')
