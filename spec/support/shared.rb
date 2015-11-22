@@ -43,14 +43,12 @@ shared_examples_for 'request with error' do |options|
         expect(json['errors'][0]['code']).to eq(112)
       end
     end
+  end
 
+  if options[:action] == :index
     context 'when error is in "filter"' do
       it 'renders 400 response' do
-        record = options[:record]
-        params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
-        params.merge!({ filter: { foo: 'bar' } })
-
-        get options[:action], params, headers
+        get options[:action], { filter: { foo: 'bar' } }, headers
 
         expect(response).to have_http_status 400
         expect(json['errors'][0]['title']).to eq('Filter not allowed')
@@ -60,24 +58,18 @@ shared_examples_for 'request with error' do |options|
 
     context 'when error is in "sort"' do
       it 'renders 400 response' do
-        record = options[:record]
-        params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
-        params.merge!(sort: 'foo')
-
-        get options[:action], params, headers
+        get options[:action], { sort: 'foo' }, headers
 
         expect(response).to have_http_status 400
         expect(json['errors'][0]['title']).to eq('Invalid sort criteria')
         expect(json['errors'][0]['code']).to eq(114)
       end
     end
-  end
-
-  unless options[:record].nil?
+  elsif !options[:record].nil?
     context 'with a not found record' do
       it 'renders 404 response' do
         record = options[:record]
-        get :index, { :"#{record[:key]}" => record[:value]}, headers
+        get :show, { :"#{record[:key]}" => record[:value]}, headers
         expect(response).to have_http_status 404
       end
     end
