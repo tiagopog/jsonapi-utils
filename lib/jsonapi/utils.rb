@@ -1,5 +1,6 @@
 require 'jsonapi/utils/version'
 require 'active_support/concern'
+require 'jsonapi/utils/exceptions'
 
 module JSONAPI
   module Utils
@@ -11,59 +12,55 @@ module JSONAPI
 
     def jsonapi_render(options)
       if options.has_key?(:json)
-        response = build_response(options)
-        render json: response[:body], status: options[:status] || response[:status] || :ok
+        response = jsonapi_serialize(options[:json], options[:options] || {})
+        render json: response, status: options[:status] || :ok
       end
     end
 
+    def jsonapi_render_errors(exception)
+      error = jsonapi_format_errors(exception)
+      render json: { errors: error.errors }, status: error.code
+    end
+
+    def jsonapi_format_errors(exception)
+      JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors)
+    end
+
+    def jsonapi_render_internal_server_error
+      jsonapi_render_errors(::JSONAPI::Utils::Exceptions::InternalServerError.new)
+    end
+
+    def jsonapi_render_bad_request
+      jsonapi_render_errors(::JSONAPI::Utils::Exceptions::BadRequest.new)
+    end
+
     def jsonapi_render_not_found
-      jsonapi_render json: nil
+      id = extract_ids(@request.params)
+      jsonapi_render_errors(JSONAPI::Exceptions::RecordNotFound.new(id))
     end
 
     def jsonapi_render_not_found_with_null
-      jsonapi_render json: nil, options: { allow_null: true }
+      render json: { data: nil }, status: 200
     end
 
     def jsonapi_serialize(records, options = {})
-      return build_nil if records.nil? && options[:allow_null]
       results = JSONAPI::OperationResults.new
 
-      if records.nil?
-        id = extract_ids(@request.params)
-        record_not_found = JSONAPI::Exceptions::RecordNotFound.new(id)
-        results.add_result(JSONAPI::ErrorsOperationResult.new(record_not_found.errors[0].code, record_not_found.errors))
-      else
-        fix_request_options(params, records)
+      fix_request_options(params, records)
 
-        if records.respond_to?(:to_ary)
-          records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
-          @resources = build_collection(records, options)
-          results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
-        else
-          @resource = turn_into_resource(records, options)
-          results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
-        end
+      if records.respond_to?(:to_ary)
+        records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
+        @resources = build_collection(records, options)
+        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
+      else
+        @resource = turn_into_resource(records, options)
+        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
       end
 
       create_response_document(results).contents
     end
 
-    def jsonapi_error(exception)
-      JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors).as_json
-    end
-
     private
-
-    def build_response(options)
-      {
-        body: jsonapi_serialize(options[:json], options[:options] || {}),
-        status: options[:json].nil? && !options[:allow_null] ? :not_found : :ok
-      }
-    end
-
-    def build_nil
-      { data: nil }
-    end
 
     def extract_ids(hash)
       ids = hash.keys.select { |e| e =~ /id$/i }.map { |e| hash[e] }
@@ -109,10 +106,10 @@ module JSONAPI
     end
 
     def build_collection(records, options = {})
-      return [] if records.nil? || records.empty?
-      JSONAPI.configuration.default_paginator == :none ||
+      unless JSONAPI.configuration.default_paginator == :none
         records = paginator(@request.params).apply(records, nil)
-      records.map { |record| turn_into_resource(record, options) }
+      end
+      records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
     def turn_into_resource(record, options = {})

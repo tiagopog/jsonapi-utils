@@ -27,7 +27,7 @@ RSpec.describe UsersController, type: :controller do
 
   describe 'GET #show' do
     context 'when invalid' do
-      options = { action: :show, record: { key: :id, value: 9999} }
+      options = { action: :show, record: { key: :id, value: 9999 } }
       it_behaves_like 'request with error', options
     end
   end
