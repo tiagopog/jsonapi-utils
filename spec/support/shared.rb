@@ -65,6 +65,28 @@ shared_examples_for 'request with error' do |options|
         expect(json['errors'][0]['code']).to eq(114)
       end
     end
+
+    context 'when error is in "page"' do
+      context 'with invalid "number"' do
+        it 'renders 400 response' do
+          get options[:action], { page: { number: 'foo' } }, headers
+
+          expect(response).to have_http_status 400
+          expect(json['errors'][0]['title']).to eq('Invalid page value')
+          expect(json['errors'][0]['code']).to eq(118)
+        end
+      end
+
+      context 'with invalid "size"' do
+        it 'renders 400 response' do
+          get options[:action], { page: { size: 'foo' } }, headers
+
+          expect(response).to have_http_status 400
+          expect(json['errors'][0]['title']).to eq('Invalid page value')
+          expect(json['errors'][0]['code']).to eq(118)
+        end
+      end
+    end
   elsif !options[:record].nil?
     context 'with a not found record' do
       it 'renders 404 response' do
