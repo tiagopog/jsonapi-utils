@@ -1,8 +1,13 @@
 require 'spec_helper'
 
 RSpec.describe UsersController, type: :controller do
+  OPTIONS = {
+    resource: :users,
+    fields: UserResource.fields,
+    include: %i(posts)
+  }
+
   subject(:user) { create(:user, :with_posts) }
-  let(:headers) { { 'Accept' => 'application/vnd.api+json' } }
 
   it { is_expected.to be_valid }
 
@@ -12,22 +17,19 @@ RSpec.describe UsersController, type: :controller do
     end
 
     context 'when valid' do
-      before(:each) { expect(response).to have_http_status 200 }
-
       context 'when no query string is set' do
-        subject(:response) do
-          get :index
-        end
-
-        it 'returns a collection of users' do
-        end
+        options = OPTIONS.merge({
+          action: :index,
+          record: { id: 1 }
+        })
+        it_behaves_like 'JSON API request', options
       end
     end
   end
 
   describe 'GET #show' do
     context 'when invalid' do
-      options = { action: :show, record: { key: :id, value: 9999 } }
+      options = { action: :show, record: { id: 9999 } }
       it_behaves_like 'request with error', options
     end
   end

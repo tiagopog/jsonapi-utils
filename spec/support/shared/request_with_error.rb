@@ -1,8 +1,10 @@
 shared_examples_for 'request with error' do |options|
+  let(:headers) { { 'Accept' => 'application/vnd.api+json' } }
+
   shared_examples_for '400 response' do |options|
     it 'renders 400 response' do
       record = options[:record]
-      params = record.nil? ? {} : { :"#{record[:key]}" => 1 }
+      params = record.nil? ? {} : { :"#{record.keys.first}" => 1 }
       params.merge!(options[:params])
 
       get options[:action], params, headers
@@ -32,7 +34,7 @@ shared_examples_for 'request with error' do |options|
       end
     end
 
-    context 'when error is in "include"' do
+    context 'when error is at "include" param' do
       options.merge!({
         params: { include: 'foo' },
         expect: { title: 'Invalid field', code: 112 }
@@ -42,7 +44,7 @@ shared_examples_for 'request with error' do |options|
   end
 
   if options[:action] == :index
-    context 'when error is in "filter"' do
+    context 'when error is at "filter" param' do
       options.merge!({
         params: { filter: { foo: 'bar' } },
         expect: { title: 'Filter not allowed', code: 102 }
@@ -50,7 +52,7 @@ shared_examples_for 'request with error' do |options|
       it_behaves_like '400 response', options
     end
 
-    context 'when error is in "sort"' do
+    context 'when error is at "sort" param' do
       options.merge!({
         params: { sort: 'foo' },
         expect: { title: 'Invalid sort criteria', code: 114 }
@@ -58,7 +60,7 @@ shared_examples_for 'request with error' do |options|
       it_behaves_like '400 response', options
     end
 
-    context 'when error is in "page"' do
+    context 'when error is at "page" param' do
       %i(number size).each do |field|
         context 'with invalid "number"' do
           options.merge!({
@@ -72,8 +74,7 @@ shared_examples_for 'request with error' do |options|
   elsif !options[:record].nil?
     context 'with a not found record' do
       it 'renders 404 response' do
-        record = options[:record]
-        get :show, { :"#{record[:key]}" => record[:value]}, headers
+        get :show, options[:record], headers
         expect(response).to have_http_status 404
       end
     end

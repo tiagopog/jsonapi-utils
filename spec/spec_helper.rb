@@ -53,8 +53,8 @@ end
 
 TestApp.initialize!
 
-# Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
-require 'support/shared'
+Dir[Rails.root.join('support/shared/**/*.rb')].each { |f| require f }
+
 require 'support/models'
 require 'support/factories'
 require 'support/resources'
