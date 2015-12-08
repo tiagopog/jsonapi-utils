@@ -9,7 +9,12 @@ shared_examples_for 'JSON API request' do |options|
   end
 
   it_behaves_like 'default request', options
+  it_behaves_like 'request with query string', options
 end
+
+##
+# Requests
+##
 
 shared_examples_for 'default request' do |options|
   context 'default request' do
@@ -18,22 +23,16 @@ shared_examples_for 'default request' do |options|
     end
 
     it_behaves_like 'base top-level nodes', options
-
-    context 'query string' do
-      context 'with "fields" param' do
-        it 'returns only the listed fields' do
-          field = options[:fields].delete_if { |e| e == :id }.sample
-          fields = { "#{options[:resource]}": field }
-
-          params.merge!({ fields: fields })
-          get options[:action], params, headers
-
-          expect(data[0]['attributes'].keys).to include_items(field.to_s)
-        end
-      end
-    end
   end
 end
+
+shared_examples_for 'request with query string' do |options|
+  include_context 'with "fields" param', options
+end
+
+##
+# JSON API's top-level nodes
+##
 
 shared_examples_for 'base top-level nodes' do |options|
   it 'has the "data" field' do
@@ -56,3 +55,18 @@ shared_examples_for 'base top-level nodes' do |options|
   end
 end
 
+##
+# Query string params
+##
+
+shared_context 'with "fields" param' do |options|
+  it 'returns only the listed fields' do
+    field = options[:fields].delete_if { |e| e == :id }.sample
+    fields = { "#{options[:resource]}": field }
+
+    params.merge!({ fields: fields })
+    get options[:action], params, headers
+
+    expect(data[0]['attributes'].keys).to include_items(field.to_s)
+  end
+end

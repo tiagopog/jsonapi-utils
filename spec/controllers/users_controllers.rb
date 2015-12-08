@@ -17,13 +17,11 @@ RSpec.describe UsersController, type: :controller do
     end
 
     context 'when valid' do
-      context 'when no query string is set' do
-        options = OPTIONS.merge({
-          action: :index,
-          record: { id: 1 }
-        })
-        it_behaves_like 'JSON API request', options
-      end
+      options = OPTIONS.merge({
+        action: :index,
+        record: { id: 1 }
+      })
+      it_behaves_like 'JSON API request', options
     end
   end
 
