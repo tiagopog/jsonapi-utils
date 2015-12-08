@@ -74,13 +74,35 @@ shared_context 'with "fields" param' do |options|
 end
 
 shared_context 'with "include" param' do |options|
-  it 'returns the listed nested resources' do
-    nested = options[:include].sample
+  let(:nested) { options[:include].sample.to_s }
 
+  def get_with_include(options)
     params.merge!({ include: nested })
     get options[:action], params, headers
+  end
 
-    all_ok = json['included'].all? { |e| e['type'] == nested.to_s }
+  it 'returns the listed nested resources' do
+    get_with_include(options)
+    all_ok = json['included'].all? { |e| e['type'] == nested }
     expect(all_ok).to be_truthy
   end
+
+  it 'includes the "self" and "related" links within "relationships" node' do
+    get_with_include(options)
+    links = data[0]['relationships'][nested]['links']
+    expect(links['self']).to be_present
+    expect(links['related']).to be_present
+  end
 end
+
+# shared_context 'with "" param' do |options|
+#   it 'returns the listed nested resources' do
+#     nested = options[:include].sample
+#
+#     params.merge!({ include: nested })
+#     get options[:action], params, headers
+#
+#     all_ok = json['included'].all? { |e| e['type'] == nested.to_s }
+#     expect(all_ok).to be_truthy
+#   end
+# end
