@@ -28,6 +28,7 @@ end
 
 shared_examples_for 'request with query string' do |options|
   include_context 'with "fields" param', options
+  include_context 'with "include" param', options
 end
 
 ##
@@ -61,12 +62,25 @@ end
 
 shared_context 'with "fields" param' do |options|
   it 'returns only the listed fields' do
-    field = options[:fields].delete_if { |e| e == :id }.sample
+    options[:fields] -= [:id]
+    field = options[:fields].sample
     fields = { "#{options[:resource]}": field }
 
     params.merge!({ fields: fields })
     get options[:action], params, headers
 
     expect(data[0]['attributes'].keys).to include_items(field.to_s)
+  end
+end
+
+shared_context 'with "include" param' do |options|
+  it 'returns the listed nested resources' do
+    nested = options[:include].sample
+
+    params.merge!({ include: nested })
+    get options[:action], params, headers
+
+    all_ok = json['included'].all? { |e| e['type'] == nested.to_s }
+    expect(all_ok).to be_truthy
   end
 end

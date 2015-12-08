@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe UsersController, type: :controller do
   OPTIONS = {
     resource: :users,
-    fields: UserResource.fields,
+    fields: UserResource.fields - [:posts],
     include: %i(posts)
   }
 

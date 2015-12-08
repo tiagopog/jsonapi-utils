@@ -16,8 +16,8 @@ FactoryGirl.define do
 
     trait :with_posts do
       transient { post_count 2 }
-      after(:build) do |user, e|
-        build_list(:post, e.post_count, author: user)
+      after(:create) do |user, e|
+        create_list(:post, e.post_count, author: user)
       end
     end
   end
