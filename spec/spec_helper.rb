@@ -1,10 +1,14 @@
 require 'rails/all'
 require 'rails/test_help'
 require 'rspec/rails'
+require 'smart_rspec'
+require 'factory_girl'
+
 require 'jsonapi-resources'
 require 'jsonapi/utils'
-require 'factory_girl'
+
 require 'pry'
+
 require 'support/helpers'
 
 ##
@@ -23,7 +27,7 @@ end
 Rails.env = 'test'
 
 JSONAPI.configure do |config|
-  config.json_key_format = :camelized_key
+  config.json_key_format = :underscored_key
   config.default_paginator = :paged
 end
 
