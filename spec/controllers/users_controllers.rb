@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe UsersController, type: :controller do
   OPTIONS = {
     resource: :users,
-    fields: UserResource.fields - [:posts],
+    fields: UserResource.fields - [:id, :posts],
     include: %i(posts)
   }
 
@@ -11,30 +11,21 @@ RSpec.describe UsersController, type: :controller do
 
   describe 'GET #index' do
     context 'when invalid' do
-      it_behaves_like 'request with error', action: :index
+      it_behaves_like 'JSON for collections with error'
     end
 
     context 'when valid' do
-      options = OPTIONS.merge({
-        action: :index,
-        record: { id: 1 },
-        count: 3
-      })
-      it_behaves_like 'JSON API request', options
+      it_behaves_like 'JSON for collections', OPTIONS
     end
   end
 
   describe 'GET #show' do
     context 'when valid' do
-      options = OPTIONS.merge({
-        action: :show,
-        record: { id: 1 },
-      })
-      it_behaves_like 'JSON API request', options
+      it_behaves_like 'JSON for a single record', OPTIONS
     end
+
     context 'when invalid' do
-      options = { action: :show, record: { id: 9999 } }
-      it_behaves_like 'request with error', options
+      it_behaves_like 'JSON for a single record with error'
     end
   end
 end

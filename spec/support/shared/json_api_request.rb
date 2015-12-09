@@ -38,6 +38,24 @@ shared_examples_for 'request with query string' do |options|
   include_context 'with "page" param', options if options[:actions] == :index
 end
 
+shared_examples_for 'JSON for collections' do |options|
+  options.merge!({ action: :index, count: 3 })
+  it_behaves_like 'JSON API request', options
+end
+
+shared_examples_for 'JSON for collections with error' do
+  it_behaves_like 'request with error', action: :index
+end
+
+shared_examples_for 'JSON for a single record' do |options|
+  options.merge!({ action: :show, record: { id: 1 } })
+  it_behaves_like 'JSON API request', options
+end
+
+shared_examples_for 'JSON for a single record with error' do
+  it_behaves_like 'request with error', { action: :show, record: { id: 9999 } }
+end
+
 ##
 # JSON API's top-level nodes
 ##
@@ -58,7 +76,7 @@ shared_examples_for 'base top-level nodes' do |options|
   end
 
   it "returns a collection of #{options[:resource]}" do
-    all_ok = data.all? { |e| e['type'] == 'users' }
+    all_ok = data.all? { |e| e['type'] == options[:resource].to_s }
     expect(all_ok).to be_truthy
   end
 end
@@ -69,8 +87,7 @@ end
 
 shared_context 'with "fields" param' do |options|
   it 'returns only the listed fields' do
-    options[:fields] -= [:id]
-    field = options[:fields].sample
+    field = options[:fields].try(:sample) || options[:fields]
     fields = { "#{options[:resource]}": field }
 
     params.merge!({ fields: fields })
