@@ -29,6 +29,7 @@ end
 shared_examples_for 'request with query string' do |options|
   include_context 'with "fields" param', options
   include_context 'with "include" param', options
+  include_context 'with "page" param', options
 end
 
 ##
@@ -87,7 +88,7 @@ shared_context 'with "include" param' do |options|
     expect(all_ok).to be_truthy
   end
 
-  it 'includes the "self" and "related" links within "relationships" node' do
+  it 'includes the "self" and "related" links in "relationships"' do
     get_with_include(options)
     links = data[0]['relationships'][nested]['links']
     expect(links['self']).to be_present
@@ -95,14 +96,58 @@ shared_context 'with "include" param' do |options|
   end
 end
 
-# shared_context 'with "" param' do |options|
-#   it 'returns the listed nested resources' do
-#     nested = options[:include].sample
-#
-#     params.merge!({ include: nested })
-#     get options[:action], params, headers
-#
-#     all_ok = json['included'].all? { |e| e['type'] == nested.to_s }
-#     expect(all_ok).to be_truthy
-#   end
-# end
+shared_context 'with "page" param' do |options|
+  let(:size) { 1 }
+
+
+  def get_with_pagination(options, size = 1, number = 1)
+    params.merge!({ page: { size: size, number: number } })
+    get options[:action], params, headers
+  end
+
+  context 'for any collection' do
+    before(:each) { get_with_pagination(options, size) }
+
+    it 'returns the paginated results' do
+      expect(data.size).to be <= size
+    end
+
+    it 'includes "record_count" in "meta"' do
+      record_count = json['meta']['record_count']
+      expect(record_count).to eq(options[:count])
+    end
+
+    it 'includes pagination links' do
+      expect(links['first']).to be_present
+      expect(links['last']).to be_present
+    end
+  end
+
+  context 'when data is not empty' do
+    context 'when in the beginning of the pagination' do
+      before(:each) { get_with_pagination(options, size) }
+
+      it 'includes the "next" node' do
+        expect(links['next']).to be_present
+      end
+
+      it 'does not include the "previous" node' do
+        expect(links['previous']).not_to be_present
+      end
+    end
+
+    if options[:count].present? && options[:count].to_i > 2
+      context 'when in middle of the pagination' do
+        before(:each) { get_with_pagination(options, 1, 2) }
+
+        it 'includes the "next" node' do
+          expect(links['next']).to be_present
+        end
+
+        it 'includes the "previous" node' do
+          expect(links['previous']).to be_present
+        end
+      end
+    end
+  end
+end

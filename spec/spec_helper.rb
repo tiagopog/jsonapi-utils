@@ -28,7 +28,15 @@ Rails.env = 'test'
 
 JSONAPI.configure do |config|
   config.json_key_format = :underscored_key
+
+  config.allow_include = true
+  config.allow_sort = true
+  config.allow_filter = true
+
   config.default_paginator = :paged
+  config.top_level_links_include_pagination = true
+  config.top_level_meta_include_record_count = true
+  config.top_level_meta_record_count_key = :record_count
 end
 
 ##
@@ -43,7 +51,7 @@ class TestApp < Rails::Application
   config.session_store :cookie_store, key: 'session'
   config.secret_key_base = 'secret'
 
-  #Raise errors on unsupported parameters
+  # Raise errors on unsupported parameters
   config.action_controller.action_on_unpermitted_parameters = :raise
 
   ActiveRecord::Schema.verbose = false

@@ -7,9 +7,7 @@ RSpec.describe UsersController, type: :controller do
     include: %i(posts)
   }
 
-  subject(:user) { create(:user, :with_posts) }
-
-  it { is_expected.to be_valid }
+  before(:all) { create_list(:user, 3, :with_posts) }
 
   describe 'GET #index' do
     context 'when invalid' do
@@ -19,7 +17,8 @@ RSpec.describe UsersController, type: :controller do
     context 'when valid' do
       options = OPTIONS.merge({
         action: :index,
-        record: { id: 1 }
+        record: { id: 1 },
+        count: 3
       })
       it_behaves_like 'JSON API request', options
     end
