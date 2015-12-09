@@ -1,11 +1,17 @@
 shared_examples_for 'JSON API request' do |options|
-  let(:headers) { { 'Accept' => 'application/vnd.api+json' } }
-  let(:params) { options.try(:params) || {}  }
+  let(:headers) do
+    { 'Accept' => 'application/vnd.api+json' }
+  end
+
+  let(:params) do
+    local_params = options.try(:params) || {}
+    options[:action] == :show ? local_params.merge!(options[:record]) : local_params
+  end
 
   before(:each) { expect(response).to have_http_status 200 }
 
   def data
-    json['data'].is_a?(Array) ? json['data'] : Array(json['data'])
+    json['data'].is_a?(Array) ? json['data'] : [json['data']]
   end
 
   it_behaves_like 'default request', options
@@ -29,7 +35,7 @@ end
 shared_examples_for 'request with query string' do |options|
   include_context 'with "fields" param', options
   include_context 'with "include" param', options
-  include_context 'with "page" param', options
+  include_context 'with "page" param', options if options[:actions] == :index
 end
 
 ##
@@ -98,7 +104,6 @@ end
 
 shared_context 'with "page" param' do |options|
   let(:size) { 1 }
-
 
   def get_with_pagination(options, size = 1, number = 1)
     params.merge!({ page: { size: size, number: number } })

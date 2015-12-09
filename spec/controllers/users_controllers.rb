@@ -25,6 +25,13 @@ RSpec.describe UsersController, type: :controller do
   end
 
   describe 'GET #show' do
+    context 'when valid' do
+      options = OPTIONS.merge({
+        action: :show,
+        record: { id: 1 },
+      })
+      it_behaves_like 'JSON API request', options
+    end
     context 'when invalid' do
       options = { action: :show, record: { id: 9999 } }
       it_behaves_like 'request with error', options
