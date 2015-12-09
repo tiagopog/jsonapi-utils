@@ -1,5 +1,7 @@
 shared_examples_for 'request with error' do |options|
-  let(:headers) { { 'Accept' => 'application/vnd.api+json' } }
+  let(:headers) do
+    { 'Accept' => 'application/vnd.api+json' }
+  end
 
   shared_examples_for '400 response' do |options|
     it 'renders 400 response' do

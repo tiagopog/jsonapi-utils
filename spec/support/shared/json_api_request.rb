@@ -1,3 +1,7 @@
+##
+# Requests
+##
+
 shared_examples_for 'JSON API request' do |options|
   let(:headers) do
     { 'Accept' => 'application/vnd.api+json' }
@@ -17,10 +21,6 @@ shared_examples_for 'JSON API request' do |options|
   it_behaves_like 'default request', options
   it_behaves_like 'request with query string', options
 end
-
-##
-# Requests
-##
 
 shared_examples_for 'default request' do |options|
   context 'default request' do
@@ -141,7 +141,7 @@ shared_context 'with "page" param' do |options|
       end
     end
 
-    if options[:count].present? && options[:count].to_i > 2
+    if options[:count].to_i > 2
       context 'when in middle of the pagination' do
         before(:each) { get_with_pagination(options, 1, 2) }
 
