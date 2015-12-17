@@ -15,7 +15,7 @@ FactoryGirl.define do
     sequence(:last_name) {|n| "Lastname ##{n}"}
 
     trait :with_posts do
-      transient { post_count 2 }
+      transient { post_count 3 }
       after(:create) do |user, e|
         create_list(:post, e.post_count, author: user)
       end

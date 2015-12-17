@@ -1,32 +1,17 @@
 require 'spec_helper'
 
-RSpec.describe UsersController, type: :controller do
-  OPTIONS = {
-    resource: :users,
-    fields: UserResource.fields - [:id, :posts],
-    include: %i(posts)
-  }
+describe UsersController, type: :controller do
+  before(:all) do
+    @collection = create_list(:user, 3, :with_posts)
+  end
 
-  before(:all) { create_list(:user, 3, :with_posts) }
+  options = { resource: :users, fields: :first_name, include: :posts }
 
   describe 'GET #index' do
-    context 'when invalid' do
-      it_behaves_like 'JSON for collections with error'
-    end
-
-    context 'when valid' do
-      it_behaves_like 'JSON for collections', OPTIONS
-    end
+    it_behaves_like 'JSON API #index action', options.merge(action: :index, count: 3)
   end
 
   describe 'GET #show' do
-    context 'when valid' do
-      it_behaves_like 'JSON for a single record', OPTIONS
-    end
-
-    context 'when invalid' do
-      it_behaves_like 'JSON for a single record with error'
-    end
+    it_behaves_like 'JSON API #show action', options.merge(action: :show)
   end
 end
-

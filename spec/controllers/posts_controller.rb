@@ -1,19 +1,23 @@
 require 'spec_helper'
 
-RSpec.describe PostsController, type: :controller do
-  subject(:post) { create(:post, :with_author) }
-  let(:headers) { { 'Accept' => 'application/vnd.api+json' } }
+describe PostsController, type: :controller do
+  before(:all) do
+    @collection = create_list(:user, 3, :with_posts)
+  end
 
-  describe '#index' do
-    before(:each) { expect(response).to have_http_status 200 }
+  options = {
+    params: { user_id: 1 },
+    resource: :posts,
+    fields: :title,
+    include: [{ name: :author, type: :users }]
+  }
 
-    context 'when no query string is set' do
-      # subject(:response) do
-      #   get :index
-      # end
-      #
-      # it 'returns a collection of posts' do
-      # end
-    end
+  describe 'GET #index' do
+    it_behaves_like 'JSON API #index action', options.merge(action: :index, count: 3)
+  end
+
+  describe 'GET #show' do
+    it_behaves_like 'JSON API #show action', options.merge(action: :show)
   end
 end
+

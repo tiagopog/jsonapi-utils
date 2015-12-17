@@ -1,6 +1,6 @@
 class PostResource < JSONAPI::Resource
   attributes :title, :body
-  has_one :author
+  has_one :author, class_name: 'User', foreign_key: 'user_id'
 end
 
 class UserResource < JSONAPI::Resource
