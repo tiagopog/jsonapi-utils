@@ -1,5 +1,8 @@
 # JSONAPI::Utils
 
+[![Code Climate](https://codeclimate.com/github/b2beauty/jsonapi-utils/badges/gpa.svg)](https://codeclimate.com/github/b2beauty/jsonapi-utils)
+[![Gem Version](https://badge.fury.io/rb/jsonapi-utils.svg)](https://badge.fury.io/rb/jsonapi-utils)
+
 JSON::Utils is a simple way to get a full-featured [JSON API](jsonapi.org) serialization in your
 controller's responses. This gem works on top of the awesome gem [jsonapi-resources](https://github.com/cerebris/jsonapi-resources),
 bringing to controllers a Rails-native way to render data.
