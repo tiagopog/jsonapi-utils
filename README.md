@@ -12,7 +12,7 @@ bringing to controllers a Rails-native way to render data.
 Add these lines to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-resources', '~> 0.5.7'
+gem 'jsonapi-resources', '~> 0.7.0'
 gem 'jsonapi-utils'
 ```
 
