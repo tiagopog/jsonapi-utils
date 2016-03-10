@@ -12,11 +12,14 @@ module JSONAPI
     end
 
     def jsonapi_render(options)
-      set_request
       if options.has_key?(:json)
         response = jsonapi_serialize(options[:json], options[:options] || {})
         render json: response, status: options[:status] || :ok
       end
+    rescue => e
+      handle_exceptions(e)
+    ensure
+      headers['Content-Type'] = JSONAPI::MEDIA_TYPE
     end
 
     def jsonapi_render_errors(exception)
@@ -46,6 +49,7 @@ module JSONAPI
     end
 
     def jsonapi_serialize(records, options = {})
+      set_request
       results = JSONAPI::OperationResults.new
 
       fix_request_options(params, records)
@@ -160,13 +164,6 @@ module JSONAPI
                                       server_error_callbacks: (self.class.server_error_callbacks || []))
       unless @request.errors.empty?
         render_errors(@request.errors)
-      end
-
-    rescue => e
-      handle_exceptions(e)
-    ensure
-      if response.body.size > 0
-        response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
       end
     end
   end

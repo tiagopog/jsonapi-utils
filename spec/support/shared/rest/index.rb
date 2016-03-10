@@ -57,4 +57,3 @@ shared_examples_for 'JSON API #index action' do |options|
     end
   end
 end
-

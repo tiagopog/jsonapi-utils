@@ -81,8 +81,8 @@ shared_examples_for 'first page' do
       expect(json['links']['next']).to be_present
     end
 
-    it 'does not include the "previous" node' do
-      expect(json['links']['previous']).not_to be_present
+    it 'does not include the "prev" node' do
+      expect(json['links']['prev']).not_to be_present
     end
   end
 end
@@ -93,8 +93,8 @@ shared_examples_for 'middle page' do
       expect(json['links']['next']).to be_present
     end
 
-    it 'includes the "previous" node' do
-      expect(json['links']['previous']).to be_present
+    it 'includes the "prev" node' do
+      expect(json['links']['prev']).to be_present
     end
   end
 end
@@ -105,8 +105,8 @@ shared_examples_for 'beyond the last page' do
       expect(json['links']['next']).not_to be_present
     end
 
-    it 'includes the "previous" node' do
-      expect(json['links']['previous']).to be_present
+    it 'includes the "prev" node' do
+      expect(json['links']['prev']).to be_present
     end
   end
 end
