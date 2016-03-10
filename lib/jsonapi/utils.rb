@@ -1,7 +1,6 @@
 require 'jsonapi/utils/version'
 require 'active_support/concern'
 require 'jsonapi/utils/exceptions'
-require 'pry'
 
 module JSONAPI
   module Utils
