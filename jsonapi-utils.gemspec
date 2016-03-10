@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'factory_girl', '~> 4.5'
-  spec.add_development_dependency 'jsonapi-resources', '~> 0.5.7'
+  spec.add_development_dependency 'jsonapi-resources', '~> 0.7.0'
 
   spec.add_dependency 'rails', '>= 4.0'
 end

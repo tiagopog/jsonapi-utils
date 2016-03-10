@@ -1,6 +1,7 @@
 require 'jsonapi/utils/version'
 require 'active_support/concern'
 require 'jsonapi/utils/exceptions'
+require 'pry'
 
 module JSONAPI
   module Utils
@@ -11,6 +12,7 @@ module JSONAPI
     end
 
     def jsonapi_render(options)
+      set_request
       if options.has_key?(:json)
         response = jsonapi_serialize(options[:json], options[:options] || {})
         render json: response, status: options[:status] || :ok
@@ -99,24 +101,9 @@ module JSONAPI
         options = {}
         @paginator.class.requires_record_count &&
           options[:record_count] = count_records(@resources, options)
-        return @paginator.links_page_params(options)
+        @paginator.links_page_params(options)
       else
-        return {}
-      end
-    end
-
-    def build_collection(records, options = {})
-      unless JSONAPI.configuration.default_paginator == :none
-        records = paginator(@request.params).apply(records, nil)
-      end
-      records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
-    end
-
-    def turn_into_resource(record, options = {})
-      if options[:resource]
-        options[:resource].to_s.constantize.new(record)
-      else
-        @request.resource_klass.new(record)
+        {}
       end
     end
 
@@ -131,6 +118,21 @@ module JSONAPI
         end
     end
 
+    def build_collection(records, options = {})
+      unless JSONAPI.configuration.default_paginator == :none
+        records = paginator(@request.params).apply(records, nil)
+      end
+      records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
+    end
+
+    def turn_into_resource(record, options = {})
+      if options[:resource]
+        options[:resource].to_s.constantize.new(record, context)
+      else
+        @request.resource_klass.new(record, context)
+      end
+    end
+
     def fix_when_hash(records, options)
       return [] unless options[:model]
       records.map { |hash| options[:model].new(hash) }
@@ -141,11 +143,30 @@ module JSONAPI
     end
 
     def count_records(records, options)
-      if records.size.zero? then 0
-      elsif options[:count] then options[:count]
+      if records.size.zero?                    then 0
+      elsif options[:count]                    then options[:count]
       elsif options[:model] && options[:scope] then options[:model].send(options[:scope]).count
-      elsif options[:model] then options[:model].count
-      else records.first.model.class.count
+      elsif options[:model]                    then options[:model].count
+      else
+        record = records.first
+        model  = record.try(:model) || record.try(:_model)
+        model.class.count
+      end
+    end
+
+    def set_request
+      @request = JSONAPI::Request.new(params, context: context,
+                                      key_formatter: key_formatter,
+                                      server_error_callbacks: (self.class.server_error_callbacks || []))
+      unless @request.errors.empty?
+        render_errors(@request.errors)
+      end
+
+    rescue => e
+      handle_exceptions(e)
+    ensure
+      if response.body.size > 0
+        response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
       end
     end
   end
