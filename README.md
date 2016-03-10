@@ -3,8 +3,8 @@
 [![Code Climate](https://codeclimate.com/github/b2beauty/jsonapi-utils/badges/gpa.svg)](https://codeclimate.com/github/b2beauty/jsonapi-utils)
 [![Gem Version](https://badge.fury.io/rb/jsonapi-utils.svg)](https://badge.fury.io/rb/jsonapi-utils)
 
-JSON::Utils is a simple way to get a full-featured [JSON API](jsonapi.org) serialization in your
-controller's responses. This gem works on top of the awesome gem [jsonapi-resources](https://github.com/cerebris/jsonapi-resources),
+JSONAPI::Utils is a simple way to get [JSON API](jsonapi.org)-compliant requests and responses to your
+controller actions. This gem works on top of the awesome gem [jsonapi-resources](https://github.com/cerebris/jsonapi-resources),
 bringing to controllers a Rails-native way to render data.
 
 ## Installation
@@ -22,7 +22,7 @@ And then execute:
 $ bundle
 ```
 
-## Macros
+## Main Macros
 
 * `jsonapi_render`: it works like ActionController's `render` method, receiving model objects and
 rendering them into JSON API's data format.
