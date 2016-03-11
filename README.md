@@ -3,9 +3,8 @@
 [![Code Climate](https://codeclimate.com/github/b2beauty/jsonapi-utils/badges/gpa.svg)](https://codeclimate.com/github/b2beauty/jsonapi-utils)
 [![Gem Version](https://badge.fury.io/rb/jsonapi-utils.svg)](https://badge.fury.io/rb/jsonapi-utils)
 
-JSONAPI::Utils is a simple way to get [JSON API](jsonapi.org)-compliant requests and responses to your
-controller actions. This gem works on top of the awesome gem [jsonapi-resources](https://github.com/cerebris/jsonapi-resources),
-bringing to controllers a Rails-native way to render data.
+JSONAPI::Utils works on top of the awesome [jsonapi-resources](https://github.com/cerebris/jsonapi-resources) gem bringing to your controllers a 
+"Rails way" to render [JSON API](http://jsonapi.org) responses.
 
 ## Installation
 
