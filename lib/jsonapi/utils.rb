@@ -93,7 +93,6 @@ module JSONAPI
     end
 
     def pagination_params(options)
-      @paginator ||= paginator(params)
       if @paginator && JSONAPI.configuration.top_level_links_include_pagination
         options = {}
         @paginator.class.requires_record_count &&
@@ -105,9 +104,7 @@ module JSONAPI
     end
 
     def build_collection(records, options = {})
-      unless JSONAPI.configuration.default_paginator == :none
-        records = paginator(@request.params).apply(records, nil)
-      end
+      records = paginate(records, options)
       records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
@@ -119,15 +116,38 @@ module JSONAPI
       end
     end
 
-    def paginator(params)
-      page_params = ActionController::Parameters.new(params[:page])
+    def paginate(records, options = {})
+      return records if pagination_disabled?(options)
+      pagination = set_pagination(options)
 
-      @paginator ||=
-        if JSONAPI.configuration.default_paginator == :paged
-          PagedPaginator.new(page_params)
-        elsif JSONAPI.configuration.default_paginator == :offset
-          OffsetPaginator.new(page_params)
+      records =
+        if records.is_a?(Array)
+          records[pagination[:range]]
+        else
+          pagination[:paginator].apply(records, nil)
         end
+    end
+
+    def set_pagination(options)
+      page_params = ActionController::Parameters.new(@request.params[:page])
+      if JSONAPI.configuration.default_paginator == :paged
+        @paginator ||= PagedPaginator.new(page_params)
+        n = page_params['number'].to_i.nonzero? || 1
+        s = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
+        { paginator: @paginator, range: (n - 1) * s..n * s - 1 }
+      elsif JSONAPI.configuration.default_paginator == :offset
+        @paginator ||= OffsetPaginator.new(page_params)
+        o = page_params['offset'].to_i.nonzero? || 0
+        l = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
+        { paginator: @paginator, range: o..o + l - 1 }
+      else
+        {}
+      end
+    end
+
+    def pagination_disabled?(options)
+      JSONAPI.configuration.default_paginator == :none ||
+        !options[:paginate].nil? && !options[:paginate]
     end
 
     def fix_when_hash(records, options)
