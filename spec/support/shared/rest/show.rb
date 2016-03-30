@@ -1,6 +1,16 @@
 require 'spec_helper'
 
 shared_examples_for 'JSON API #show action' do |options|
+  context 'when invalid' do
+    context 'when not found' do
+      it 'renders 404 response' do
+        options[:params] ||= {}
+        get :show, options[:params].merge(id: 9999)
+        expect(response).to have_http_status :not_found
+      end
+    end
+  end
+
   context 'when valid' do
     after(:each) { expect(response).to have_http_status :ok }
 

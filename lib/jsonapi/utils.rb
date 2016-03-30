@@ -42,6 +42,7 @@ module JSONAPI
     end
 
     def jsonapi_render_not_found
+      setup_request
       id = extract_ids(@request.params)
       jsonapi_render_errors(JSONAPI::Exceptions::RecordNotFound.new(id))
     end

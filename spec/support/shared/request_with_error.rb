@@ -41,39 +41,30 @@ shared_context 'request with error' do |options|
     end
   end
 
-  if options[:action] == :index
-    context 'when error is at "filter" param' do
-      options.merge!(
-        params: { filter: { foo: 'bar' } },
-        expect: { title: 'Filter not allowed', code: 102 }
-      )
-      it_behaves_like '400 response', options
-    end
+  context 'when error is at "filter" param' do
+    options.merge!(
+      params: { filter: { foo: 'bar' } },
+      expect: { title: 'Filter not allowed', code: 102 }
+    )
+    it_behaves_like '400 response', options
+  end
 
-    context 'when error is at "sort" param' do
-      options.merge!(
-        params: { sort: 'foo' },
-        expect: { title: 'Invalid sort criteria', code: 114 }
-      )
-      it_behaves_like '400 response', options
-    end
+  context 'when error is at "sort" param' do
+    options.merge!(
+      params: { sort: 'foo' },
+      expect: { title: 'Invalid sort criteria', code: 114 }
+    )
+    it_behaves_like '400 response', options
+  end
 
-    context 'when error is at "page" param' do
-      %i(number size).each do |field|
-        context 'with invalid "number"' do
-          options.merge!(
-            params: { page: { "#{field}": 'foo' } },
-            expect: { title: 'Invalid page value', code: 118 }
-          )
-          it_behaves_like '400 response', options
-        end
-      end
-    end
-  elsif !options[:record].nil?
-    context 'with a not found record' do
-      it 'renders 404 response' do
-        get :show, options[:record]
-        expect(response).to have_http_status :not_found
+  context 'when error is at "page" param' do
+    %i(number size).each do |field|
+      context 'with invalid "number"' do
+        options.merge!(
+          params: { page: { "#{field}": 'foo' } },
+          expect: { title: 'Invalid page value', code: 118 }
+        )
+        it_behaves_like '400 response', options
       end
     end
   end
