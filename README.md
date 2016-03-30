@@ -3,8 +3,7 @@
 [![Code Climate](https://codeclimate.com/github/b2beauty/jsonapi-utils/badges/gpa.svg)](https://codeclimate.com/github/b2beauty/jsonapi-utils)
 [![Gem Version](https://badge.fury.io/rb/jsonapi-utils.svg)](https://badge.fury.io/rb/jsonapi-utils)
 
-`JSONAPI::Utils` works on top of the awesome [jsonapi-resources](https://github.com/cerebris/jsonapi-resources) gem bringing to your controllers a 
-Rails way to render [JSON API](http://jsonapi.org) responses.
+`JSONAPI::Utils` works on top of the awesome [jsonapi-resources](https://github.com/cerebris/jsonapi-resources) gem bringing to your controllers a Rails way to render [JSON API](http://jsonapi.org)-compliant responses.
 
 ## Installation
 
