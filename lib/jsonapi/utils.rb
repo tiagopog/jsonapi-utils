@@ -104,7 +104,7 @@ module JSONAPI
     end
 
     def build_collection(records, options = {})
-      records = paginate(records, options)
+      records = apply_pagination(apply_filter(records), options)
       records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
@@ -116,7 +116,19 @@ module JSONAPI
       end
     end
 
-    def paginate(records, options = {})
+    def apply_filter(records)
+      if params[:filter].present? && records.respond_to?(:where)
+        filter_params =
+          params[:filter].keys.reduce({}) do |h, e|
+            h.merge(e => params[:filter][e])
+          end
+        records.where(filter_params)
+      else
+        records
+      end
+    end
+
+    def apply_pagination(records, options = {})
       return records if pagination_disabled?(options)
       pagination = set_pagination(options)
 
@@ -132,14 +144,14 @@ module JSONAPI
       page_params = ActionController::Parameters.new(@request.params[:page])
       if JSONAPI.configuration.default_paginator == :paged
         @paginator ||= PagedPaginator.new(page_params)
-        n = page_params['number'].to_i.nonzero? || 1
-        s = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
-        { paginator: @paginator, range: (n - 1) * s..n * s - 1 }
+        number = page_params['number'].to_i.nonzero? || 1
+        size   = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
+        { paginator: @paginator, range: (number - 1) * size..number * size - 1 }
       elsif JSONAPI.configuration.default_paginator == :offset
         @paginator ||= OffsetPaginator.new(page_params)
-        o = page_params['offset'].to_i.nonzero? || 0
-        l = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
-        { paginator: @paginator, range: o..o + l - 1 }
+        offset = page_params['offset'].to_i.nonzero? || 0
+        limit  = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
+        { paginator: @paginator, range: offset..offset + limit - 1 }
       else
         {}
       end
