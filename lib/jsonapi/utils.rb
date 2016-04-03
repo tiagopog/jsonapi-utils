@@ -102,7 +102,8 @@ module JSONAPI
     end
 
     def build_collection(records, options = {})
-      records = apply_pagination(apply_filter(records), options)
+      records = apply_filter(records, options)
+      records = apply_pagination(records, options)
       records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
@@ -114,8 +115,8 @@ module JSONAPI
       end
     end
 
-    def apply_filter(records)
-      if params[:filter].present? && records.respond_to?(:where)
+    def apply_filter(records, options = {})
+      if apply_filter?(records, options)
         filter_params =
           params[:filter].keys.reduce({}) do |h, e|
             h.merge(e => params[:filter][e])
@@ -126,8 +127,13 @@ module JSONAPI
       end
     end
 
+    def apply_filter?(records, options = {})
+      params[:filter].present? && records.respond_to?(:where) &&
+        (options[:filter].nil? || options[:filter])
+    end
+
     def apply_pagination(records, options = {})
-      return records if pagination_disabled?(options)
+      return records unless apply_pagination?(options)
       pagination = set_pagination(options)
 
       records =
@@ -155,9 +161,9 @@ module JSONAPI
       end
     end
 
-    def pagination_disabled?(options)
-      JSONAPI.configuration.default_paginator == :none ||
-        !options[:paginate].nil? && !options[:paginate]
+    def apply_pagination?(options)
+      JSONAPI.configuration.default_paginator != :none &&
+        (options[:paginate].nil? || options[:paginate])
     end
 
     def fix_when_hash(records, options)
@@ -170,9 +176,14 @@ module JSONAPI
     end
 
     def count_records(records, options)
-      return options[:count] if options[:count].present?
-      records = apply_filter(records) if params[:filter].present?
-      records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
+      if options[:count].present?
+        options[:count]
+      elsif records.is_a?(Array)
+        records.length
+      else
+        records = apply_filter(records, options) if params[:filter].present?
+        records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
+      end
     end
   end
 end
