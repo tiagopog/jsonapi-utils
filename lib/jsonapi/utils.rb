@@ -48,12 +48,12 @@ module JSONAPI
       fix_request_options(params, records)
 
       if records.respond_to?(:to_ary)
-        records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
-        @resources = build_collection(records, options)
-        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
+        records   = fix_when_hash(records, options) if needs_to_be_fixed?(records)
+        @_records = build_collection(records, options)
+        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @_records, result_options(records, options)))
       else
-        @resource = turn_into_resource(records, options)
-        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
+        @_record = turn_into_resource(records, options)
+        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @_record))
       end
 
       create_response_document(results).contents
@@ -78,28 +78,26 @@ module JSONAPI
       records.is_a?(Array) && records.all? { |e| e.is_a?(Hash) }
     end
 
-    def result_options(options)
-      hash = {}
+    def result_options(records, options)
+      {}.tap do |data|
+        if JSONAPI.configuration.top_level_links_include_pagination
+          data[:pagination_params] = pagination_params(records, options)
+        end
 
-      if JSONAPI.configuration.top_level_links_include_pagination
-        hash[:pagination_params] = pagination_params(options)
+        if JSONAPI.configuration.top_level_meta_include_record_count
+          data[:record_count] = count_records(records, options)
+        end
       end
-
-      if JSONAPI.configuration.top_level_meta_include_record_count
-        hash[:record_count] = count_records(@resources, options)
-      end
-
-      hash
     end
 
-    def pagination_params(options)
-      if @paginator && JSONAPI.configuration.top_level_links_include_pagination
-        options = {}
-        @paginator.class.requires_record_count &&
-          options[:record_count] = count_records(@resources, options)
-        return @paginator.links_page_params(options)
+    def pagination_params(records, options)
+      data = {}
+      if @_paginator && JSONAPI.configuration.top_level_links_include_pagination
+        @_paginator.class.requires_record_count &&
+          data[:record_count] = count_records(records, options)
+        @_paginator.links_page_params(data)
       else
-        return {}
+        data
       end
     end
 
@@ -143,15 +141,15 @@ module JSONAPI
     def set_pagination(options)
       page_params = ActionController::Parameters.new(@request.params[:page])
       if JSONAPI.configuration.default_paginator == :paged
-        @paginator ||= PagedPaginator.new(page_params)
+        @_paginator ||= PagedPaginator.new(page_params)
         number = page_params['number'].to_i.nonzero? || 1
         size   = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
-        { paginator: @paginator, range: (number - 1) * size..number * size - 1 }
+        { paginator: @_paginator, range: (number - 1) * size..number * size - 1 }
       elsif JSONAPI.configuration.default_paginator == :offset
-        @paginator ||= OffsetPaginator.new(page_params)
+        @_paginator ||= OffsetPaginator.new(page_params)
         offset = page_params['offset'].to_i.nonzero? || 0
         limit  = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
-        { paginator: @paginator, range: offset..offset + limit - 1 }
+        { paginator: @_paginator, range: offset..offset + limit - 1 }
       else
         {}
       end
@@ -172,12 +170,9 @@ module JSONAPI
     end
 
     def count_records(records, options)
-      if records.size.zero? then 0
-      elsif options[:count] then options[:count]
-      elsif options[:model] && options[:scope] then options[:model].send(options[:scope]).count
-      elsif options[:model] then options[:model].count
-      else records.first.model.class.count
-      end
+      return options[:count] if options[:count].present?
+      records = apply_filter(records) if params[:filter].present?
+      records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
     end
   end
 end
