@@ -144,12 +144,12 @@ module JSONAPI
     end
 
     def apply_sort(records)
+      return records unless params[:sort].present?
+
       if records.is_a?(Array)
         records.sort { |a, b| comp = 0; eval(sort_criteria) }
-      elsif params[:sort].present?
+      elsif records.respond_to?(:order)
         records.order(sort_params)
-      else
-        records
       end
     end
 
