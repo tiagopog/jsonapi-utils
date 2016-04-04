@@ -33,8 +33,8 @@ module JSONAPI
       jsonapi_render_errors(::JSONAPI::Utils::Exceptions::BadRequest.new)
     end
 
-    def jsonapi_render_not_found
-      id = extract_ids(@request.params)
+    def jsonapi_render_not_found(exception)
+      id = exception.message.match(/=(\d+)/)[1]
       jsonapi_render_errors(JSONAPI::Exceptions::RecordNotFound.new(id))
     end
 
@@ -60,11 +60,6 @@ module JSONAPI
     end
 
     private
-
-    def extract_ids(hash)
-      ids = hash.keys.select { |e| e =~ /id$/i }.map { |e| hash[e] }
-      ids.first rescue '(id not identified)'
-    end
 
     def fix_request_options(params, records)
       return if request.method !~ /get/i ||
@@ -199,7 +194,7 @@ module JSONAPI
     def fix_when_hash(records, options)
       return [] unless options[:model]
       records.map { |hash| options[:model].new(hash) }
-    rescue
+    rescue ActiveRecord::UnknownAttributeError
       ids = records.map { |e| e[:id] || e['id'] }
       scope = options[:scope] ? options[:model].send(options[:scope]) : options[:model]
       scope.where(id: ids)
