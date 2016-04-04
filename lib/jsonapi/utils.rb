@@ -104,6 +104,7 @@ module JSONAPI
     def build_collection(records, options = {})
       records = apply_filter(records, options)
       records = apply_pagination(records, options)
+      records = apply_sort(records)
       records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
@@ -117,10 +118,6 @@ module JSONAPI
 
     def apply_filter(records, options = {})
       if apply_filter?(records, options)
-        filter_params =
-          params[:filter].keys.reduce({}) do |h, e|
-            h.merge(e => params[:filter][e])
-          end
         records.where(filter_params)
       else
         records
@@ -132,6 +129,13 @@ module JSONAPI
         (options[:filter].nil? || options[:filter])
     end
 
+    def filter_params
+      @_filter_params =
+        params[:filter].keys.each_with_object({}) do |resource, hash|
+          hash[resource] = params[:filter][resource]
+        end
+    end
+
     def apply_pagination(records, options = {})
       return records unless apply_pagination?(options)
       pagination = set_pagination(options)
@@ -141,6 +145,32 @@ module JSONAPI
           records[pagination[:range]]
         else
           pagination[:paginator].apply(records, nil)
+        end
+    end
+
+    def apply_sort(records)
+      if records.is_a?(Array)
+        records.sort { |a, b| comp = 0; eval(sort_criteria) }
+      elsif params[:sort].present?
+        records.order(sort_params)
+      else
+        records
+      end
+    end
+
+    def sort_criteria
+      sort_params.reduce('') do |sum, hash|
+        foo = ["a[:#{hash[0]}]", "b[:#{hash[0]}]"]
+        foo.reverse! if hash[1] == :desc
+        sum + "comp = comp == 0 ? #{foo.join(' <=> ')} : comp; "
+      end
+    end
+
+    def sort_params
+      @_sort_params ||=
+        params[:sort].split(',').each_with_object({}) do |criteria, hash|
+          order, field = criteria.match(/(\-?)(\w+)/i)[1..2]
+          hash[field]  = order == '-' ? :desc : :asc
         end
     end
 
