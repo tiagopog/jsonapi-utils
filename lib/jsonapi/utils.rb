@@ -91,7 +91,8 @@ module JSONAPI
     def result_options(options)
       hash = {}
 
-      if JSONAPI.configuration.top_level_links_include_pagination
+      if JSONAPI.configuration.default_paginator != :none &&
+          JSONAPI.configuration.top_level_links_include_pagination
         hash[:pagination_params] = pagination_params(options)
       end
 
