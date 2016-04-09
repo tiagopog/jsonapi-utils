@@ -41,9 +41,9 @@ module JSONAPI
       jsonapi_render_errors(::JSONAPI::Utils::Exceptions::BadRequest.new)
     end
 
-    def jsonapi_render_not_found
+    def jsonapi_render_not_found(exception)
       setup_request
-      id = extract_ids(@request.params)
+      id = exception.message.match(/=(\d+)/)[1]
       jsonapi_render_errors(JSONAPI::Exceptions::RecordNotFound.new(id))
     end
 
@@ -59,22 +59,17 @@ module JSONAPI
 
       if records.respond_to?(:to_ary)
         records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
-        @resources = build_collection(records, options)
-        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @resources, result_options(options)))
+        @_records = build_collection(records, options)
+        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @_records, result_options(records, options)))
       else
-        @resource = turn_into_resource(records, options)
-        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @resource))
+        @_record = turn_into_resource(records, options)
+        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @_record))
       end
 
       create_response_document(results).contents
     end
 
     private
-
-    def extract_ids(hash)
-      ids = hash.keys.select { |e| e =~ /id$/i }.map { |e| hash[e] }
-      ids.first rescue '(id not identified)'
-    end
 
     def fix_request_options(params, records)
       return if request.method !~ /get/i ||
@@ -88,27 +83,25 @@ module JSONAPI
       records.is_a?(Array) && records.all? { |e| e.is_a?(Hash) }
     end
 
-    def result_options(options)
-      hash = {}
-
-      if JSONAPI.configuration.default_paginator != :none &&
+    def result_options(records, options)
+      {}.tap do |data|
+        if JSONAPI.configuration.default_paginator != :none &&
           JSONAPI.configuration.top_level_links_include_pagination
-        hash[:pagination_params] = pagination_params(options)
-      end
+          data[:pagination_params] = pagination_params(records, options)
+        end
 
-      if JSONAPI.configuration.top_level_meta_include_record_count
-        hash[:record_count] = count_records(@resources, options)
+        if JSONAPI.configuration.top_level_meta_include_record_count
+          data[:record_count] = count_records(records, options)
+        end
       end
-
-      hash
     end
 
-    def pagination_params(options)
+    def pagination_params(records, options)
       @paginator ||= paginator(params)
       if @paginator && JSONAPI.configuration.top_level_links_include_pagination
         options = {}
         @paginator.class.requires_record_count &&
-          options[:record_count] = count_records(@resources, options)
+          options[:record_count] = count_records(records, options)
         @paginator.links_page_params(options)
       else
         {}
@@ -127,9 +120,9 @@ module JSONAPI
     end
 
     def build_collection(records, options = {})
-      unless JSONAPI.configuration.default_paginator == :none
-        records = paginator(@request.params).apply(records, nil)
-      end
+      records = apply_filter(records, options)
+      records = apply_pagination(records, options)
+      records = apply_sort(records)
       records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
     end
 
@@ -141,24 +134,103 @@ module JSONAPI
       end
     end
 
+    def apply_filter(records, options = {})
+      if apply_filter?(records, options)
+        records.where(filter_params)
+      else
+        records
+      end
+    end
+
+    def apply_filter?(records, options = {})
+      params[:filter].present? && records.respond_to?(:where) &&
+        (options[:filter].nil? || options[:filter])
+    end
+
+    def filter_params
+      @_filter_params ||=
+        params[:filter].keys.each_with_object({}) do |resource, hash|
+          hash[resource] = params[:filter][resource]
+        end
+    end
+
+    def apply_pagination(records, options = {})
+      return records unless apply_pagination?(options)
+      pagination = set_pagination(options)
+
+      records =
+        if records.is_a?(Array)
+          records[pagination[:range]]
+        else
+          pagination[:paginator].apply(records, nil)
+        end
+    end
+
+    def apply_sort(records)
+      return records unless params[:sort].present?
+
+      if records.is_a?(Array)
+        records.sort { |a, b| comp = 0; eval(sort_criteria) }
+      elsif records.respond_to?(:order)
+        records.order(sort_params)
+      end
+    end
+
+    def sort_criteria
+      sort_params.reduce('') do |sum, hash|
+        foo = ["a[:#{hash[0]}]", "b[:#{hash[0]}]"]
+        foo.reverse! if hash[1] == :desc
+        sum + "comp = comp == 0 ? #{foo.join(' <=> ')} : comp; "
+      end
+    end
+
+    def sort_params
+      @_sort_params ||=
+        params[:sort].split(',').each_with_object({}) do |criteria, hash|
+          order, field = criteria.match(/(\-?)(\w+)/i)[1..2]
+          hash[field]  = order == '-' ? :desc : :asc
+        end
+    end
+
+    def set_pagination(options)
+      page_params = ActionController::Parameters.new(@request.params[:page])
+      if JSONAPI.configuration.default_paginator == :paged
+        @_paginator ||= PagedPaginator.new(page_params)
+        number = page_params['number'].to_i.nonzero? || 1
+        size   = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
+        { paginator: @_paginator, range: (number - 1) * size..number * size - 1 }
+      elsif JSONAPI.configuration.default_paginator == :offset
+        @_paginator ||= OffsetPaginator.new(page_params)
+        offset = page_params['offset'].to_i.nonzero? || 0
+        limit  = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
+        { paginator: @_paginator, range: offset..offset + limit - 1 }
+      else
+        {}
+      end
+    end
+
+    def apply_pagination?(options)
+      JSONAPI.configuration.default_paginator != :none &&
+        (options[:paginate].nil? || options[:paginate])
+    end
+
     def fix_when_hash(records, options)
       return [] unless options[:model]
       records.map { |hash| options[:model].new(hash) }
-    rescue
+    rescue ActiveRecord::UnknownAttributeError
       ids = records.map { |e| e[:id] || e['id'] }
       scope = options[:scope] ? options[:model].send(options[:scope]) : options[:model]
       scope.where(id: ids)
     end
 
     def count_records(records, options)
-      if records.size.zero?                    then 0
-      elsif options[:count]                    then options[:count]
-      elsif options[:model] && options[:scope] then options[:model].send(options[:scope]).count
-      elsif options[:model]                    then options[:model].count
+      if options[:count].present?
+        options[:count]
+      elsif records.is_a?(Array)
+        records.length
       else
-        record = records.first
-        model  = record.try(:model) || record.try(:_model)
-        model.class.count
+        records = apply_filter(records, options) if params[:filter].present?
+        records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
       end
     end
 

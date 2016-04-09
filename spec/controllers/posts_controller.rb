@@ -20,4 +20,3 @@ describe PostsController, type: :controller do
     it_behaves_like 'JSON API #show action', options.merge(action: :show)
   end
 end
-
