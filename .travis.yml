@@ -3,4 +3,4 @@ rvm:
  - 2.2
  - jruby
 before_install: gem install bundler -v 1.10.4
-script: bundle exec rake
+script: bundle exec rspec spec/controllers/{user,post}s_controller.rb
