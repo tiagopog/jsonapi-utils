@@ -23,4 +23,3 @@ module JSONAPI::Utils::Exceptions
     end
   end
 end
-
