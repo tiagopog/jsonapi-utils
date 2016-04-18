@@ -42,7 +42,7 @@ module JSONAPI
     end
 
     def jsonapi_render_not_found(exception)
-      id = exception.message.match(/=([\w-]+)/)[1]
+      id = exception.message.match(/=([\w-]+)/).try(:[], 1) || '(no identifier)'
       jsonapi_render_errors(JSONAPI::Exceptions::RecordNotFound.new(id))
     end
 
