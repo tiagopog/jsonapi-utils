@@ -1,13 +1,10 @@
 require 'jsonapi/utils/version'
-require 'active_support/concern'
 require 'jsonapi/utils/exceptions'
 
 module JSONAPI
   module Utils
-    extend ::ActiveSupport::Concern
-
-    include do
-      helper_method :jsonapi_serialize
+    def self.included(base)
+      base.helper_method :jsonapi_serialize
     end
 
     def jsonapi_render(options)
