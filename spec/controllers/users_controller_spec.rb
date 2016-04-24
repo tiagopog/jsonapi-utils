@@ -1,6 +1,11 @@
 require 'spec_helper'
 
 describe UsersController, type: :controller do
+  before(:all) { FactoryGirl.create_list(:user, 3) }
+
+  let(:fields) { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
+  let(:relationships) { %w(posts) }
+
   include_examples 'JSON API invalid request', resource: :users
 
   context 'when response is invalid' do
@@ -16,11 +21,16 @@ describe UsersController, type: :controller do
   end
 
   describe '#index' do
-    it 'renders a collection of users' do
+    it 'renders a collection of users', :aggregate_failures do
+      get :index
+      expect(response).to have_http_status :ok
+      expect(has_valid_id_and_type_members?('users')).to be_truthy
+      expect(has_fetchable_fields?(fields)).to be_truthy
+      expect(has_relationship_members?(relationships)).to be_truthy
     end
 
-    # context 'with "fields" params' do
-    # end
+    context 'with "fields"' do
+    end
   end
 
   describe '#show' do
