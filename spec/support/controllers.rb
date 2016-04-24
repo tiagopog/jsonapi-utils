@@ -31,7 +31,7 @@ class UsersController < BaseController
     jsonapi_render json: @user
   end
 
-  # GET /no_hash_failure
+  # GET /no_json_key_failure
   def no_json_key_failure
     jsonapi_render foo: :bar
   end

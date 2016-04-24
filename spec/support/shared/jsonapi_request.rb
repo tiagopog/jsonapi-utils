@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 ##
 # JSON API's top-level nodes
 ##

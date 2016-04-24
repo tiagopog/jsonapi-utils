@@ -77,8 +77,8 @@ JSONAPI.configuration.route_format = :dasherized_route
 
 TestApp.routes.draw do
   jsonapi_resources :users do
-    get :no_json_key_failure, on: :collection
     jsonapi_resources :posts
+    get :no_json_key_failure, on: :collection
   end
 end
 
