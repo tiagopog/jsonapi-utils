@@ -7,9 +7,9 @@ module JSONAPI
       base.helper_method :jsonapi_serialize
     end
 
-    def jsonapi_render(options)
-      unless options.has_key?(:json)
-        raise ArgumentError.new('":json" key must be set to JSONAPI::Utils#jsonapi_render') 
+    def jsonapi_render(hash)
+      unless hash.present? && hash.has_key?(:json)
+        fail ArgumentError.new('":json" key must be set to JSONAPI::Utils#jsonapi_render') 
       end
 
       setup_request
@@ -17,8 +17,8 @@ module JSONAPI
       if @request.errors.present?
         render_errors(@request.errors)
       else
-        body = jsonapi_serialize(options[:json], options[:options] || {})
-        render json: body, status: options[:status] || :ok
+        body = jsonapi_serialize(hash[:json], hash[:options] || {})
+        render json: body, status: hash[:status] || :ok
       end
     rescue => e
       handle_exceptions(e)

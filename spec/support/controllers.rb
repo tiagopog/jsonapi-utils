@@ -30,5 +30,9 @@ class UsersController < BaseController
     @user = User.find(params[:id])
     jsonapi_render json: @user
   end
-end
 
+  # GET /no_hash_failure
+  def no_json_key_failure
+    jsonapi_render foo: :bar
+  end
+end

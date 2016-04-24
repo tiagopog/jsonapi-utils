@@ -2,6 +2,16 @@ require 'spec_helper'
 
 describe UsersController, type: :controller do
   context 'with invalid' do
+    context 'with no "json" key present' do
+      it 'renders a 500 response', :aggregate_failures do
+        get :no_json_key_failure
+        expect(response).to have_http_status :internal_server_error
+        expect(errors['title']).to eq('Internal Server Error')
+        expect(errors['code']).to eq(500)
+        expect(errors['meta']['exception']).to eq('":json" key must be set to JSONAPI::Utils#jsonapi_render')
+      end
+    end
+
     context '"include"' do
       context 'when resource does not exist' do
         it 'renders a 400 response', :aggregate_failures do
