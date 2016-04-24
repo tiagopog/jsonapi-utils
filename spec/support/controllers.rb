@@ -8,7 +8,7 @@ class PostsController < BaseController
   # GET /users/:user_id/posts
   def index
     @posts = User.find(params[:user_id]).posts
-    jsonapi_render json: @posts, options: { count: @posts.count }
+    jsonapi_render json: @posts
   end
 
   # GET /posts/:id
@@ -22,7 +22,7 @@ class UsersController < BaseController
   # GET /users
   def index
     @users = User.all
-    jsonapi_render json: @users, options: { count: @users.count }
+    jsonapi_render json: @users
   end
 
   # GET /users/:id

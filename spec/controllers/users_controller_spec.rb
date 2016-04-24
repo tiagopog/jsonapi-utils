@@ -34,7 +34,7 @@ describe UsersController, type: :controller do
         get :index, include: :posts
         expect(response).to have_http_status :ok
         expect(has_valid_id_and_type_members?('users')).to be_truthy
-        expect(has_included_relationships?(%w(posts foobars))).to be_truthy
+        expect(has_included_relationships?(%w(posts))).to be_truthy
       end
     end
 
@@ -44,6 +44,47 @@ describe UsersController, type: :controller do
         expect(response).to have_http_status :ok
         expect(has_valid_id_and_type_members?('users')).to be_truthy
         expect(has_fetchable_fields?(%w(first_name))).to be_truthy
+      end
+    end
+
+    context 'with "filter"' do
+      let(:first_name) { User.first.first_name }
+
+      it 'returns only results corresponding to the applied filter' do
+        get :index, filter: { first_name: first_name }
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('users')).to be_truthy
+        expect(record_count).to eq(1)
+        expect(data[0]['attributes']['first_name']).to eq(first_name)
+      end
+    end
+
+    context 'with "sort"' do
+      context 'when asc' do
+        it 'returns sorted results' do
+          get :index, sort: :first_name
+
+          first_name1 = data[0]['attributes']['first_name']
+          first_name2 = data[1]['attributes']['first_name']
+
+          expect(response).to have_http_status :ok
+          expect(has_valid_id_and_type_members?('users')).to be_truthy
+          expect(first_name1).to be <= first_name2
+        end
+      end
+
+      context 'when desc' do
+        it 'returns sorted results' do
+          get :index, sort: '-first_name,-last_name'
+
+          first_name1, last_name1 = data[0]['attributes'].values_at('first_name', 'last_name')
+          first_name2, last_name2 = data[1]['attributes'].values_at('first_name', 'last_name')
+          sorted = first_name1 > first_name2 || (first_name1 == first_name2 && last_name1 >= last_name2)
+
+          expect(response).to have_http_status :ok
+          expect(has_valid_id_and_type_members?('users')).to be_truthy
+          expect(sorted).to be_truthy
+        end
       end
     end
   end

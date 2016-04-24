@@ -6,20 +6,24 @@ module Helpers
       @json ||= JSON.parse(response.body)
     end
 
-    def data
-      @data ||= json['data']
+    def error
+      @error ||= json['errors'].first
     end
 
-    def included
-      @included ||= json['included']
+    def data
+      @data ||= json['data']
     end
 
     def links
       @links ||= json['links']
     end
 
-    def error
-      @error ||= json['errors'].first
+    def included
+      @included ||= json['included']
+    end
+
+    def record_count
+      @record_count ||= json['meta']['record_count']
     end
 
     def has_fetchable_fields?(fields)
