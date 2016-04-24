@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe UsersController, type: :controller do
-  before(:all) { FactoryGirl.create_list(:user, 3) }
+  before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
   let(:fields) { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
@@ -29,7 +29,22 @@ describe UsersController, type: :controller do
       expect(has_relationship_members?(relationships)).to be_truthy
     end
 
+    context 'with "include"' do
+      it 'returns only the required relationships in the "included" member' do
+        get :index, include: :posts
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('users')).to be_truthy
+        expect(has_included_relationships?(%w(posts foobars))).to be_truthy
+      end
+    end
+
     context 'with "fields"' do
+      it 'returns only the required fields in the "attributes" member' do
+        get :index, fields: { users: :first_name }
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('users')).to be_truthy
+        expect(has_fetchable_fields?(%w(first_name))).to be_truthy
+      end
     end
   end
 
