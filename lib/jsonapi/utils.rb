@@ -8,17 +8,24 @@ module JSONAPI
     end
 
     def jsonapi_render(options)
-      if options.has_key?(:json)
-        response = jsonapi_serialize(options[:json], options[:options] || {})
-        render json: response, status: options[:status] || :ok
+      unless options.has_key?(:json)
+        raise ArgumentError.new('":json" key must be set to JSONAPI::Utils#jsonapi_render') 
+      end
+
+      setup_request
+
+      if @request.errors.present?
+        render_errors(@request.errors)
       else
-        raise ArgumentError.new('":json" key must be set to JSONAPI::Utils#jsonapi_render')
+        body = jsonapi_serialize(options[:json], options[:options] || {})
+        render json: body, status: options[:status] || :ok
       end
     rescue => e
-      raise e unless e.class.name.starts_with?('JSONAPI::Exceptions')
       handle_exceptions(e)
     ensure
-      headers['Content-Type'] = JSONAPI::MEDIA_TYPE
+      if response.body.size > 0
+        response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
+      end
     end
 
     def jsonapi_render_errors(exception)
@@ -48,7 +55,6 @@ module JSONAPI
     end
 
     def jsonapi_serialize(records, options = {})
-      setup_request
       results = JSONAPI::OperationResults.new
 
       fix_request_options(params, records)
