@@ -3,7 +3,11 @@ require 'json'
 module Helpers
   module ResponseParser
     def data
-      json['data'].is_a?(Array) ? json['data'] : [json['data']]
+      @data ||= json['data'].is_a?(Array) ? json['data'] : [json['data']]
+    end
+
+    def errors
+      @errors ||= json['errors'].first
     end
 
     def json
