@@ -70,10 +70,25 @@ shared_examples_for 'JSON API invalid request' do |options|
             expect(error['code']).to eq(105)
           end
         end
+
+        context 'with a "size" greater than the max limit' do
+          it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"', :aggregate_failures do
+            get :index, page: { size: 999 }
+            expect(response).to have_http_status :bad_request
+            expect(error['title']).to eq('Invalid page value')
+            expect(error['code']).to eq(118)
+          end
+        end
       end
 
       context 'when using "offset" paginator' do
-        before(:all) { UserResource.paginator :offset }
+        before(:all) do
+          if options[:resource] == :users
+            UserResource.paginator :offset
+          else
+            PostResource.paginator :offset
+          end
+        end
 
         context 'with invalid offset' do
           it 'renders a 400 response', :aggregate_failures do
@@ -99,6 +114,15 @@ shared_examples_for 'JSON API invalid request' do |options|
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Page parameter not allowed')
             expect(error['code']).to eq(105)
+          end
+        end
+
+        context 'with a "size" greater than the max limit' do
+          it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"', :aggregate_failures do
+            get :index, page: { limit: 999 }
+            expect(response).to have_http_status :bad_request
+            expect(error['title']).to eq('Invalid page value')
+            expect(error['code']).to eq(118)
           end
         end
       end
