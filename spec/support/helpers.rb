@@ -1,4 +1,5 @@
 require 'json'
+require 'pry'
 
 module Helpers
   module ResponseParser
@@ -14,6 +15,10 @@ module Helpers
       @data ||= json['data']
     end
 
+    def collection
+      @collection ||= [data].flatten
+    end
+
     def links
       @links ||= json['links']
     end
@@ -27,21 +32,19 @@ module Helpers
     end
 
     def has_fetchable_fields?(fields)
-      Array(data).all? { |record| record['attributes'].keys == fields }
+      collection.all? { |record| record['attributes'].keys == fields }
     end
 
     def has_valid_id_and_type_members?(type)
-      Array(data).all? do |record|
-        record['id'].present? && record['type'] == type
-      end
+      collection.all? { |record| record['id'].present? && record['type'] == type }
     end
 
     def has_relationship_members?(relationships)
-      Array(data).all? { |record| record['relationships'].keys == relationships }
+      collection.all? { |record| record['relationships'].keys == relationships }
     end
 
     def has_included_relationships?(relationships)
-      Array(data).all? do |record|
+      collection.all? do |record|
         record['relationships'].all? do |(key, relation)|
           return true if relation['data'].blank?
           relationship_ids = relation['data'].map { |e| e['id'] }

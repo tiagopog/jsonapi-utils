@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe UsersController, type: :controller do
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
@@ -195,7 +194,7 @@ describe UsersController, type: :controller do
           end
         end
 
-        context 'without "size"' do
+        context 'without "limit"' do
           it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
             get :index, page: { offset: 1 }
             expect(response).to have_http_status :ok
@@ -237,6 +236,14 @@ describe UsersController, type: :controller do
   end
 
   describe '#show' do
+    it 'renders a single user' do
+      get :show, id: 1
+      expect(response).to have_http_status :ok
+      expect(has_valid_id_and_type_members?('users')).to be_truthy
+      expect(has_relationship_members?(relationships)).to be_truthy
+      expect(data['attributes']['first_name']).to eq('User #1')
+    end
+
     context 'when resource was not found' do
       it 'renders a 400 response' do
         get :show, id: 999
