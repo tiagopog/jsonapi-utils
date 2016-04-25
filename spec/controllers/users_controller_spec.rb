@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pry'
 
 describe UsersController, type: :controller do
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
@@ -61,7 +62,10 @@ describe UsersController, type: :controller do
 
     context 'with "page"' do
       context 'when using "paged" paginator' do
-        before(:all) { UserResource.paginator :paged }
+        before(:all) do
+          JSONAPI.configuration.default_paginator = :paged
+          UserResource.paginator :paged
+        end
 
         context 'at the first page' do
           it 'returns the paginated results' do
@@ -130,6 +134,75 @@ describe UsersController, type: :controller do
       end
 
       context 'when using "offset" paginator' do
+        before(:all) do
+          JSONAPI.configuration.default_paginator = :offset
+          UserResource.paginator :offset
+        end
+
+        context 'at the first page' do
+          it 'returns the paginated results' do
+            get :index, page: { offset: 0, limit: 2 }
+
+            expect(response).to have_http_status :ok
+
+            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(data[0]['id']).to eq('1')
+            expect(data[1]['id']).to eq('2')
+
+            expect(data.size).to eq(2)
+            expect(record_count).to eq(3)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the middle' do
+          it 'returns the paginated results' do
+            get :index, page: { offset: 1, limit: 1 }
+
+            expect(response).to have_http_status :ok
+
+            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(data[0]['id']).to eq('2')
+
+            expect(data.size).to eq(1)
+            expect(record_count).to eq(3)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['previous']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the last page' do
+          it 'returns the paginated results' do
+            get :index, page: { offset: 2, limit: 1 }
+
+            expect(response).to have_http_status :ok
+
+            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(data[0]['id']).to eq('3')
+
+            expect(data.size).to eq(1)
+            expect(record_count).to eq(3)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['previous']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'without "size"' do
+          it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
+            get :index, page: { offset: 1 }
+            expect(response).to have_http_status :ok
+            expect(data.size).to eq(JSONAPI.configuration.default_page_size)
+            expect(record_count).to eq(3)
+          end
+        end
       end
     end
 
