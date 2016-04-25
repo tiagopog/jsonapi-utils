@@ -1,4 +1,4 @@
-shared_examples_for 'JSON API invalid request' do |options|
+shared_examples_for 'JSON API invalid request' do
   context 'when request is invalid' do
     context 'with "include"' do
       context 'when resource does not exist' do
@@ -23,7 +23,7 @@ shared_examples_for 'JSON API invalid request' do |options|
 
       context 'when field does not exist' do
         it 'renders a 400 response', :aggregate_failures do
-          get :index, fields: { "#{options[:resource]}": 'bar' }
+          get :index, fields: { users: 'bar' }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid field')
           expect(error['code']).to eq(104)
@@ -82,13 +82,7 @@ shared_examples_for 'JSON API invalid request' do |options|
       end
 
       context 'when using "offset" paginator' do
-        before(:all) do
-          if options[:resource] == :users
-            UserResource.paginator :offset
-          else
-            PostResource.paginator :offset
-          end
-        end
+        before(:all) { UserResource.paginator :offset }
 
         context 'with invalid offset' do
           it 'renders a 400 response', :aggregate_failures do
