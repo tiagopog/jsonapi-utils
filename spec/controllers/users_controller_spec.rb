@@ -8,18 +8,6 @@ describe UsersController, type: :controller do
 
   include_examples 'JSON API invalid request', resource: :users
 
-  context 'when response is invalid' do
-    context 'when no "json" key is present' do
-      it 'renders a 500 response' do
-        get :no_json_key_failure
-        expect(response).to have_http_status :internal_server_error
-        expect(error['title']).to eq('Internal Server Error')
-        expect(error['code']).to eq(500)
-        expect(error['meta']['exception']).to eq('":json" key must be set to JSONAPI::Utils#jsonapi_render')
-      end
-    end
-  end
-
   describe '#index' do
     it 'renders a collection of users' do
       get :index
