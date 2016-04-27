@@ -13,8 +13,8 @@ module JSONAPI
       if @request.errors.present?
         render_errors(@request.errors)
       else
-        body = jsonapi_serialize(json, options || {})
-        render json: body, status: status || :ok
+        body = jsonapi_serialize(json, options)
+        render json: body, status: status || @_response_document.status
       end
     rescue => e
       handle_exceptions(e)
@@ -64,7 +64,8 @@ module JSONAPI
         results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @_record))
       end
 
-      create_response_document(results).contents
+      @_response_document = create_response_document(results)
+      @_response_document.contents
     end
 
     private
