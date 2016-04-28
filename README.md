@@ -13,8 +13,7 @@ JSONAPI::Utils (JU) was built on top of [JSONAPI::Resources](https://github.com/
 Add these lines to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-resources', '~> 0.7.0'
-gem 'jsonapi-utils'
+gem 'jsonapi-utils', '~> 0.4.3'
 ```
 
 And then execute:
