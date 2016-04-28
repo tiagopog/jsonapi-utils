@@ -54,7 +54,7 @@ jsonapi_render json: User.some_weird_scope, options: { count: User.some_weird_sc
 # Hash rendering
 jsonapi_render json: { data: { id: 1, first_name: 'Tiago' } }, options: { model: User }
 
-# Collection of Hash rendering
+# Collection of Hashes rendering
 jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_name: 'Doug' }] }, options: { model: User }
 ```
 
@@ -364,7 +364,7 @@ Content-Type: application/vnd.api+json
 Request:
 
 ```
-GET /users?include=posts&fields[users]=full_name,posts&fields[posts]=title&page[number]=1&page[size]=1 HTTP/1.1
+GET /users?include=posts&fields[users]=first_name,last_name,posts&fields[posts]=title&sort=first_name,last_name&page[number]=1&page[size]=1 HTTP/1.1
 Accept: application/vnd.api+json
 ```
 
@@ -377,13 +377,34 @@ Content-Type: application/vnd.api+json
 {
   "data": [
     {
+      "id": "2",
+      "type": "users",
+      "links": {
+        "self": "http://api.myblog.com/users/2"
+      },
+      "attributes": {
+        "first_name": "Douglas",
+        "last_name": "André"
+      },
+      "relationships": {
+        "posts": {
+          "links": {
+            "self": "http://api.myblog.com/users/2/relationships/posts",
+            "related": "http://api.myblog.com/users/2/posts"
+          },
+          "data": []
+        }
+      }
+    },
+    {
       "id": "1",
       "type": "users",
       "links": {
         "self": "http://api.myblog.com/users/1"
       },
       "attributes": {
-        "full_name": "Tiago Guedes"
+        "first_name": "Tiago",
+        "last_name": "Guedes"
       },
       "relationships": {
         "posts": {
@@ -417,9 +438,8 @@ Content-Type: application/vnd.api+json
     "record_count": 2
   },
   "links": {
-    "first": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=1&page%5Bsize%5D=1",
-    "next": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1",
-    "last": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1"
+    "first": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=first_name%2Clast_name%2Cposts&include=posts&page%5Blimit%5D=2&page%5Boffset%5D=0&sort=first_name%2Clast_name",
+    "last": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=first_name%2Clast_name%2Cposts&include=posts&page%5Blimit%5D=2&page%5Boffset%5D=0&sort=first_name%2Clast_name"
   }
 }
 ```
