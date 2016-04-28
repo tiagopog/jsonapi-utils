@@ -68,6 +68,25 @@ module JSONAPI
       @_response_document.contents
     end
 
+    def filter_params
+      @_filter_params ||=
+        if params[:filter].is_a?(Hash)
+          params[:filter].keys.each_with_object({}) do |resource, hash|
+            hash[resource] = params[:filter][resource]
+          end
+        end
+    end
+
+    def sort_params
+      @_sort_params ||=
+        if params[:sort].present?
+          params[:sort].split(',').each_with_object({}) do |criteria, hash|
+            order, field = criteria.match(/(\-?)(\w+)/i)[1..2]
+            hash[field]  = order == '-' ? :desc : :asc
+          end
+        end
+    end
+
     private
 
     def fix_request_options(params, records)
@@ -146,13 +165,6 @@ module JSONAPI
         (options[:filter].nil? || options[:filter])
     end
 
-    def filter_params
-      @_filter_params ||=
-        params[:filter].keys.each_with_object({}) do |resource, hash|
-          hash[resource] = params[:filter][resource]
-        end
-    end
-
     def apply_pagination(records, options = {})
       return records unless apply_pagination?(options)
       pagination = set_pagination(options)
@@ -181,14 +193,6 @@ module JSONAPI
         foo.reverse! if hash[1] == :desc
         sum + "comp = comp == 0 ? #{foo.join(' <=> ')} : comp; "
       end
-    end
-
-    def sort_params
-      @_sort_params ||=
-        params[:sort].split(',').each_with_object({}) do |criteria, hash|
-          order, field = criteria.match(/(\-?)(\w+)/i)[1..2]
-          hash[field]  = order == '-' ? :desc : :asc
-        end
     end
 
     def set_pagination(options)
