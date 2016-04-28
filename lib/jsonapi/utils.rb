@@ -51,7 +51,7 @@ module JSONAPI
     end
 
     def jsonapi_serialize(records, options = {})
-      results = JSONAPI::OperationResults.new
+      setup_request
 
       if records.is_a?(Hash)
         hash    = records.with_indifferent_access
@@ -59,17 +59,7 @@ module JSONAPI
       end
 
       fix_request_options(params, records)
-
-      if records.respond_to?(:to_ary)
-        @_records = build_collection(records, options)
-        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @_records, result_options(records, options)))
-      else
-        @_record = turn_into_resource(records, options)
-        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @_record))
-      end
-
-      @_response_document = create_response_document(results)
-      @_response_document.contents
+      build_response_document(records, options).contents
     end
 
     def filter_params
@@ -92,6 +82,21 @@ module JSONAPI
     end
 
     private
+
+    def build_response_document(records, options)
+      results = JSONAPI::OperationResults.new
+
+      if records.respond_to?(:to_ary)
+        @_records = build_collection(records, options)
+        results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @_records, result_options(records, options)))
+      else
+        @_record = turn_into_resource(records, options)
+        results.add_result(JSONAPI::ResourceOperationResult.new(:ok, @_record))
+      end
+
+      @_response_document = create_response_document(results)
+    end
+
 
     def fix_request_options(params, records)
       return if request.method !~ /get/i ||
