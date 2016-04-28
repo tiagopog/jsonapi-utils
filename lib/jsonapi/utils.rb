@@ -53,10 +53,14 @@ module JSONAPI
     def jsonapi_serialize(records, options = {})
       results = JSONAPI::OperationResults.new
 
+      if records.is_a?(Hash)
+        hash    = records.with_indifferent_access
+        records = hash_to_active_record(hash[:data], options[:model])
+      end
+
       fix_request_options(params, records)
 
       if records.respond_to?(:to_ary)
-        records = fix_when_hash(records, options) if needs_to_be_fixed?(records)
         @_records = build_collection(records, options)
         results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, @_records, result_options(records, options)))
       else
@@ -95,10 +99,6 @@ module JSONAPI
                 %w(index show create update destroy).include?(params[:action])
       action = records.respond_to?(:to_ary) ? 'index' : 'show'
       @request.send("setup_#{action}_action", params)
-    end
-
-    def needs_to_be_fixed?(records)
-      records.is_a?(Array) && records.all? { |e| e.is_a?(Hash) }
     end
 
     def result_options(records, options)
@@ -217,13 +217,17 @@ module JSONAPI
         (options[:paginate].nil? || options[:paginate])
     end
 
-    def fix_when_hash(records, options)
-      return [] unless options[:model]
-      records.map { |hash| options[:model].new(hash) }
+    def hash_to_active_record(data, model)
+      return data if model.nil?
+      coerced = [data].flatten.map { |hash| model.new(hash) }
+      data.is_a?(Array) ? coerced : coerced.first
     rescue ActiveRecord::UnknownAttributeError
-      ids = records.map { |e| e[:id] || e['id'] }
-      scope = options[:scope] ? options[:model].send(options[:scope]) : options[:model]
-      scope.where(id: ids)
+      if data.is_a?(Array)
+        ids = data.map { |e| e[:id] }
+        model.where(id: ids)
+      else
+        model.find_by(id: data[:id])
+      end
     end
 
     def count_records(records, options)
