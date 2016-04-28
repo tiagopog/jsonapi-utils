@@ -6,7 +6,7 @@
 
 Simple yet powerful way to have your Rails API compliant with [JSON API](http://jsonapi.org).
 
-JSONAPI::Utils was built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
+JSONAPI::Utils (JU) was built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
 
 ## Installation
 
@@ -23,33 +23,52 @@ And then execute:
 $ bundle
 ```
 
-## Main Macros
+## Macros
 
-* `jsonapi_render`: it works like ActionController's `render` method, receiving model objects and
-rendering them into JSON API's data format.
+### jsonapi_render
 
-* `jsonapi_serialize`: in the backstage, it's the method that actually parsers model objects or hashes and builds JSON data.
-It can be called anywhere in controllers, concerns etc.
+Validates the request and renders ActiveRecord/Hash objects into JSON API-compliant responses.
 
-## Options
+Arguments:
 
-Those macros accept the following options:
-
-* `resource`: explicitly points the resource to be used in the serialization. By default, JSONAPI::Utils will
-select resources by inferencing from controller's name.
-
-```ruby
-# If in UsersController for some reason it needs to render a different resource:
-jsonapi_render json: Post.all, options: { resource: PostResource }
-```
-
-* `count`: explicitly points the total count of records for the request, in order to build a proper pagination. By default, JSONAPI::Utils will
-count the total number of records for a given resource.
+  - `json`: ActiveRecord or Hash object to be rendered as JSON document;
+  - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered;
+  - `options`:
+    - `resource`: explicitly points the resource to be used in the serialization. By default, JU will select resources by inferencing from controller's name.
+    - `count`: explicitly points the total count of records for the request in order to build a proper pagination. By default, JU will count the total number of records.
+    - `model`: sets the model reference in cases when `json` is a Hash or a collection of Hashes.
 
 ```ruby
-users = User.all
-jsonapi_render json: users, options: { count: users.count }
+# Single resource rendering
+jsonapi_render json: User.find(params[:id])
+
+# Collection rendering
+jsonapi_render json: User.all
+
+# Forcing a different resource
+jsonapi_render json: User.all, options: { resource: V2::UserResource }
+
+# Using a specific count
+jsonapi_render json: User.some_weird_scope, options: { count: User.some_weird_scope_count }
+
+# Hash rendering
+jsonapi_render json: { data: { id: 1, first_name: 'Tiago' } }, options: { model: User }
+
+# Collection of Hashes rendering
+jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_name: 'Doug' }] }, options: { model: User }
 ```
+
+### jsonapi_serialize
+
+In the backstage that's the method that actually parsers ActiveRecord/Hash objects and builds a new Hash compliant with JSON API. It can be called anywhere in controllers, concerns etc.
+
+```ruby
+collection = jsonapi_serialize(User.all)
+render json: do_some_magic_with(collection)
+```
+
+Arguments:
+  - It receives a second optional argument with the same options for `jsonapi_render`.
 
 ## Usage
 
@@ -345,7 +364,7 @@ Content-Type: application/vnd.api+json
 Request:
 
 ```
-GET /users?include=posts&fields[users]=full_name,posts&fields[posts]=title&page[number]=1&page[size]=1 HTTP/1.1
+GET /users?include=posts&fields[users]=first_name,last_name,posts&fields[posts]=title&sort=first_name,last_name&page[number]=1&page[size]=1 HTTP/1.1
 Accept: application/vnd.api+json
 ```
 
@@ -358,13 +377,34 @@ Content-Type: application/vnd.api+json
 {
   "data": [
     {
+      "id": "2",
+      "type": "users",
+      "links": {
+        "self": "http://api.myblog.com/users/2"
+      },
+      "attributes": {
+        "first_name": "Douglas",
+        "last_name": "André"
+      },
+      "relationships": {
+        "posts": {
+          "links": {
+            "self": "http://api.myblog.com/users/2/relationships/posts",
+            "related": "http://api.myblog.com/users/2/posts"
+          },
+          "data": []
+        }
+      }
+    },
+    {
       "id": "1",
       "type": "users",
       "links": {
         "self": "http://api.myblog.com/users/1"
       },
       "attributes": {
-        "full_name": "Tiago Guedes"
+        "first_name": "Tiago",
+        "last_name": "Guedes"
       },
       "relationships": {
         "posts": {
@@ -398,9 +438,8 @@ Content-Type: application/vnd.api+json
     "record_count": 2
   },
   "links": {
-    "first": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=1&page%5Bsize%5D=1",
-    "next": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1",
-    "last": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=full_name%2Cposts&include=posts&page%5Bnumber%5D=2&page%5Bsize%5D=1"
+    "first": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=first_name%2Clast_name%2Cposts&include=posts&page%5Blimit%5D=2&page%5Boffset%5D=0&sort=first_name%2Clast_name",
+    "last": "http://api.myblog.com/users?fields%5Bposts%5D=title&fields%5Busers%5D=first_name%2Clast_name%2Cposts&include=posts&page%5Blimit%5D=2&page%5Boffset%5D=0&sort=first_name%2Clast_name"
   }
 }
 ```
