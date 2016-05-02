@@ -44,6 +44,9 @@ jsonapi_render json: User.find(params[:id])
 # Collection rendering
 jsonapi_render json: User.all
 
+# Specify a particular HTTP status code
+jsonapi_render json: new_user, status: :created
+
 # Forcing a different resource
 jsonapi_render json: User.all, options: { resource: V2::UserResource }
 
