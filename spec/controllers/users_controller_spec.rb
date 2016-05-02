@@ -3,7 +3,7 @@ require 'spec_helper'
 describe UsersController, type: :controller do
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
-  let(:fields) { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
+  let(:fields)        { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
 
   include_examples 'JSON API invalid request', resource: :users
@@ -233,7 +233,7 @@ describe UsersController, type: :controller do
     end
 
     context 'when resource was not found' do
-      it 'renders a 400 response' do
+      it 'renders a 404 response' do
         get :show, id: 999
         expect(response).to have_http_status :not_found
         expect(error['title']).to eq('Record not found')
