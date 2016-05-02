@@ -7,8 +7,11 @@ end
 class PostsController < BaseController
   # GET /users/:user_id/posts
   def index
-    @posts = User.find(params[:user_id]).posts
-    jsonapi_render json: @posts
+    @posts = { data: [
+      { id: 1, title: 'Lorem Ipsum' },
+      { id: 2, title: 'Dolor Sit' }
+    ]}
+    jsonapi_render json: @posts, options: { model: Post }
   end
 
   # GET /posts/:id

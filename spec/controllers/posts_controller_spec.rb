@@ -7,6 +7,18 @@ describe PostsController, type: :controller do
   let(:relationships) { %w(author) }
   let(:post)          { Post.first }
 
+  describe '#index' do
+    context 'when passing a Hash' do
+      it 'renders a collection of users' do
+        get :index, user_id: post.user_id
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('posts')).to be_truthy
+        expect(has_fetchable_fields?(fields)).to be_truthy
+        expect(has_relationship_members?(relationships)).to be_truthy
+      end
+    end
+  end
+
   describe '#show' do
     it 'renders a single post' do
       get :show, user_id: post.user_id, id: post.id
