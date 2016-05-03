@@ -23,6 +23,12 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
   end
+
+  config.before(:all) do
+    %w(users posts).each do |table_name|
+      ActiveRecord::Base.connection.execute("DELETE FROM #{table_name}; VACUUM;")
+    end
+  end
 end
 
 Rails.env = 'test'

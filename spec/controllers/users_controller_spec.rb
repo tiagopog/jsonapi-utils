@@ -59,11 +59,7 @@ describe UsersController, type: :controller do
             get :index, page: { number: 1, size: 2 }
 
             expect(response).to have_http_status :ok
-
             expect(has_valid_id_and_type_members?('users')).to be_truthy
-            expect(data[0]['id']).to eq('1')
-            expect(data[1]['id']).to eq('2')
-
             expect(data.size).to eq(2)
             expect(record_count).to eq(3)
 
@@ -78,10 +74,7 @@ describe UsersController, type: :controller do
             get :index, page: { number: 2, size: 1 }
 
             expect(response).to have_http_status :ok
-
             expect(has_valid_id_and_type_members?('users')).to be_truthy
-            expect(data[0]['id']).to eq('2')
-
             expect(data.size).to eq(1)
             expect(record_count).to eq(3)
 
@@ -97,10 +90,7 @@ describe UsersController, type: :controller do
             get :index, page: { number: 3, size: 1 }
 
             expect(response).to have_http_status :ok
-
             expect(has_valid_id_and_type_members?('users')).to be_truthy
-            expect(data[0]['id']).to eq('3')
-
             expect(data.size).to eq(1)
             expect(record_count).to eq(3)
 
@@ -131,11 +121,7 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 0, limit: 2 }
 
             expect(response).to have_http_status :ok
-
             expect(has_valid_id_and_type_members?('users')).to be_truthy
-            expect(data[0]['id']).to eq('1')
-            expect(data[1]['id']).to eq('2')
-
             expect(data.size).to eq(2)
             expect(record_count).to eq(3)
 
@@ -150,10 +136,7 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 1, limit: 1 }
 
             expect(response).to have_http_status :ok
-
             expect(has_valid_id_and_type_members?('users')).to be_truthy
-            expect(data[0]['id']).to eq('2')
-
             expect(data.size).to eq(1)
             expect(record_count).to eq(3)
 
@@ -169,10 +152,7 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 2, limit: 1 }
 
             expect(response).to have_http_status :ok
-
             expect(has_valid_id_and_type_members?('users')).to be_truthy
-            expect(data[0]['id']).to eq('3')
-
             expect(data.size).to eq(1)
             expect(record_count).to eq(3)
 
@@ -224,12 +204,14 @@ describe UsersController, type: :controller do
   end
 
   describe '#show' do
+    let(:user) { User.first }
+
     it 'renders a single user' do
-      get :show, id: 1
+      get :show, id: user.id
       expect(response).to have_http_status :ok
       expect(has_valid_id_and_type_members?('users')).to be_truthy
       expect(has_relationship_members?(relationships)).to be_truthy
-      expect(data['attributes']['first_name']).to eq('User #1')
+      expect(data['attributes']['first_name']).to eq("User ##{user.id}")
     end
 
     context 'when resource was not found' do
