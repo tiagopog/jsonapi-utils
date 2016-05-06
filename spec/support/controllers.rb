@@ -5,8 +5,15 @@ class BaseController < JSONAPI::ResourceController
 end
 
 class PostsController < BaseController
+  before_action :load_user, except: %i(index_with_hash show_with_hash)
+
   # GET /users/:user_id/posts
   def index
+    jsonapi_render json: @user.posts, options: { count: 100 }
+  end
+
+  # GET /index_with_hash
+  def index_with_hash
     @posts = { data: [
       { id: 1, title: 'Lorem Ipsum' },
       { id: 2, title: 'Dolor Sit' }
@@ -14,10 +21,27 @@ class PostsController < BaseController
     jsonapi_render json: @posts, options: { model: Post }
   end
 
-  # GET /posts/:id
+  # GET /users/:user_id/posts/:id
   def show
-    @post = Post.find(params[:id])
-    jsonapi_render json: @post
+    jsonapi_render json: @user.posts.find(params[:id])
+  end
+
+  # GET /show_with_hash/:id
+  def show_with_hash
+    jsonapi_render json: { data: { id: params[:id], title: 'Lorem ipsum' } },
+                   options: { model: Post, resource: ::V2::PostResource }
+  end
+
+  # POST /users/:user_id/posts
+  def create
+    new_post = FactoryGirl.create(:post, user: @user)
+    jsonapi_render json: new_post, status: :created
+  end
+
+  private
+
+  def load_user
+    @user = User.find(params[:user_id])
   end
 end
 

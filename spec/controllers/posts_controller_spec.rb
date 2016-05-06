@@ -8,9 +8,20 @@ describe PostsController, type: :controller do
   let(:post)          { Post.first }
 
   describe '#index' do
-    context 'when passing a Hash' do
+    context 'with ActiveRecord::Relation' do
       it 'renders a collection of users' do
         get :index, user_id: post.user_id
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('posts')).to be_truthy
+        expect(has_fetchable_fields?(fields)).to be_truthy
+        expect(has_relationship_members?(relationships)).to be_truthy
+        expect(record_count).to eq(100)
+      end
+    end
+
+    context 'with Hash' do
+      it 'renders a collection of users' do
+        get :index_with_hash
         expect(response).to have_http_status :ok
         expect(has_valid_id_and_type_members?('posts')).to be_truthy
         expect(has_fetchable_fields?(fields)).to be_truthy
@@ -20,12 +31,24 @@ describe PostsController, type: :controller do
   end
 
   describe '#show' do
-    it 'renders a single post' do
-      get :show, user_id: post.user_id, id: post.id
-      expect(response).to have_http_status :ok
-      expect(has_valid_id_and_type_members?('posts')).to be_truthy
-      expect(has_relationship_members?(relationships)).to be_truthy
-      expect(data['attributes']['title']).to eq("Title for Post #{post.id}")
+    context 'with ActiveRecord' do
+      it 'renders a single post' do
+        get :show, user_id: post.user_id, id: post.id
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('posts')).to be_truthy
+        expect(has_relationship_members?(relationships)).to be_truthy
+        expect(data['attributes']['title']).to eq("Title for Post #{post.id}")
+      end
+    end
+
+    context 'with Hash' do
+      it 'renders a single post' do
+        get :show_with_hash, id: 1
+        expect(response).to have_http_status :ok
+        expect(has_valid_id_and_type_members?('posts')).to be_truthy
+        expect(has_relationship_members?(relationships)).to be_truthy
+        expect(data['attributes']['title']).to eq('Lorem ipsum')
+      end
     end
 
     context 'when resource was not found' do
