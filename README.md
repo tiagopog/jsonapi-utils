@@ -197,7 +197,7 @@ class PostsController < BaseController
 end
 ```
 
-### Erros
+### Errors
 
 #### Not found
 
