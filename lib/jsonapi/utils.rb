@@ -5,7 +5,9 @@ require 'jsonapi/utils/exceptions'
 module JSONAPI
   module Utils
     def self.included(base)
-      base.helper_method :jsonapi_serialize
+      if base.respond_to?(:helper_method)
+        base.helper_method :jsonapi_serialize
+      end
     end
 
     def jsonapi_render(json:, status: nil, options: {})
