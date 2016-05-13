@@ -12,17 +12,19 @@ describe UsersController, type: :controller do
     it 'renders a collection of users' do
       get :index
       expect(response).to have_http_status :ok
-      expect(has_valid_id_and_type_members?('users')).to be_truthy
-      expect(has_fetchable_fields?(fields)).to be_truthy
-      expect(has_relationship_members?(relationships)).to be_truthy
+      expect(response).to have_primary_data('users')
+      expect(response).to have_data_attributes(fields)
+      expect(response).to have_relationships(relationships)
     end
 
     context 'with "include"' do
       it 'returns only the required relationships in the "included" member' do
         get :index, include: :posts
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('users')).to be_truthy
-        expect(has_included_relationships?(%w(posts))).to be_truthy
+        expect(response).to have_primary_data('users')
+        expect(response).to have_data_attributes(fields)
+        expect(response).to have_relationships(relationships)
+        expect(response).to have_included_relationships
       end
     end
 
@@ -30,8 +32,8 @@ describe UsersController, type: :controller do
       it 'returns only the required fields in the "attributes" member' do
         get :index, fields: { users: :first_name }
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('users')).to be_truthy
-        expect(has_fetchable_fields?(%w(first_name))).to be_truthy
+        expect(response).to have_primary_data('users')
+        expect(response).to have_data_attributes(%w(first_name))
       end
     end
 
@@ -41,8 +43,8 @@ describe UsersController, type: :controller do
       it 'returns only results corresponding to the applied filter' do
         get :index, filter: { first_name: first_name }
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('users')).to be_truthy
-        expect(record_count).to eq(1)
+        expect(response).to have_primary_data('users')
+        expect(response).to have_meta_record_count(1)
         expect(data[0]['attributes']['first_name']).to eq(first_name)
       end
     end
@@ -59,9 +61,9 @@ describe UsersController, type: :controller do
             get :index, page: { number: 1, size: 2 }
 
             expect(response).to have_http_status :ok
-            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(response).to have_primary_data('users')
             expect(data.size).to eq(2)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['next']).to be_present
@@ -74,9 +76,9 @@ describe UsersController, type: :controller do
             get :index, page: { number: 2, size: 1 }
 
             expect(response).to have_http_status :ok
-            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -90,9 +92,9 @@ describe UsersController, type: :controller do
             get :index, page: { number: 3, size: 1 }
 
             expect(response).to have_http_status :ok
-            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -105,7 +107,7 @@ describe UsersController, type: :controller do
             get :index, page: { number: 1 }
             expect(response).to have_http_status :ok
             expect(data.size).to eq(JSONAPI.configuration.default_page_size)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
           end
         end
       end
@@ -121,9 +123,9 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 0, limit: 2 }
 
             expect(response).to have_http_status :ok
-            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(response).to have_primary_data('users')
             expect(data.size).to eq(2)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['next']).to be_present
@@ -136,9 +138,9 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 1, limit: 1 }
 
             expect(response).to have_http_status :ok
-            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['previous']).to be_present
@@ -152,9 +154,9 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 2, limit: 1 }
 
             expect(response).to have_http_status :ok
-            expect(has_valid_id_and_type_members?('users')).to be_truthy
+            expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['previous']).to be_present
@@ -167,7 +169,7 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 1 }
             expect(response).to have_http_status :ok
             expect(data.size).to eq(JSONAPI.configuration.default_page_size)
-            expect(record_count).to eq(3)
+            expect(response).to have_meta_record_count(3)
           end
         end
       end
@@ -182,7 +184,7 @@ describe UsersController, type: :controller do
           first_name2 = data[1]['attributes']['first_name']
 
           expect(response).to have_http_status :ok
-          expect(has_valid_id_and_type_members?('users')).to be_truthy
+          expect(response).to have_primary_data('users')
           expect(first_name1).to be <= first_name2
         end
       end
@@ -196,7 +198,7 @@ describe UsersController, type: :controller do
           sorted = first_name1 > first_name2 || (first_name1 == first_name2 && last_name1 >= last_name2)
 
           expect(response).to have_http_status :ok
-          expect(has_valid_id_and_type_members?('users')).to be_truthy
+          expect(response).to have_primary_data('users')
           expect(sorted).to be_truthy
         end
       end
@@ -209,8 +211,8 @@ describe UsersController, type: :controller do
     it 'renders a single user' do
       get :show, id: user.id
       expect(response).to have_http_status :ok
-      expect(has_valid_id_and_type_members?('users')).to be_truthy
-      expect(has_relationship_members?(relationships)).to be_truthy
+      expect(response).to have_primary_data('users')
+      expect(response).to have_data_attributes(fields)
       expect(data['attributes']['first_name']).to eq("User ##{user.id}")
     end
 

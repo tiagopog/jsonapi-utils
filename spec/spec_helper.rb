@@ -1,6 +1,7 @@
 require 'rails/all'
 require 'rails/test_help'
 require 'rspec/rails'
+require 'smart_rspec'
 require 'factory_girl'
 
 require 'jsonapi-resources'

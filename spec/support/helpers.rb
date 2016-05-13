@@ -21,48 +21,5 @@ module Helpers
     def links
       @links ||= json['links']
     end
-
-    def included
-      @included ||= json['included']
-    end
-
-    def record_count
-      @record_count ||= json['meta']['record_count']
-    end
-
-    def has_fetchable_fields?(fields)
-      collection.all? { |record| record['attributes'].keys == fields }
-    end
-
-    def has_valid_id_and_type_members?(type)
-      collection.all? { |record| record['id'].present? && record['type'] == type }
-    end
-
-    def has_relationship_members?(relationships)
-      collection.all? { |record| record['relationships'].keys == relationships }
-    end
-
-    def has_included_relationships?(relationships)
-      collection.all? do |record|
-        record['relationships'].all? do |(key, relation)|
-          return true if relation['data'].blank?
-          relationship_ids = relation['data'].map { |e| e['id'] }
-          (relationship_ids - included_ids[key]).empty?
-        end
-      end
-    end
-
-    def included_ids
-      return false unless included.present?
-      @included_ids ||= included.reduce({}) do |sum, record|
-        sum.tap do |hash|
-          if hash[record['type']].blank?
-            hash[record['type']] = Array(record['id'])
-          else
-            hash[record['type']].push(record['id'])
-          end
-        end
-      end
-    end
   end
 end

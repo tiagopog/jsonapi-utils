@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rspec/expectations'
 
 describe PostsController, type: :controller do
   before(:all) { FactoryGirl.create_list(:post, 3) }
@@ -12,10 +13,10 @@ describe PostsController, type: :controller do
       it 'renders a collection of users' do
         get :index, user_id: post.user_id
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('posts')).to be_truthy
-        expect(has_fetchable_fields?(fields)).to be_truthy
-        expect(has_relationship_members?(relationships)).to be_truthy
-        expect(record_count).to eq(100)
+        expect(response).to have_primary_data('posts')
+        expect(response).to have_data_attributes(fields)
+        expect(response).to have_relationships(relationships)
+        expect(response).to have_meta_record_count(100)
       end
     end
 
@@ -23,9 +24,9 @@ describe PostsController, type: :controller do
       it 'renders a collection of users' do
         get :index_with_hash
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('posts')).to be_truthy
-        expect(has_fetchable_fields?(fields)).to be_truthy
-        expect(has_relationship_members?(relationships)).to be_truthy
+        expect(response).to have_primary_data('posts')
+        expect(response).to have_data_attributes(fields)
+        expect(response).to have_relationships(relationships)
       end
     end
   end
@@ -35,8 +36,9 @@ describe PostsController, type: :controller do
       it 'renders a single post' do
         get :show, user_id: post.user_id, id: post.id
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('posts')).to be_truthy
-        expect(has_relationship_members?(relationships)).to be_truthy
+        expect(response).to have_primary_data('posts')
+        expect(response).to have_data_attributes(fields)
+        expect(response).to have_relationships(relationships)
         expect(data['attributes']['title']).to eq("Title for Post #{post.id}")
       end
     end
@@ -45,8 +47,9 @@ describe PostsController, type: :controller do
       it 'renders a single post' do
         get :show_with_hash, id: 1
         expect(response).to have_http_status :ok
-        expect(has_valid_id_and_type_members?('posts')).to be_truthy
-        expect(has_relationship_members?(relationships)).to be_truthy
+        expect(response).to have_primary_data('posts')
+        expect(response).to have_data_attributes(fields)
+        expect(response).to have_relationships(relationships)
         expect(data['attributes']['title']).to eq('Lorem ipsum')
       end
     end
