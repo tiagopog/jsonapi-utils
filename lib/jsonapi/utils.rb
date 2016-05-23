@@ -6,19 +6,14 @@ module JSONAPI
   module Utils
     def self.included(base)
       if base.respond_to?(:helper_method)
-        base.helper_method :jsonapi_serialize
+        base.before_action :setup_request, :check_request
+        base.helper_method :jsonapi_render, :jsonapi_serialize
       end
     end
 
     def jsonapi_render(json:, status: nil, options: {})
-      setup_request
-
-      if @request.errors.present?
-        render_errors(@request.errors)
-      else
-        body = jsonapi_serialize(json, options)
-        render json: body, status: status || @_response_document.status
-      end
+      body = jsonapi_serialize(json, options)
+      render json: body, status: status || @_response_document.status
     rescue => e
       handle_exceptions(e)
     ensure
@@ -54,8 +49,6 @@ module JSONAPI
     end
 
     def jsonapi_serialize(records, options = {})
-      setup_request
-
       if records.is_a?(Hash)
         hash    = records.with_indifferent_access
         records = hash_to_active_record(hash[:data], options[:model])
@@ -257,6 +250,10 @@ module JSONAPI
           key_formatter: key_formatter,
           server_error_callbacks: (self.class.server_error_callbacks || [])
         )
+    end
+
+    def check_request
+      @request.errors.blank? || render_errors(@request.errors)
     end
   end
 end
