@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'rspec/expectations'
 
 describe PostsController, type: :controller do
+  include_context 'JSON API headers'
+
   before(:all) { FactoryGirl.create_list(:post, 3) }
 
   let(:fields)        { (PostResource.fetchable_fields - %i(id author)).map(&:to_s) }
