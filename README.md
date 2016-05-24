@@ -13,7 +13,7 @@ JSONAPI::Utils (JU) was built on top of [JSONAPI::Resources](https://github.com/
 Add these lines to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.3'
+gem 'jsonapi-utils', '~> 0.4.4'
 ```
 
 And then execute:
@@ -22,11 +22,23 @@ And then execute:
 $ bundle
 ```
 
-## Macros
+## Response Macros
 
 ### jsonapi_render
 
-Validates the request and renders ActiveRecord/Hash objects into JSON API-compliant responses.
+Takes ActiveRecord/Hash objects and generates JSON API-compliant responses.
+
+```ruby
+# GET /users
+def index
+  jsonapi_render json: User.all
+end
+
+# GET /users/:id
+def show
+  jsonapi_render json: User.find(params[:id])
+end
+```
 
 Arguments:
 
@@ -37,13 +49,9 @@ Arguments:
     - `count`: explicitly points the total count of records for the request in order to build a proper pagination. By default, JU will count the total number of records.
     - `model`: sets the model reference in cases when `json` is a Hash or a collection of Hashes.
 
+Examples:
+
 ```ruby
-# Single resource rendering
-jsonapi_render json: User.find(params[:id])
-
-# Collection rendering
-jsonapi_render json: User.all
-
 # Specify a particular HTTP status code
 jsonapi_render json: new_user, status: :created
 
@@ -62,15 +70,17 @@ jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_nam
 
 ### jsonapi_serialize
 
-In the backstage that's the method that actually parsers ActiveRecord/Hash objects and builds a new Hash compliant with JSON API. It can be called anywhere in controllers, concerns etc.
+In the backstage this is the method that actually parses ActiveRecord/Hash objects and builds a new Hash compliant with JSON API. It can be called anywhere in your controllers being very useful whenever you need to work with a JSON API "serialized" version of your object before rendering it. 
 
 ```ruby
-collection = jsonapi_serialize(User.all)
-render json: do_some_magic_with(collection)
+def index
+  result = do_some_magic(jsonapi_serialize(User.all))
+  render json: result
+end
 ```
 
 Arguments:
-  - It receives a second optional argument with the same options for `jsonapi_render`.
+  - It receives the same options as `jsonapi_render`.
 
 ## Usage
 
