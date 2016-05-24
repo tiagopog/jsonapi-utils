@@ -23,8 +23,9 @@ module JSONAPI
     end
 
     def jsonapi_render_errors(exception)
-      error = jsonapi_format_errors(exception)
-      render json: { errors: error.errors }, status: error.code
+      result = jsonapi_format_errors(exception)
+      errors = result.errors
+      render json: { errors: errors }, status: errors.first.status
     end
 
     def jsonapi_format_errors(exception)

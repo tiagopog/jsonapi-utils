@@ -1,10 +1,17 @@
 require 'spec_helper'
 
 describe UsersController, type: :controller do
+  include_context 'JSON API headers'
+
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
   let(:fields)        { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
+  let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
+
+  let(:user_params) do
+    { data: { type: 'users', attributes: attributes } }
+  end
 
   include_examples 'JSON API invalid request', resource: :users
 
@@ -222,6 +229,44 @@ describe UsersController, type: :controller do
         expect(response).to have_http_status :not_found
         expect(error['title']).to eq('Record not found')
         expect(error['code']).to eq(404)
+      end
+    end
+  end
+
+  describe '#create' do
+    it 'creates a new user' do
+      expect { post :create, user_params }.to change(User, :count).by(1)
+      expect(response).to have_http_status :created
+      expect(response).to have_primary_data('users')
+      expect(response).to have_data_attributes(fields)
+      expect(data['attributes']['first_name']).to eq(user_params[:data][:attributes][:first_name])
+    end
+
+    shared_examples_for '400 response' do |hash|
+      it 'renders a 400 response' do
+        user_params[:data][:attributes].merge!(hash)
+        expect { post :create, user_params }.to change(User, :count).by(0)
+        expect(response).to have_http_status :bad_request
+        expect(error['title']).to eq('Param not allowed')
+        expect(error['code']).to eq(105)
+      end
+    end
+
+    context 'with a not permitted param' do
+      it_behaves_like '400 response', foo: 'bar'
+    end
+
+    context 'with a param not present in resource\'s attribute list' do
+      it_behaves_like '400 response', admin: true
+    end
+
+    context 'when validation fails' do
+      it 'render a 422 response' do
+        user_params[:data][:attributes].merge!(first_name: '')
+        expect { post :create, user_params }.to change(User, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+        expect(error['title']).to eq('Impossible to change this User')
+        expect(error['code']).to eq(125)
       end
     end
   end

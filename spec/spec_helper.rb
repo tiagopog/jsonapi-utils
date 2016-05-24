@@ -97,4 +97,3 @@ TestApp.routes.draw do
   get :index_with_hash, to: 'posts#index_with_hash'
   get :show_with_hash,  to: 'posts#show_with_hash'
 end
-

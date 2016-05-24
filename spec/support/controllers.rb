@@ -1,3 +1,5 @@
+require 'support/exceptions'
+
 class BaseController < JSONAPI::ResourceController
   include JSONAPI::Utils
   protect_from_forgery with: :null_session
@@ -38,7 +40,7 @@ class PostsController < BaseController
     jsonapi_render json: new_post, status: :created
   end
 
-  private
+  protected
 
   def load_user
     @user = User.find(params[:user_id])
@@ -48,13 +50,29 @@ end
 class UsersController < BaseController
   # GET /users
   def index
-    @users = User.all
-    jsonapi_render json: @users
+    users = User.all
+    jsonapi_render json: users
   end
 
   # GET /users/:id
   def show
-    @user = User.find(params[:id])
-    jsonapi_render json: @user
+    user = User.find(params[:id])
+    jsonapi_render json: user
+  end
+
+  # POST /users
+  def create
+    user = User.new(user_params)
+    if user.save
+      jsonapi_render json: user, status: :created
+    else
+      jsonapi_render_errors ::Exceptions::ActiveRecordError.new(user)
+    end
+  end
+
+  protected
+
+  def user_params
+    params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
   end
 end
