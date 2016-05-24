@@ -10,7 +10,7 @@ module Exceptions
       [JSONAPI::Error.new(
         code: 125,
         status: :unprocessable_entity,
-        title: "Impossible to change this #{@object.class.name}",
+        title: "Can't change this #{@object.class.name}",
         detail: @object.errors)]
     end
   end

@@ -262,10 +262,10 @@ describe UsersController, type: :controller do
 
     context 'when validation fails' do
       it 'render a 422 response' do
-        user_params[:data][:attributes].merge!(first_name: '')
+        user_params[:data][:attributes].merge!(first_name: nil)
         expect { post :create, user_params }.to change(User, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
-        expect(error['title']).to eq('Impossible to change this User')
+        expect(error['title']).to eq('Can\'t change this User')
         expect(error['code']).to eq(125)
       end
     end
