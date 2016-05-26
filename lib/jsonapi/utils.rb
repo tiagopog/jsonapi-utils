@@ -6,8 +6,11 @@ module JSONAPI
   module Utils
     def self.included(base)
       if base.respond_to?(:helper_method)
-        base.before_action :setup_request, :check_request
         base.helper_method :jsonapi_render, :jsonapi_serialize
+      end
+
+      if base.respond_to?(:before_action)
+        base.before_action :setup_request, :check_request
       end
     end
 
@@ -245,7 +248,7 @@ module JSONAPI
 
     def setup_request
       @request ||=
-        JSONAPI::Request.new(
+        JSONAPI::RequestParser.new(
           params,
           context: context,
           key_formatter: key_formatter,
