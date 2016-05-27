@@ -5,9 +5,8 @@ require 'jsonapi/utils/exceptions'
 module JSONAPI
   module Utils
     def self.included(base)
-      if base.respond_to?(:helper_method)
+      if base.respond_to?(:before_action)
         base.before_action :setup_request, :check_request
-        base.helper_method :jsonapi_render, :jsonapi_serialize
       end
     end
 
