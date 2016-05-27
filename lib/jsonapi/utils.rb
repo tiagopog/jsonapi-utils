@@ -1,9 +1,12 @@
 require 'jsonapi-resources'
 require 'jsonapi/utils/version'
 require 'jsonapi/utils/exceptions'
+require 'jsonapi/utils/request'
 
 module JSONAPI
   module Utils
+    include JSONAPI::Utils::Request
+
     def self.included(base)
       if base.respond_to?(:before_action)
         base.before_action :setup_request, :check_request
@@ -240,20 +243,6 @@ module JSONAPI
         records = apply_filter(records, options) if params[:filter].present?
         records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
       end
-    end
-
-    def setup_request
-      @request ||=
-        JSONAPI::Request.new(
-          params,
-          context: context,
-          key_formatter: key_formatter,
-          server_error_callbacks: (self.class.server_error_callbacks || [])
-        )
-    end
-
-    def check_request
-      @request.errors.blank? || render_errors(@request.errors)
     end
   end
 end
