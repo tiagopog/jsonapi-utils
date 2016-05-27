@@ -58,6 +58,17 @@ module JSONAPI
             {}
           end
         end
+
+        def count_records(records, options)
+          if options[:count].present?
+            options[:count]
+          elsif records.is_a?(Array)
+            records.length
+          else
+            records = apply_filter(records, options) if params[:filter].present?
+            records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
+          end
+        end
       end
     end
   end
