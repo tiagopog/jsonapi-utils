@@ -228,7 +228,7 @@ describe UsersController, type: :controller do
         get :show, id: 999
         expect(response).to have_http_status :not_found
         expect(error['title']).to eq('Record not found')
-        expect(error['code']).to eq(404)
+        expect(error['code']).to eq('404')
       end
     end
   end
@@ -248,7 +248,7 @@ describe UsersController, type: :controller do
         expect { post :create, user_params }.to change(User, :count).by(0)
         expect(response).to have_http_status :bad_request
         expect(error['title']).to eq('Param not allowed')
-        expect(error['code']).to eq(105)
+        expect(error['code']).to eq('105')
       end
     end
 
@@ -266,7 +266,7 @@ describe UsersController, type: :controller do
         expect { post :create, user_params }.to change(User, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
         expect(error['title']).to eq('Can\'t change this User')
-        expect(error['code']).to eq(125)
+        expect(error['code']).to eq('125')
       end
     end
   end

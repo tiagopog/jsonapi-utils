@@ -1,3 +1,5 @@
+require 'pry'
+
 module JSONAPI
   module Utils
     module Response
@@ -15,8 +17,8 @@ module JSONAPI
 
         def jsonapi_render_errors(exception)
           result = jsonapi_format_errors(exception)
-          errors = result.errors
-          render json: { errors: errors }, status: errors.first.status
+          errors = JSONAPI::Utils::Support::Render.get_error_hash(result)
+          render json: { errors: errors }, status: errors[0][:status]
         end
 
         def jsonapi_render_internal_server_error

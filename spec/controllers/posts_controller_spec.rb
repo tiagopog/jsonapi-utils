@@ -63,7 +63,7 @@ describe PostsController, type: :controller do
           expect(response).to have_http_status :not_found
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include('999')
-          expect(error['code']).to eq(404)
+          expect(error['code']).to eq('404')
         end
       end
 
@@ -75,7 +75,7 @@ describe PostsController, type: :controller do
           expect(response).to have_http_status :not_found
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include(uuid)
-          expect(error['code']).to eq(404)
+          expect(error['code']).to eq('404')
         end
       end
 
@@ -87,7 +87,7 @@ describe PostsController, type: :controller do
           expect(response).to have_http_status :not_found
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include(slug)
-          expect(error['code']).to eq(404)
+          expect(error['code']).to eq('404')
         end
       end
     end

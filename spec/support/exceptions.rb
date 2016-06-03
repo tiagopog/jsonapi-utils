@@ -8,7 +8,7 @@ module Exceptions
 
     def errors
       [JSONAPI::Error.new(
-        code: 125,
+        code: '125',
         status: :unprocessable_entity,
         title: "Can't change this #{@object.class.name}",
         detail: @object.errors)]

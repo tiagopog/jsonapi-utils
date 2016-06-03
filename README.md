@@ -228,12 +228,8 @@ Content-Type: application/vnd.api+json
     {
       "title": "Record not found",
       "detail": "The record identified by 3 could not be found.",
-      "id": null,
-      "href": null,
-      "code": 404,
-      "source": null,
-      "links": null,
-      "status": "not_found"
+      "code": "404",
+      "status": "404"
     }
   ]
 }
