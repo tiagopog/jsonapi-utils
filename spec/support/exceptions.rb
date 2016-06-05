@@ -1,5 +1,5 @@
 module Exceptions
-  class ActiveRecordError < ::JSONAPI::Exceptions::Error
+  class MyCustomError < ::JSONAPI::Exceptions::Error
     attr_accessor :object
 
     def initialize(object)
@@ -10,8 +10,8 @@ module Exceptions
       [JSONAPI::Error.new(
         code: '125',
         status: :unprocessable_entity,
-        title: "Can't change this #{@object.class.name}",
-        detail: @object.errors)]
+        id: 'my_custom_validation_error',
+        title: 'My custom error message')]
     end
   end
 end

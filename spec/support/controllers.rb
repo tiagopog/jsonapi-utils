@@ -68,7 +68,8 @@ class UsersController < BaseController
     if user.save
       jsonapi_render json: user, status: :created
     else
-      jsonapi_render_errors json: user
+      # Example of error rendering for ActiveRecord objects:
+      jsonapi_render_errors json: user, status: :unprocessable_entity
     end
   end
 
@@ -78,9 +79,9 @@ class UsersController < BaseController
     if user.update(user_params)
       jsonapi_render json: user
     else
-      # Example of error rendering for ActiveRecord or any object
+      # Example of error rendering for exceptions or any object
       # that implements the "errors" method.
-      jsonapi_render_errors json: user, status: :unprocessable_entity
+      jsonapi_render_errors ::Exceptions::MyCustomError.new(user)
     end
   end
 

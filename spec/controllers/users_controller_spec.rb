@@ -314,9 +314,9 @@ describe UsersController, type: :controller do
         update_params[:data][:attributes].merge!(first_name: nil, last_name: nil)
         patch :update, update_params
         expect(response).to have_http_status :unprocessable_entity
-        expect(errors[0]['id']).to eq('first_name')
-        expect(errors[0]['title']).to eq("First name can\'t be blank")
-        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['id']).to eq('my_custom_validation_error')
+        expect(errors[0]['title']).to eq('My custom error message')
+        expect(errors[0]['code']).to eq('125')
         expect(errors[0]['source']).to be_nil
       end
     end
