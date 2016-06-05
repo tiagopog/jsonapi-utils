@@ -2,7 +2,7 @@ module JSONAPI
   module Utils
     module Response
       module Formatters
-        def jsonapi_serialize(records, options = {})
+        def jsonapi_format(records, options = {})
           if records.is_a?(Hash)
             hash    = records.with_indifferent_access
             records = hash_to_active_record(hash[:data], options[:model])
@@ -10,6 +10,10 @@ module JSONAPI
           fix_request_options(params, records)
           build_response_document(records, options).contents
         end
+
+        alias_method :jsonapi_serialize, :jsonapi_format
+
+        module_function
 
         def build_response_document(records, options)
           results = JSONAPI::OperationResults.new

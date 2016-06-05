@@ -3,7 +3,7 @@ module JSONAPI
     module Response
       module Renders
         def jsonapi_render(json:, status: nil, options: {})
-          body = jsonapi_serialize(json, options)
+          body = jsonapi_format(json, options)
           render json: body, status: status || @_response_document.status
         rescue => e
           handle_exceptions(e)
