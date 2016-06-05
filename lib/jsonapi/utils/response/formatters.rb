@@ -2,10 +2,6 @@ module JSONAPI
   module Utils
     module Response
       module Formatters
-        def jsonapi_format_errors(exception)
-          JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors)
-        end
-
         def jsonapi_serialize(records, options = {})
           if records.is_a?(Hash)
             hash    = records.with_indifferent_access

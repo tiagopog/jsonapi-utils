@@ -6,7 +6,7 @@ shared_examples_for 'JSON API invalid request' do
           get :index, include: :foobar
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid field')
-          expect(error['code']).to eq(112)
+          expect(error['code']).to eq('112')
         end
       end
     end
@@ -17,7 +17,7 @@ shared_examples_for 'JSON API invalid request' do
           get :index, fields: { foo: 'bar' }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid resource')
-          expect(error['code']).to eq(101)
+          expect(error['code']).to eq('101')
         end
       end
 
@@ -26,7 +26,7 @@ shared_examples_for 'JSON API invalid request' do
           get :index, fields: { users: 'bar' }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid field')
-          expect(error['code']).to eq(104)
+          expect(error['code']).to eq('104')
         end
       end
     end
@@ -37,7 +37,7 @@ shared_examples_for 'JSON API invalid request' do
           get :index, filter: { foo: 'bar' }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Filter not allowed')
-          expect(error['code']).to eq(102)
+          expect(error['code']).to eq('102')
         end
       end
     end
@@ -49,7 +49,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { number: 'foo' }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
-            expect(error['code']).to eq(118)
+            expect(error['code']).to eq('118')
           end
         end
 
@@ -58,7 +58,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { size: 'foo' }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
-            expect(error['code']).to eq(118)
+            expect(error['code']).to eq('118')
           end
         end
 
@@ -67,7 +67,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { offset: 1 }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Page parameter not allowed')
-            expect(error['code']).to eq(105)
+            expect(error['code']).to eq('105')
           end
         end
 
@@ -76,7 +76,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { size: 999 }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
-            expect(error['code']).to eq(118)
+            expect(error['code']).to eq('118')
           end
         end
       end
@@ -89,7 +89,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { offset: -1 }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
-            expect(error['code']).to eq(118)
+            expect(error['code']).to eq('118')
           end
         end
 
@@ -98,7 +98,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { limit: 'foo' }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
-            expect(error['code']).to eq(118)
+            expect(error['code']).to eq('118')
           end
         end
 
@@ -107,7 +107,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { size: 1 }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Page parameter not allowed')
-            expect(error['code']).to eq(105)
+            expect(error['code']).to eq('105')
           end
         end
 
@@ -116,7 +116,7 @@ shared_examples_for 'JSON API invalid request' do
             get :index, page: { limit: 999 }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
-            expect(error['code']).to eq(118)
+            expect(error['code']).to eq('118')
           end
         end
       end
@@ -128,7 +128,7 @@ shared_examples_for 'JSON API invalid request' do
           get :index, sort: 'foo'
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid sort criteria')
-          expect(error['code']).to eq(114)
+          expect(error['code']).to eq('114')
         end
       end
     end
