@@ -13,7 +13,19 @@ module JSONAPI
 
         alias_method :jsonapi_serialize, :jsonapi_format
 
-        module_function
+        def jsonapi_format_errors(data)
+          data   = JSONAPI::Utils::Exceptions::ActiveRecord.new(data) if data.is_a?(ActiveRecord::Base)
+          errors = data.respond_to?(:errors) ? data.errors : data
+          JSONAPI::Utils::Support::Error.sanitize(errors)
+        end
+
+        protected
+
+        def correct_media_type
+          if response.body.size > 0
+            response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
+          end
+        end
 
         def build_response_document(records, options)
           results = JSONAPI::OperationResults.new
