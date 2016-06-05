@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'pry'
 
 describe UsersController, type: :controller do
   include_context 'JSON API headers'

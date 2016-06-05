@@ -7,7 +7,7 @@ class BaseController < JSONAPI::ResourceController
 end
 
 class PostsController < BaseController
-  before_action :load_user, except: %i(index_with_hash show_with_hash)
+  before_action :load_user, except: %i(create index_with_hash show_with_hash)
 
   # GET /users/:user_id/posts
   def index
@@ -36,13 +36,27 @@ class PostsController < BaseController
                    options: { model: Post, resource: ::V2::PostResource }
   end
 
-  # POST /users/:user_id/posts
+  # POST /users
   def create
-    new_post = FactoryGirl.create(:post, user: @user)
-    jsonapi_render json: new_post, status: :created
+    post = Post.new(post_params)
+    if post.save
+      jsonapi_render json: post, status: :created
+    else
+      errors = [{ id: 'title', title: 'Title can\'t be blank'}]
+      jsonapi_render_errors json: errors, status: :unprocessable_entity
+    end
   end
 
   protected
+
+  def post_params
+    params.require(:data).require(:attributes).permit(:title, :body)
+          .merge(user_id: author_params[:id])
+  end
+
+  def author_params
+    params.require(:relationships).require(:author).require(:data).permit(:id)
+  end
 
   def load_user
     @user = User.find(params[:user_id])

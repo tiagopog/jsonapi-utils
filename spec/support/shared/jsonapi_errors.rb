@@ -65,9 +65,7 @@ shared_examples_for 'JSON API invalid request' do
         context 'with invalid page param' do
           it 'renders a 400 response' do
             get :index, page: { offset: 1 }
-            expect(response).to have_http_status :bad_request
-            expect(error['title']).to eq('Page parameter not allowed')
-            expect(error['code']).to eq('105')
+            expect(response).to have_http_status :ok
           end
         end
 
@@ -105,13 +103,11 @@ shared_examples_for 'JSON API invalid request' do
         context 'with invalid page param' do
           it 'renders a 400 response' do
             get :index, page: { size: 1 }
-            expect(response).to have_http_status :bad_request
-            expect(error['title']).to eq('Page parameter not allowed')
-            expect(error['code']).to eq('105')
+            expect(response).to have_http_status :ok
           end
         end
 
-        context 'with a "size" greater than the max limit' do
+        context 'with a "limit" greater than the max limit' do
           it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"' do
             get :index, page: { limit: 999 }
             expect(response).to have_http_status :bad_request
