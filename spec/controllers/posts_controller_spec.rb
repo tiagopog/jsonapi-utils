@@ -1,6 +1,4 @@
 require 'spec_helper'
-require 'rspec/expectations'
-require 'pry'
 
 describe PostsController, type: :controller do
   include_context 'JSON API headers'
@@ -118,23 +116,17 @@ describe PostsController, type: :controller do
       expect(data['attributes']['title']).to eq(post_params[:data][:attributes][:title])
     end
 
-    # context 'when validation fails' do
-    #   it 'render a 422 response' do
-    #     user_params[:data][:attributes].merge!(first_name: nil, last_name: nil)
-    #
-    #     expect { post :create, user_params }.to change(User, :count).by(0)
-    #     expect(response).to have_http_status :unprocessable_entity
-    #
-    #     expect(errors[0]['id']).to eq('first_name')
-    #     expect(errors[0]['title']).to eq("First name can\'t be blank")
-    #     expect(errors[0]['code']).to eq('100')
-    #     expect(errors[0]['source']).to be_nil
-    #
-    #     expect(errors[1]['id']).to eq('last_name')
-    #     expect(errors[1]['title']).to eq("Last name can\'t be blank")
-    #     expect(errors[1]['code']).to eq('100')
-    #     expect(errors[1]['source']).to be_nil
-    #   end
-    # end
+    context 'when validation fails' do
+      it 'render a 422 response' do
+        post_params[:data][:attributes].merge!(title: nil)
+
+        expect { post :create, post_params }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('title')
+        expect(errors[0]['title']).to eq('Title can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+      end
+    end
   end
 end

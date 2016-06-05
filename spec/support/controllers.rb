@@ -42,7 +42,8 @@ class PostsController < BaseController
     if post.save
       jsonapi_render json: post, status: :created
     else
-      errors = [{ id: 'title', title: 'Title can\'t be blank'}]
+      # Example of error rendering for Array of Hashes:
+      errors = [{ id: 'title', title: 'Title can\'t be blank', code: '100' }]
       jsonapi_render_errors json: errors, status: :unprocessable_entity
     end
   end

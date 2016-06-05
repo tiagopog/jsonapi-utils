@@ -9,7 +9,7 @@ module JSONAPI
         def sanitize(errors)
           Array(errors).map do |error|
             MEMBERS.reduce({}) do |sum, key|
-              value = error.send(key)
+              value = error.try(key) || error.try(:[], key)
               if value.nil?
                 sum
               else

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe UsersController, type: :controller do
   include_context 'JSON API headers'
@@ -269,12 +268,12 @@ describe UsersController, type: :controller do
         expect(response).to have_http_status :unprocessable_entity
 
         expect(errors[0]['id']).to eq('first_name')
-        expect(errors[0]['title']).to eq("First name can\'t be blank")
+        expect(errors[0]['title']).to eq('First name can\'t be blank')
         expect(errors[0]['code']).to eq('100')
         expect(errors[0]['source']).to be_nil
 
         expect(errors[1]['id']).to eq('last_name')
-        expect(errors[1]['title']).to eq("Last name can\'t be blank")
+        expect(errors[1]['title']).to eq('Last name can\'t be blank')
         expect(errors[1]['code']).to eq('100')
         expect(errors[1]['source']).to be_nil
       end
