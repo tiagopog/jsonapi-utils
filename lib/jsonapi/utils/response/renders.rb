@@ -18,10 +18,16 @@ module JSONAPI
             json = JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors)
           end
 
-          errors = JSONAPI::Utils::Support::Render.get_error_hash(json)
+          json   = JSONAPI::Utils::Exceptions::ActiveRecord.new(json) if json.is_a?(ActiveRecord::Base)
+          json   = json.errors if json.respond_to?(:errors)
+          errors = JSONAPI::Utils::Support::Error.sanitize(json)
           status = status || errors.try(:first).try(:[], :status)
 
           render json: { errors: errors }, status: status
+        ensure
+          if response.body.size > 0
+            response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
+          end
         end
 
         def jsonapi_render_internal_server_error

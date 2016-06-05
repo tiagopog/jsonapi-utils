@@ -262,11 +262,62 @@ describe UsersController, type: :controller do
 
     context 'when validation fails' do
       it 'render a 422 response' do
-        user_params[:data][:attributes].merge!(first_name: nil)
+        user_params[:data][:attributes].merge!(first_name: nil, last_name: nil)
+
         expect { post :create, user_params }.to change(User, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
-        expect(error['title']).to eq('Can\'t change this User')
-        expect(error['code']).to eq('125')
+
+        expect(errors[0]['id']).to eq('first_name')
+        expect(errors[0]['title']).to eq("First name can\'t be blank")
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']).to be_nil
+
+        expect(errors[1]['id']).to eq('last_name')
+        expect(errors[1]['title']).to eq("Last name can\'t be blank")
+        expect(errors[1]['code']).to eq('100')
+        expect(errors[1]['source']).to be_nil
+      end
+    end
+  end
+
+  describe '#update' do
+    let(:user) { User.first }
+
+    let(:update_params) do
+      user_params.tap do |params|
+        params[:data][:id] = user.id
+        params[:data][:attributes].merge!(first_name: 'Yukihiro')
+        params.merge!(id: user.id)
+      end
+    end
+
+    it 'update an existing user' do
+      patch :update, update_params
+      expect(response).to have_http_status :ok
+      expect(response).to have_primary_data('users')
+      expect(response).to have_data_attributes(fields)
+      expect(data['attributes']['first_name']).to eq(user_params[:data][:attributes][:first_name])
+    end
+
+    context 'when resource was not found' do
+      it 'renders a 404 response' do
+        update_params[:data][:id] = 999
+        patch :update, update_params.merge(id: 999)
+        expect(response).to have_http_status :not_found
+        expect(error['title']).to eq('Record not found')
+        expect(error['code']).to eq('404')
+      end
+    end
+
+    context 'when validation fails' do
+      it 'render a 422 response' do
+        update_params[:data][:attributes].merge!(first_name: nil, last_name: nil)
+        patch :update, update_params
+        expect(response).to have_http_status :unprocessable_entity
+        expect(errors[0]['id']).to eq('first_name')
+        expect(errors[0]['title']).to eq("First name can\'t be blank")
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']).to be_nil
       end
     end
   end

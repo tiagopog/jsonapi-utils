@@ -20,6 +20,7 @@ class PostsController < BaseController
       { id: 1, title: 'Lorem Ipsum' },
       { id: 2, title: 'Dolor Sit' }
     ]}
+    # Example of response rendering from Hash + options:
     jsonapi_render json: @posts, options: { model: Post }
   end
 
@@ -30,6 +31,7 @@ class PostsController < BaseController
 
   # GET /show_with_hash/:id
   def show_with_hash
+    # Example of response rendering from Hash + options: (2)
     jsonapi_render json: { data: { id: params[:id], title: 'Lorem ipsum' } },
                    options: { model: Post, resource: ::V2::PostResource }
   end
@@ -66,7 +68,19 @@ class UsersController < BaseController
     if user.save
       jsonapi_render json: user, status: :created
     else
-      jsonapi_render_errors ::Exceptions::ActiveRecordError.new(user)
+      jsonapi_render_errors json: user
+    end
+  end
+
+  # PATCH /users/:id
+  def update
+    user = User.find(params[:id])
+    if user.update(user_params)
+      jsonapi_render json: user
+    else
+      # Example of error rendering for ActiveRecord or any object
+      # that implements the "errors" method.
+      jsonapi_render_errors json: user, status: :unprocessable_entity
     end
   end
 

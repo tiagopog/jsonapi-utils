@@ -6,8 +6,12 @@ module Helpers
       @json ||= JSON.parse(response.body)
     end
 
+    def errors
+      @errors ||= json['errors']
+    end
+
     def error
-      @error ||= json['errors'].first
+      @error ||= errors.first
     end
 
     def data

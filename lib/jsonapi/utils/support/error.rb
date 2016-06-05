@@ -1,14 +1,14 @@
 module JSONAPI
   module Utils
     module Support
-      module Render
+      module Error
+        MEMBERS = %i(title detail id code source links status meta)
+
         module_function
 
-        def get_error_hash(object)
-          return {} unless object.respond_to?(:errors)
-          object.errors.map do |error|
-            keys = %i(title detail id code source links  status meta)
-            keys.reduce({}) do |sum, key|
+        def sanitize(errors)
+          Array(errors).map do |error|
+            MEMBERS.reduce({}) do |sum, key|
               value = error.send(key)
               if value.nil?
                 sum
