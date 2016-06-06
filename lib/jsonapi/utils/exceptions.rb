@@ -26,10 +26,12 @@ module JSONAPI
         def code; '400' end
 
         def errors
-          [JSONAPI::Error.new(code: code,
-                              status: :bad_request,
-                              title: 'Bad Request',
-                              detail: 'This request is not supported.')]
+          [JSONAPI::Error.new(
+              code: code,
+              status: :bad_request,
+              title: 'Bad Request',
+              detail: 'This request is not supported.'
+            )]
         end
       end
 
@@ -37,10 +39,12 @@ module JSONAPI
         def code; '500' end
 
         def errors
-          [JSONAPI::Error.new(code: code,
-                              status: :internal_server_error,
-                              title: 'Internal Server Error',
-                              detail: 'An internal error ocurred while processing the request.')]
+          [JSONAPI::Error.new(
+            code: code,
+            status: :internal_server_error,
+            title: 'Internal Server Error',
+            detail: 'An internal error ocurred while processing the request.'
+          )]
         end
       end
     end

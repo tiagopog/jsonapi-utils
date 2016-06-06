@@ -21,12 +21,6 @@ module JSONAPI
 
         protected
 
-        def correct_media_type
-          if response.body.size > 0
-            response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
-          end
-        end
-
         def build_response_document(records, options)
           results = JSONAPI::OperationResults.new
 

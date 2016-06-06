@@ -8,13 +8,14 @@ describe PostsController, type: :controller do
   let(:fields)        { (PostResource.fetchable_fields - %i(id author)).map(&:to_s) }
   let(:relationships) { %w(author) }
   let(:first_post)    { Post.first }
+  let(:user_id)       { first_post.user_id }
 
   let(:attributes) do
     { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.' }
   end
 
   let(:author_params) do
-    { data: { type: 'users', id: first_post.user_id } }
+    { data: { type: 'users', id: user_id } }
   end
 
   let(:post_params) do
@@ -27,7 +28,7 @@ describe PostsController, type: :controller do
   describe '#index' do
     context 'with ActiveRecord::Relation' do
       it 'renders a collection of users' do
-        get :index, user_id: first_post.user_id
+        get :index, user_id: user_id
         expect(response).to have_http_status :ok
         expect(response).to have_primary_data('posts')
         expect(response).to have_data_attributes(fields)
@@ -50,7 +51,7 @@ describe PostsController, type: :controller do
   describe '#show' do
     context 'with ActiveRecord' do
       it 'renders a single post' do
-        get :show, user_id: first_post.user_id, id: first_post.id
+        get :show, user_id: user_id, id: first_post.id
         expect(response).to have_http_status :ok
         expect(response).to have_primary_data('posts')
         expect(response).to have_data_attributes(fields)
@@ -73,7 +74,7 @@ describe PostsController, type: :controller do
     context 'when resource was not found' do
       context 'with conventional id' do
         it 'renders a 404 response' do
-          get :show, user_id: first_post.user_id, id: 999
+          get :show, user_id: user_id, id: 999
           expect(response).to have_http_status :not_found
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include('999')
@@ -85,7 +86,7 @@ describe PostsController, type: :controller do
         let(:uuid) { SecureRandom.uuid }
 
         it 'renders a 404 response' do
-          get :show, user_id: first_post.user_id, id: uuid
+          get :show, user_id: user_id, id: uuid
           expect(response).to have_http_status :not_found
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include(uuid)
@@ -97,7 +98,7 @@ describe PostsController, type: :controller do
         let(:slug) { 'some-awesome-slug' }
 
         it 'renders a 404 response' do
-          get :show, user_id: first_post.user_id, id: slug
+          get :show, user_id: user_id, id: slug
           expect(response).to have_http_status :not_found
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include(slug)
