@@ -63,7 +63,7 @@ class TestApp < Rails::Application
   config.secret_key_base = 'secret'
 
   # Raise errors on unsupported parameters
-  config.action_controller.action_on_unpermitted_parameters = :raise
+  config.action_controller.action_on_unpermitted_parameters = :log
 
   ActiveRecord::Schema.verbose = false
   config.active_record.schema_format = :none
@@ -91,8 +91,10 @@ JSONAPI.configuration.route_format = :dasherized_route
 
 TestApp.routes.draw do
   jsonapi_resources :users do
-    jsonapi_resources :posts
+    jsonapi_resources :posts, only: %i(index show)
   end
+
+  jsonapi_resources :posts, only: %i(create)
 
   get :index_with_hash, to: 'posts#index_with_hash'
   get :show_with_hash,  to: 'posts#show_with_hash'

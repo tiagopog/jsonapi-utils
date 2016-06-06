@@ -68,13 +68,15 @@ jsonapi_render json: { data: { id: 1, first_name: 'Tiago' } }, options: { model:
 jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_name: 'Doug' }] }, options: { model: User }
 ```
 
-### jsonapi_serialize
+### jsonapi_format
 
 In the backstage this is the method that actually parses ActiveRecord/Hash objects and builds a new Hash compliant with JSON API. It can be called anywhere in your controllers being very useful whenever you need to work with a JSON API "serialized" version of your object before rendering it. 
 
+Note: because of semantic reasons `JSONAPI::Utils#jsonapi_serialize` was renamed being now just an alias to `JSONAPI::Utils#jsonapi_format`.
+
 ```ruby
 def index
-  result = do_some_magic(jsonapi_serialize(User.all))
+  result = do_some_magic(jsonapi_format(User.all))
   render json: result
 end
 ```
@@ -228,12 +230,8 @@ Content-Type: application/vnd.api+json
     {
       "title": "Record not found",
       "detail": "The record identified by 3 could not be found.",
-      "id": null,
-      "href": null,
-      "code": 404,
-      "source": null,
-      "links": null,
-      "status": "not_found"
+      "code": "404",
+      "status": "404"
     }
   ]
 }

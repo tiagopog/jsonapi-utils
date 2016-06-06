@@ -12,7 +12,7 @@ module JSONAPI
       end
 
       def check_request
-        @request.errors.blank? || render_errors(@request.errors)
+        @request.errors.blank? || jsonapi_render_errors(json: @request)
       end
     end
   end

@@ -3,20 +3,20 @@ module JSONAPI
     module Response
       module Renders
         def jsonapi_render(json:, status: nil, options: {})
-          body = jsonapi_serialize(json, options)
+          body = jsonapi_format(json, options)
           render json: body, status: status || @_response_document.status
         rescue => e
           handle_exceptions(e)
         ensure
-          if response.body.size > 0
-            response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
-          end
+          correct_media_type
         end
 
-        def jsonapi_render_errors(exception)
-          result = jsonapi_format_errors(exception)
-          errors = result.errors
-          render json: { errors: errors }, status: errors.first.status
+        def jsonapi_render_errors(exception = nil, json: nil, status: nil)
+          body   = jsonapi_format_errors(exception || json)
+          status = status || body.try(:first).try(:[], :status)
+          render json: { errors: body }, status: status
+        ensure
+          correct_media_type
         end
 
         def jsonapi_render_internal_server_error

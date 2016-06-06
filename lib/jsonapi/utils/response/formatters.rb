@@ -2,11 +2,7 @@ module JSONAPI
   module Utils
     module Response
       module Formatters
-        def jsonapi_format_errors(exception)
-          JSONAPI::ErrorsOperationResult.new(exception.errors[0].code, exception.errors)
-        end
-
-        def jsonapi_serialize(records, options = {})
+        def jsonapi_format(records, options = {})
           if records.is_a?(Hash)
             hash    = records.with_indifferent_access
             records = hash_to_active_record(hash[:data], options[:model])
@@ -14,6 +10,16 @@ module JSONAPI
           fix_request_options(params, records)
           build_response_document(records, options).contents
         end
+
+        alias_method :jsonapi_serialize, :jsonapi_format
+
+        def jsonapi_format_errors(data)
+          data   = JSONAPI::Utils::Exceptions::ActiveRecord.new(data) if data.is_a?(ActiveRecord::Base)
+          errors = data.respond_to?(:errors) ? data.errors : data
+          JSONAPI::Utils::Support::Error.sanitize(errors).uniq
+        end
+
+        protected
 
         def build_response_document(records, options)
           results = JSONAPI::OperationResults.new
