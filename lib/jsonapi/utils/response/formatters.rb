@@ -16,7 +16,7 @@ module JSONAPI
         def jsonapi_format_errors(data)
           data   = JSONAPI::Utils::Exceptions::ActiveRecord.new(data) if data.is_a?(ActiveRecord::Base)
           errors = data.respond_to?(:errors) ? data.errors : data
-          JSONAPI::Utils::Support::Error.sanitize(errors)
+          JSONAPI::Utils::Support::Error.sanitize(errors).uniq
         end
 
         protected
