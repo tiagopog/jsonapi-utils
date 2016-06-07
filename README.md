@@ -13,7 +13,7 @@ JSONAPI::Utils (JU) was built on top of [JSONAPI::Resources](https://github.com/
 Add these lines to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.4'
+gem 'jsonapi-utils', '~> 0.4.5'
 ```
 
 And then execute:
@@ -22,13 +22,24 @@ And then execute:
 $ bundle
 ```
 
-## Response Macros
+## How does it work?
 
-### jsonapi_render
+One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in your controllers so that developers can easily understand and maintain code. With this principle in mind, JU doesn't care about controller's operations, dealing with the request and response layers and thus letting the developer decides how to actually operate the actions (service objects, interactors or something).
 
-Takes ActiveRecord/Hash objects and generates JSON API-compliant responses.
+In both layers JU communicates with some `JSONAPI::Resources`' objects in order to validate requests and render responses properly. For practical reasons let's start by taking a look on how JU can be useful when it comes to render responses.
+
+### Response
+
+#### Renders
+
+JU's render methods work pretty much the same way as Rails' `ActionCntroller#render` method.
+
+**jsonapi_render**
+
+Takes an ActiveRecord object, Hash or Array of Hashes as argument and generates a JSON API-compliant response.
 
 ```ruby
+# app/controllers/users_controller.rb
 # GET /users
 def index
   jsonapi_render json: User.all
@@ -49,7 +60,7 @@ Arguments:
     - `count`: explicitly points the total count of records for the request in order to build a proper pagination. By default, JU will count the total number of records.
     - `model`: sets the model reference in cases when `json` is a Hash or a collection of Hashes.
 
-Examples:
+Other examples:
 
 ```ruby
 # Specify a particular HTTP status code
@@ -68,25 +79,103 @@ jsonapi_render json: { data: { id: 1, first_name: 'Tiago' } }, options: { model:
 jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_name: 'Doug' }] }, options: { model: User }
 ```
 
-### jsonapi_format
+**jsonapi_render_errors**
 
-In the backstage this is the method that actually parses ActiveRecord/Hash objects and builds a new Hash compliant with JSON API. It can be called anywhere in your controllers being very useful whenever you need to work with a JSON API "serialized" version of your object before rendering it. 
-
-Note: because of semantic reasons `JSONAPI::Utils#jsonapi_serialize` was renamed being now just an alias to `JSONAPI::Utils#jsonapi_format`.
+Takes an ActiveRecord object, Exception, Array of Hashes or any object which implements the `errors` method and generates a JSON API-compliant response.
 
 ```ruby
+# app/controllers/users_controller.rb
+# POST /users
+  def create
+    user = User.new(user_params)
+    if user.save
+      jsonapi_render json: user, status: :created
+    else
+      jsonapi_render_errors json: user, status: :unprocessable_entity
+    end
+  end
+```
+
+Arguments:
+  - Exception 
+  - `json`: ActiveRecord, Exception, Array of Hashes or any object containing the `errors` method to be rendered as JSON document;
+  - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered from the error body.
+
+Other examples:
+
+```ruby
+# Render errors from a custom exception:
+jsonapi_render_errors Exceptions::MyCustomError.new(user)
+
+# Render errors from an Array of Hashes:
+errors = [{ id: 'validation', title: 'Something went wrong', code: '100' }]
+jsonapi_render_errors json: errors, status: :unprocessable_entity
+```
+
+#### Formatters
+
+In the backstage those are the guys which actually parse ActiveRecord/Hash objects and build a new Hash compliant with JSON API. They can be called anywhere in controllers being very useful if you need to generate the response body and do some work with it before actually rendering the response.
+
+Note: the resulting Hash from those methods can not be passed as argument to `JSONAPI::Utils#jsonapi_render` or  `JSONAPI::Utils#jsonapi_render_error`, instead it needs to be rendered by the usual `ActionController#render`.
+
+**jsonapi_format**
+
+*Because of semantic reasons `JSONAPI::Utils#jsonapi_serialize` was renamed being now just an alias to `JSONAPI::Utils#jsonapi_format`.*
+
+```ruby
+# app/controllers/users_controller.rb
 def index
-  result = do_some_magic(jsonapi_format(User.all))
-  render json: result
+  body = jsonapi_format(User.all)
+  render json: do_some_magic_with(body)
 end
 ```
 
 Arguments:
-  - It receives the same options as `jsonapi_render`.
+  - First: ActiveRecord object, Hash or Array of Hashes;
+  - Last: Hash of options (same as `JSONAPI::Utils#jsonapi_render`).
+
+### Request
+
+Before your controller's action gets executed JU will validate the coming request against JSON API specifications and the eventual query string params against the resource's definitions. If something is wrong with the request JU will render an error response like this sample:
+
+```json
+HTTP/1.1 400 Bad Request
+Content-Type: application/vnd.api+json
+
+{
+  "errors": [
+    {
+      "title": "Invalid resource",
+      "detail": "foo is not a valid resource.",
+      "code": "101",
+      "status": "400"
+    },
+    {
+      "title": "Invalid resource",
+      "detail": "foobar is not a valid resource.",
+      "code": "101",
+      "status": "400"
+    },
+    {
+      "title": "Invalid field",
+      "detail": "bar is not a valid relationship of users",
+      "code": "112",
+      "status": "400"
+    }
+  ]
+}
+```
 
 ## Usage
 
-Let's say we have a Rails app for a super simple blog.
+In order to start working with JU after installing the gem you simply need to do the following:
+
+1. Include the gem (`include JSONAPI::Utils`) in the target controller on in a `BaseController`;
+2. Define the resources for your models;
+3. Define routes;
+4. Use JU's render methods.
+
+Time for a full example, let's say we have a Rails application for a super simple blog:
 
 ### Models
 
@@ -141,7 +230,7 @@ Rails.application.routes.draw do
 end
 ```
 
-And a base controller to include the features from `jsonapi-resources` and `jsonapi-utils`:
+And a base controller to include the features from `jsonapi-utils` and define some defaults:
 
 ```ruby
 # app/controllers/base_controller.rb
@@ -152,103 +241,97 @@ class BaseController < JSONAPI::ResourceController
 end
 ```
 
-For this example, let's get focused only on read actions. After including `JSONAPI::Utils` we can use the `jsonapi_render` method
-in order to generate responses which follow the JSON API's standards.
+Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` the controller could be written as the following:
 
 ```ruby
 # app/controllers/users_controller.rb
-class UsersController < BaseController
-  before_action :load_user, only: [:show]
-
   # GET /users
   def index
-    jsonapi_render json: User.all
+    users = User.all
+    jsonapi_render json: users
   end
 
   # GET /users/:id
   def show
-    jsonapi_render json: @user
+    user = User.find(params[:id])
+    jsonapi_render json: user
   end
 
-  private
-
-  def load_user
-    @user = User.find(params[:id])
+  # POST /users
+  def create
+    user = User.new(user_params)
+    if user.save
+      jsonapi_render json: user, status: :created
+    else
+      jsonapi_render_errors json: user, status: :unprocessable_entity
+    end
   end
-end
+
+  # PATCH /users/:id
+  def update
+    user = User.find(params[:id])
+    if user.update(user_params)
+      jsonapi_render json: user
+    else
+      jsonapi_render_errors json: user, status: :unprocessable_entity
+    end
+  end
+  
+  # DELETE /users/:id
+  def destroy
+    User.find(params[:id]).destroy
+    head :no_content
+  end
+
+  protected
+
+  def user_params
+    params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
+  end
 ```
 
 And:
 
 ```ruby
-# app/controllers/posts_controller.rb
 class PostsController < BaseController
-  before_action :load_user, only: [:index, :show]
-  before_action :load_post, only: [:show]
+  before_action :load_user, except: :create
 
   # GET /users/:user_id/posts
   def index
-    posts = @user.posts.enabled
-    jsonapi_render json: posts, options: { count: posts.count }
+    jsonapi_render json: @user.posts, options: { count: 100 }
   end
 
   # GET /users/:user_id/posts/:id
   def show
-    jsonapi_render json: @post
+    jsonapi_render json: @user.posts.find(params[:id])
   end
 
-  private
+  # POST /users
+  def create
+    post = Post.new(post_params)
+    if post.save
+      jsonapi_render json: post, status: :created
+    else
+      jsonapi_render_errors json: post, status: :unprocessable_entity
+    end
+  end
+  
+  protected
+
+  def post_params
+    params.require(:data).require(:attributes).permit(:title, :body)
+          .merge(user_id: author_params[:id])
+  end
+
+  def author_params
+    params.require(:relationships).require(:author).require(:data).permit(:id)
+  end
 
   def load_user
     @user = User.find(params[:user_id])
   end
-
-  def load_post
-    @post = @user.posts.find(params[:id])
-  end
 end
 ```
-
-### Errors
-
-#### Not found
-
-As you might have seen in BaseController this line will handle all errors related to not found resources:
-
-```ruby
-rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
-```
-
-The `jsonapi_render_not_found` method will produce the following error payload:
-
-```json
-HTTP/1.1 404 Not found
-Content-Type: application/vnd.api+json
-
-{
-  "errors": [
-    {
-      "title": "Record not found",
-      "detail": "The record identified by 3 could not be found.",
-      "code": "404",
-      "status": "404"
-    }
-  ]
-}
-```
-
-In case you prefer rendering not found resources with null data and `200 OK` status code, you can use `jsonapi_render_not_found_with_null` to produce:
-
-```json
-HTTP/1.1 200 OK
-Content-Type: application/vnd.api+json
-
-{
-  "data": null
-}
-```
-
-If you need to create custom error message, check [this](https://github.com/cerebris/jsonapi-resources#error-codes).
 
 ### Initializer
 
