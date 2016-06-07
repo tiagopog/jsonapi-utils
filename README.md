@@ -28,6 +28,8 @@ One of the main motivations behind `JSONAPI::Utils` is to keep things explicit i
 
 In both layers JU communicates with some `JSONAPI::Resources`' objects in order to validate requests and render responses properly. For practical reasons let's start by taking a look on how JU can be useful when it comes to render responses.
 
+## Usage
+
 ### Response
 
 #### Renders
@@ -166,7 +168,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-## Usage
+## Full example
 
 In order to start working with JU after installing the gem you simply need to do the following:
 
