@@ -24,9 +24,9 @@ $ bundle
 
 ## How does it work?
 
-One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in your controllers so that developers can easily understand and maintain code. With this principle in mind, JU doesn't care about controller's operations, dealing with the request and response layers and thus letting the developer decides how to actually operate the actions (service objects, interactors or something).
+One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in your controller actions so that developers can easily understand and maintain code. With this principle in mind, JU doesn't care about your controller operations and it deals only with the request and response layers thus letting the developer decides how to actually operate the actions (service objects, interactors or something).
 
-In both layers JU communicates with some `JSONAPI::Resources`' objects in order to validate requests and render responses properly. For practical reasons let's start by taking a look on how JU can be useful when it comes to render responses.
+In both layers (request and response) JU communicates with some `JSONAPI::Resources`' objects in order to validate requests and render responses properly.
 
 ## Usage
 
@@ -34,11 +34,14 @@ In both layers JU communicates with some `JSONAPI::Resources`' objects in order 
 
 #### Renders
 
-JU's render methods work pretty much the same way as Rails' `ActionCntroller#render` method.
+JU brings two main renders to the game, working pretty much the same way as Rails' `ActionController#render` method:
+
+- jsonapi_render
+- jsonapi_render_errors
 
 **jsonapi_render**
 
-Takes an ActiveRecord object, Hash or Array of Hashes as argument and generates a JSON API-compliant response.
+It takes the arguments and generates a JSON API-compliant response.
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -55,7 +58,7 @@ end
 
 Arguments:
 
-  - `json`: ActiveRecord or Hash object to be rendered as JSON document;
+  - `json`: object to be rendered as a JSON document: ActiveRecord object, Hash or Array of Hashes;
   - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered;
   - `options`:
     - `resource`: explicitly points the resource to be used in the serialization. By default, JU will select resources by inferencing from controller's name.
@@ -83,7 +86,7 @@ jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_nam
 
 **jsonapi_render_errors**
 
-Takes an ActiveRecord object, Exception, Array of Hashes or any object which implements the `errors` method and generates a JSON API-compliant response.
+It takes arguments and generates a JSON API-compliant error response.
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -100,7 +103,7 @@ Takes an ActiveRecord object, Exception, Array of Hashes or any object which imp
 
 Arguments:
   - Exception 
-  - `json`: ActiveRecord, Exception, Array of Hashes or any object containing the `errors` method to be rendered as JSON document;
+  - `json`: object to be rendered as a JSON document: ActiveRecord, Exception, Array of Hashes or any object which implements the `errors` method;
   - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered from the error body.
 
 Other examples:
@@ -138,7 +141,7 @@ Arguments:
 
 ### Request
 
-Before your controller's action gets executed JU will validate the coming request against JSON API specifications and the eventual query string params against the resource's definitions. If something is wrong with the request JU will render an error response like this sample:
+Before your controller's action gets executed JU will validate request against JSON API specifications and eventual query string params against the resource's definitions. If something goes wrong with the request JU will render an error response like this:
 
 ```json
 HTTP/1.1 400 Bad Request
@@ -172,7 +175,7 @@ Content-Type: application/vnd.api+json
 
 In order to start working with JU after installing the gem you simply need to do the following:
 
-1. Include the gem (`include JSONAPI::Utils`) in the target controller on in a `BaseController`;
+1. Include the gem (`include JSONAPI::Utils`) in the target controller or in a `BaseController`;
 2. Define the resources for your models;
 3. Define routes;
 4. Use JU's render methods.
@@ -232,7 +235,7 @@ Rails.application.routes.draw do
 end
 ```
 
-And a base controller to include the features from `jsonapi-utils` and define some defaults:
+In our base controller we need to include the `JSONAPI::Utils` module and define some default rendering:
 
 ```ruby
 # app/controllers/base_controller.rb
@@ -243,7 +246,7 @@ class BaseController < JSONAPI::ResourceController
 end
 ```
 
-Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` the controller could be written as the following:
+Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we could write our actions as the following:
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -337,7 +340,7 @@ end
 
 ### Initializer
 
-In order to enable a proper pagination, record count etc, let's define an initializer such as:
+In order to enable a proper pagination, record count etc, an initializer could be defined such as:
 
 ```ruby
 # config/initializers/jsonapi_resources.rb
