@@ -34,7 +34,7 @@ module JSONAPI
         if operation.nil?
           {}
         elsif param_type == :relationship
-          operation.data.values_at(:has_one, :to_many).compact.reduce(&:merge)
+          operation.data.values_at(:to_one, :to_many).compact.reduce(&:merge)
         else
           operation.data[:attributes]
         end

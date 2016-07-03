@@ -20,8 +20,11 @@ describe PostsController, type: :controller do
 
   let(:post_params) do
     {
-      data: { type: 'posts', attributes: attributes },
-      relationships: { author: author_params }
+      data: {
+        type: 'posts',
+        attributes: attributes,
+        relationships: { author: author_params }
+      }
     }
   end
 
