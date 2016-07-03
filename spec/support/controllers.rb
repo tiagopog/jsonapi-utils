@@ -1,5 +1,4 @@
 require 'support/exceptions'
-require 'pry'
 
 class BaseController < JSONAPI::ResourceController
   include JSONAPI::Utils
