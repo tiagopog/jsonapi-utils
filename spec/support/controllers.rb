@@ -48,7 +48,7 @@ class PostsController < BaseController
     end
   end
 
-  protected
+  private
 
   def post_params
     params.require(:data).require(:attributes).permit(:title, :body)
@@ -100,7 +100,7 @@ class UsersController < BaseController
     end
   end
 
-  protected
+  private
 
   def user_params
     params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)

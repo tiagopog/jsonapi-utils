@@ -288,7 +288,7 @@ Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we 
     head :no_content
   end
 
-  protected
+  private
 
   def user_params
     params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
@@ -320,8 +320,8 @@ class PostsController < BaseController
       jsonapi_render_errors json: post, status: :unprocessable_entity
     end
   end
-  
-  protected
+
+  private
 
   def post_params
     params.require(:data).require(:attributes).permit(:title, :body)
