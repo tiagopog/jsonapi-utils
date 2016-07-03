@@ -94,4 +94,10 @@ class UsersController < BaseController
       jsonapi_render_errors ::Exceptions::MyCustomError.new(user)
     end
   end
+
+  private
+
+  def user_params
+    params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
+  end
 end
