@@ -14,6 +14,13 @@ module JSONAPI
       def check_request
         @request.errors.blank? || jsonapi_render_errors(json: @request)
       end
+
+      def resource_params
+        unless @request.operations.empty?
+          operation = @request.operations.find { |e| e.data[:attributes].present? }
+          operation.nil? ? {} : operation.data[:attributes]
+        end
+      end
     end
   end
 end
