@@ -19,7 +19,7 @@ module JSONAPI
           JSONAPI::Utils::Support::Error.sanitize(errors).uniq
         end
 
-        protected
+        private
 
         def build_response_document(records, options)
           results = JSONAPI::OperationResults.new
