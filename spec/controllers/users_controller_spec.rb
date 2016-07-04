@@ -282,21 +282,31 @@ describe UsersController, type: :controller do
 
   describe '#update' do
     let(:user) { User.first }
+    let(:post) { user.posts.first }
 
     let(:update_params) do
       user_params.tap do |params|
         params[:data][:id] = user.id
         params[:data][:attributes].merge!(first_name: 'Yukihiro')
+        params[:data][:relationships] = relationship_params
         params.merge!(id: user.id)
       end
     end
 
+    let(:relationship_params) do
+      { posts: { data: [{ id: post.id, type: "posts" }] } }
+    end
+
     it 'update an existing user' do
       patch :update, update_params
+
       expect(response).to have_http_status :ok
       expect(response).to have_primary_data('users')
       expect(response).to have_data_attributes(fields)
       expect(data['attributes']['first_name']).to eq(user_params[:data][:attributes][:first_name])
+
+      expect(user.reload.posts.count).to eq(1)
+      expect(user.posts.first).to eq(post)
     end
 
     context 'when resource was not found' do

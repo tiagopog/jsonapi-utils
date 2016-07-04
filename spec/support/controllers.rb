@@ -86,7 +86,7 @@ class UsersController < BaseController
   # PATCH /users/:id
   def update
     user = User.find(params[:id])
-    if user.update(resource_params)
+    if user.update(resource_params) && update_relationships(user)
       jsonapi_render json: user
     else
       # Example of error rendering for exceptions or any object
@@ -97,7 +97,8 @@ class UsersController < BaseController
 
   private
 
-  def user_params
-    params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
+  def update_relationships(user)
+    return user if relationship_params[:posts].blank?
+    user.posts = Post.where(id: relationship_params[:posts])
   end
 end
