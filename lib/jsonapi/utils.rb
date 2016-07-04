@@ -11,7 +11,7 @@ module JSONAPI
 
     def self.included(base)
       if base.respond_to?(:before_action)
-        base.before_action :setup_request, :check_request
+        base.before_action :jsonapi_request_handling
       end
     end
   end

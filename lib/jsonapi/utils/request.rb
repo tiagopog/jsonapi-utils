@@ -1,6 +1,11 @@
 module JSONAPI
   module Utils
     module Request
+      def jsonapi_request_handling
+        setup_request
+        check_request
+      end
+
       def setup_request
         @request ||=
           JSONAPI::Request.new(
