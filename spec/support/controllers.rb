@@ -36,7 +36,7 @@ class PostsController < BaseController
                    options: { model: Post, resource: ::V2::PostResource }
   end
 
-  # POST /users
+  # POST /posts
   def create
     post = Post.new(post_params)
     if post.save
@@ -51,12 +51,7 @@ class PostsController < BaseController
   private
 
   def post_params
-    params.require(:data).require(:attributes).permit(:title, :body)
-          .merge(user_id: author_params[:id])
-  end
-
-  def author_params
-    params.require(:relationships).require(:author).require(:data).permit(:id)
+    resource_params.merge(user_id: relationship_params[:author])
   end
 
   def load_user
@@ -79,7 +74,7 @@ class UsersController < BaseController
 
   # POST /users
   def create
-    user = User.new(user_params)
+    user = User.new(resource_params)
     if user.save
       jsonapi_render json: user, status: :created
     else
@@ -91,7 +86,7 @@ class UsersController < BaseController
   # PATCH /users/:id
   def update
     user = User.find(params[:id])
-    if user.update(user_params)
+    if user.update(resource_params) && update_relationships(user)
       jsonapi_render json: user
     else
       # Example of error rendering for exceptions or any object
@@ -102,7 +97,8 @@ class UsersController < BaseController
 
   private
 
-  def user_params
-    params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
+  def update_relationships(user)
+    return user if relationship_params[:posts].blank?
+    user.posts = Post.where(id: relationship_params[:posts])
   end
 end
