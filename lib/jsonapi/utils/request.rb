@@ -9,7 +9,7 @@ module JSONAPI
       def setup_request
         @request ||=
           JSONAPI::Request.new(
-            params,
+            params.dup,
             context: context,
             key_formatter: key_formatter,
             server_error_callbacks: (self.class.server_error_callbacks || [])
