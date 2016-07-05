@@ -171,6 +171,19 @@ Content-Type: application/vnd.api+json
 }
 ```
 
+#### Params helpers
+
+JU brings helper methods as a shortcut to get values from permitted params based on the resource configuration.
+
+- `resource_params`:
+  - Returns the permitted params present in the `attributes` JSON member;
+    - Example: `{ name: 'Bilbo', gender: 'male', city: 'Shire' }`
+  - It's the same of calling: `params.require(:data).require(:attributes).permit(:name, :gender, :city)`
+- `relationship_params`:
+  - Returns the relationship `id`s, distinguished by key, present in `relationships` JSON member;
+    - Example: `{ author: 1, posts: [1, 2, 3] }`
+  - It's the same of calling: `params.require(:relationships).require(:author).require(:data).permit(:id)`
+
 ## Full example
 
 In order to start working with JU after installing the gem you simply need to do the following:
@@ -224,7 +237,7 @@ end
 
 ### Routes & Controllers
 
-Let's define our routes using the `jsonapi_resources` and `jsonapi_links` macros provied by the `jsonapi-resources` gem:
+Let's define our routes using the `jsonapi_resources` and `jsonapi_links` methods provied by the `jsonapi-resources` gem:
 
 ```ruby
 Rails.application.routes.draw do
@@ -264,7 +277,7 @@ Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we 
 
   # POST /users
   def create
-    user = User.new(user_params)
+    user = User.new(resource_params)
     if user.save
       jsonapi_render json: user, status: :created
     else
@@ -275,7 +288,7 @@ Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we 
   # PATCH /users/:id
   def update
     user = User.find(params[:id])
-    if user.update(user_params)
+    if user.update(resource_params)
       jsonapi_render json: user
     else
       jsonapi_render_errors json: user, status: :unprocessable_entity
@@ -286,12 +299,6 @@ Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we 
   def destroy
     User.find(params[:id]).destroy
     head :no_content
-  end
-
-  private
-
-  def user_params
-    params.require(:data).require(:attributes).permit(:first_name, :last_name, :admin)
   end
 ```
 
@@ -324,12 +331,7 @@ class PostsController < BaseController
   private
 
   def post_params
-    params.require(:data).require(:attributes).permit(:title, :body)
-          .merge(user_id: author_params[:id])
-  end
-
-  def author_params
-    params.require(:relationships).require(:author).require(:data).permit(:id)
+    resource_params.merge(user_id: relationship_params[:author])
   end
 
   def load_user
