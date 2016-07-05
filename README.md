@@ -178,11 +178,11 @@ JU brings helper methods as a shortcut to get values from permitted params based
 - `resource_params`:
   - Returns the permitted params present in the `attributes` JSON member;
     - Example: `{ name: 'Bilbo', gender: 'male', city: 'Shire' }`
-  - It's the same of calling: `params.require(:data).require(:attributes).permit(:name, :gender, :city)`
+  - Same of calling: `params.require(:data).require(:attributes).permit(:name, :gender, :city)`
 - `relationship_params`:
   - Returns the relationship `id`s, distinguished by key, present in `relationships` JSON member;
     - Example: `{ author: 1, posts: [1, 2, 3] }`
-  - It's the same of calling: `params.require(:relationships).require(:author).require(:data).permit(:id)`
+  - Same as calling: `params.require(:relationships).require(:author).require(:data).permit(:id)`
 
 ## Full example
 
