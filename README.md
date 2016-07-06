@@ -4,9 +4,9 @@
 [![Gem Version](https://badge.fury.io/rb/jsonapi-utils.svg)](https://badge.fury.io/rb/jsonapi-utils)
 [![Build Status](https://travis-ci.org/b2beauty/jsonapi-utils.svg?branch=master)](https://travis-ci.org/b2beauty/jsonapi-utils)
 
-Simple yet powerful way to have your Rails API compliant with [JSON API](http://jsonapi.org).
+Simple yet powerful way to get your Rails API compliant with [JSON API](http://jsonapi.org).
 
-JSONAPI::Utils (JU) was built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
+JSONAPI::Utils (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
 
 ## Installation
 
