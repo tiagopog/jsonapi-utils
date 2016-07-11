@@ -20,4 +20,3 @@ class UserResource < JSONAPI::Resource
     "#{@model.first_name} #{@model.last_name}"
   end
 end
-
