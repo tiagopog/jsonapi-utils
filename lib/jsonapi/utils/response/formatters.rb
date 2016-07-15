@@ -49,7 +49,6 @@ module JSONAPI
                JSONAPI.configuration.top_level_links_include_pagination
               data[:pagination_params] = pagination_params(records, options)
             end
-
             if JSONAPI.configuration.top_level_meta_include_record_count
               data[:record_count] = count_records(records, options)
             end

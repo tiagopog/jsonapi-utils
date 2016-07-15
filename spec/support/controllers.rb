@@ -1,5 +1,5 @@
 require 'support/exceptions'
-
+require 'pry'
 class BaseController < JSONAPI::ResourceController
   include JSONAPI::Utils
   protect_from_forgery with: :null_session
@@ -60,10 +60,10 @@ class PostsController < BaseController
 end
 
 class UsersController < BaseController
-  def index
-    users = User.all
-    jsonapi_render json: users
-  end
+  # def index
+  #   users = User.all
+  #   jsonapi_render json: users
+  # end
 
   # GET /users/:id
   def show

@@ -1,5 +1,5 @@
 require 'spec_helper'
-
+require 'pry'
 describe UsersController, type: :controller do
   include_context 'JSON API headers'
 
@@ -46,7 +46,6 @@ describe UsersController, type: :controller do
 
     context 'with "filter"' do
       let(:first_name) { User.first.first_name }
-
       it 'returns only results corresponding to the applied filter' do
         get :index, filter: { first_name: first_name }
         expect(response).to have_http_status :ok
