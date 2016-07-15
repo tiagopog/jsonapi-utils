@@ -1,5 +1,5 @@
 require 'support/exceptions'
-require 'pry'
+
 class BaseController < JSONAPI::ResourceController
   include JSONAPI::Utils
   protect_from_forgery with: :null_session
@@ -19,7 +19,7 @@ class PostsController < BaseController
     @posts = { data: [
       { id: 1, title: 'Lorem Ipsum' },
       { id: 2, title: 'Dolor Sit' }
-    ] }
+    ]}
     # Example of response rendering from Hash + options:
     jsonapi_render json: @posts, options: { model: Post }
   end
@@ -60,6 +60,7 @@ class PostsController < BaseController
 end
 
 class UsersController < BaseController
+  # Get /users
   def index
     users = User.all
     jsonapi_render json: users

@@ -34,8 +34,6 @@ module JSONAPI
         return {} if @request.operations.empty?
 
         keys      = %i(attributes to_one to_many)
-        # not sure what this does but it essentially just makes operation equivalent to
-        # @request.operations
         operation = @request.operations.find { |e| e.options[:data].keys & keys == keys }
         if operation.nil?
           {}
