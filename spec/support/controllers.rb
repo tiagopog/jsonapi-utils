@@ -60,10 +60,10 @@ class PostsController < BaseController
 end
 
 class UsersController < BaseController
-  # def index
-  #   users = User.all
-  #   jsonapi_render json: users
-  # end
+  def index
+    users = User.all
+    jsonapi_render json: users
+  end
 
   # GET /users/:id
   def show
