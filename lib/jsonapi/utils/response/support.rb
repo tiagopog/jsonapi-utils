@@ -15,7 +15,7 @@ module JSONAPI
         private
 
         def correct_media_type
-          if response.body.size > 0
+          unless response.body.empty?
             response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
           end
         end

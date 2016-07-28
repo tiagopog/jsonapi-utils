@@ -11,7 +11,8 @@ module Exceptions
         code: '125',
         status: :unprocessable_entity,
         id: 'my_custom_validation_error',
-        title: 'My custom error message')]
+        title: 'My custom error message'
+      )]
     end
   end
 end

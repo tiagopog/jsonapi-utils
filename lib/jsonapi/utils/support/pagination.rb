@@ -32,7 +32,7 @@ module JSONAPI
         end
 
         def paginator(params)
-          page_params = ActionController::Parameters.new(params[:page])
+          page_params = ActionController::Parameters.new(params[:page] || {})
 
           @paginator ||=
             if JSONAPI.configuration.default_paginator == :paged
@@ -42,8 +42,8 @@ module JSONAPI
             end
         end
 
-        def set_pagination(options)
-          page_params = ActionController::Parameters.new(@request.params[:page])
+        def set_pagination(_options)
+          page_params = ActionController::Parameters.new(@request.params[:page] || {})
           if JSONAPI.configuration.default_paginator == :paged
             @_paginator ||= PagedPaginator.new(page_params)
             number = page_params['number'].to_i.nonzero? || 1

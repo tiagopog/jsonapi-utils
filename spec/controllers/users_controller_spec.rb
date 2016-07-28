@@ -5,7 +5,7 @@ describe UsersController, type: :controller do
 
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
-  let(:fields)        { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
+  let(:fields)        { (UserResource.updatable_fields - %i(posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
   let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
 
@@ -150,7 +150,7 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['next']).to be_present
             expect(json['links']['last']).to be_present
           end
@@ -166,7 +166,7 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(3)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['last']).to be_present
           end
         end
@@ -287,14 +287,14 @@ describe UsersController, type: :controller do
     let(:update_params) do
       user_params.tap do |params|
         params[:data][:id] = user.id
-        params[:data][:attributes].merge!(first_name: 'Yukihiro')
+        params[:data][:attributes][:first_name] = 'Yukihiro'
         params[:data][:relationships] = relationship_params
         params.merge!(id: user.id)
       end
     end
 
     let(:relationship_params) do
-      { posts: { data: [{ id: post.id, type: "posts" }] } }
+      { posts: { data: [{ id: post.id, type: 'posts' }] } }
     end
 
     it 'update an existing user' do

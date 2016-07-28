@@ -8,7 +8,7 @@ module JSONAPI
 
       def setup_request
         @request ||=
-          JSONAPI::Request.new(
+          JSONAPI::RequestParser.new(
             params.dup,
             context: context,
             key_formatter: key_formatter,
@@ -34,14 +34,13 @@ module JSONAPI
         return {} if @request.operations.empty?
 
         keys      = %i(attributes to_one to_many)
-        operation = @request.operations.find { |e| e.data.keys & keys == keys }
-
+        operation = @request.operations.find { |e| e.options[:data].keys & keys == keys }
         if operation.nil?
           {}
         elsif param_type == :relationship
-          operation.data.values_at(:to_one, :to_many).compact.reduce(&:merge)
+          operation.options[:data].values_at(:to_one, :to_many).compact.reduce(&:merge)
         else
-          operation.data[:attributes]
+          operation.options[:data][:attributes]
         end
       end
     end

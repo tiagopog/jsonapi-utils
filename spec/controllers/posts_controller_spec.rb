@@ -1,11 +1,10 @@
 require 'spec_helper'
-
 describe PostsController, type: :controller do
   include_context 'JSON API headers'
 
   before(:all) { FactoryGirl.create_list(:post, 3) }
 
-  let(:fields)        { (PostResource.fetchable_fields - %i(id author)).map(&:to_s) }
+  let(:fields)        { (PostResource.updatable_fields - %i(author)).map(&:to_s) }
   let(:relationships) { %w(author) }
   let(:first_post)    { Post.first }
   let(:user_id)       { first_post.user_id }
@@ -122,7 +121,7 @@ describe PostsController, type: :controller do
 
     context 'when validation fails' do
       it 'render a 422 response' do
-        post_params[:data][:attributes].merge!(title: nil)
+        post_params[:data][:attributes][:title] = nil
 
         expect { post :create, post_params }.to change(Post, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
