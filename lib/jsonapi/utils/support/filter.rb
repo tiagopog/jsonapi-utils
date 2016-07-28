@@ -17,12 +17,12 @@ module JSONAPI
 
         def filter_params
           @_filter_params ||=
-          case params[:filter]
-          when Hash, ActionController::Parameters
-            params[:filter].keys.each_with_object({}) do |resource, hash|
-              hash[resource] = params[:filter][resource]
+            case params[:filter]
+            when Hash, ActionController::Parameters
+              params[:filter].keys.each_with_object({}) do |resource, hash|
+                hash[resource] = params[:filter][resource]
+              end
             end
-          end
         end
       end
     end

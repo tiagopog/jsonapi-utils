@@ -6,17 +6,17 @@ module JSONAPI
           return records unless params[:sort].present?
 
           if records.is_a?(Array)
-            records.sort { |_a, _b| comp = 0; eval(sort_criteria) }
+            records.sort { |a, b| comp = 0; eval(sort_criteria) }
           elsif records.respond_to?(:order)
             records.order(sort_params)
           end
         end
 
         def sort_criteria
-          sort_params.reduce('') do |sum, hash|
-            foo = ["a[:#{hash[0]}]", "b[:#{hash[0]}]"]
-            foo.reverse! if hash[1] == :desc
-            sum + "comp = comp == 0 ? #{foo.join(' <=> ')} : comp; "
+          sort_params.reduce('') do |sum, (key, value)|
+            comparables = ["a[:#{key}]", "b[:#{key}]"]
+            comparables.reverse! if value == :desc
+            sum + "comp = comp == 0 ? #{comparables.join(' <=> ')} : comp; "
           end
         end
 
