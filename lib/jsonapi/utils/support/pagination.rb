@@ -4,7 +4,8 @@ module JSONAPI
       module Pagination
         def apply_pagination(records, options = {})
           return records unless apply_pagination?(options)
-          pagination = set_pagination(options)
+
+          pagination = set_pagination
 
           records =
             if records.is_a?(Array)
@@ -42,7 +43,7 @@ module JSONAPI
             end
         end
 
-        def set_pagination(_options)
+        def set_pagination
           page_params = ActionController::Parameters.new(@request.params[:page] || {})
           if JSONAPI.configuration.default_paginator == :paged
             @_paginator ||= PagedPaginator.new(page_params)

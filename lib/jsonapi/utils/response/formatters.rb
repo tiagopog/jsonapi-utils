@@ -11,7 +11,7 @@ module JSONAPI
           build_response_document(records, options).contents
         end
 
-        alias jsonapi_serialize jsonapi_format
+        alias_method :jsonapi_serialize, :jsonapi_format
 
         def jsonapi_format_errors(data)
           data   = JSONAPI::Utils::Exceptions::ActiveRecord.new(data) if data.is_a?(ActiveRecord::Base)
@@ -46,7 +46,7 @@ module JSONAPI
         def result_options(records, options)
           {}.tap do |data|
             if JSONAPI.configuration.default_paginator != :none &&
-               JSONAPI.configuration.top_level_links_include_pagination
+              JSONAPI.configuration.top_level_links_include_pagination
               data[:pagination_params] = pagination_params(records, options)
             end
 

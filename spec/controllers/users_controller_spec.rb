@@ -5,7 +5,7 @@ describe UsersController, type: :controller do
 
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
-  let(:fields)        { (UserResource.updatable_fields - %i(posts)).map(&:to_s) }
+  let(:fields)        { (UserResource.fields - %i(id posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
   let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
 

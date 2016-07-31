@@ -6,7 +6,7 @@ describe PostsController, type: :controller do
 
   before(:all) { FactoryGirl.create_list(:post, 3) }
 
-  let(:fields)        { (PostResource.updatable_fields - %i(author)).map(&:to_s) }
+  let(:fields)        { (PostResource.fields - %i(id author)).map(&:to_s) }
   let(:relationships) { %w(author) }
   let(:first_post)    { Post.first }
   let(:user_id)       { first_post.user_id }
