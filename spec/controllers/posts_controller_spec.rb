@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'pry'
+
 describe PostsController, type: :controller do
   include_context 'JSON API headers'
 
@@ -31,7 +33,9 @@ describe PostsController, type: :controller do
     context 'with ActiveRecord::Relation' do
       it 'renders a collection of users' do
         get :index, user_id: user_id
+
         expect(response).to have_http_status :ok
+
         expect(response).to have_primary_data('posts')
         expect(response).to have_data_attributes(fields)
         expect(response).to have_relationships(relationships)
@@ -42,10 +46,25 @@ describe PostsController, type: :controller do
     context 'with Hash' do
       it 'renders a collection of users' do
         get :index_with_hash
+
         expect(response).to have_http_status :ok
+
         expect(response).to have_primary_data('posts')
         expect(response).to have_data_attributes(fields)
         expect(response).to have_relationships(relationships)
+      end
+
+      it 'sorts Hashes by asc/desc order' do
+        get :index_with_hash, sort: 'title,-body'
+
+        expect(response).to have_http_status :ok
+
+        sorted_data = data.sort do |a, b|
+          comp = a['attributes']['title'] <=> b['attributes']['title']
+          comp == 0 ? b['attributes']['body'] <=> a['attributes']['body'] : comp
+        end
+
+        expect(data).to eq(sorted_data)
       end
     end
   end
@@ -54,7 +73,9 @@ describe PostsController, type: :controller do
     context 'with ActiveRecord' do
       it 'renders a single post' do
         get :show, user_id: user_id, id: first_post.id
+
         expect(response).to have_http_status :ok
+
         expect(response).to have_primary_data('posts')
         expect(response).to have_data_attributes(fields)
         expect(response).to have_relationships(relationships)
@@ -65,7 +86,9 @@ describe PostsController, type: :controller do
     context 'with Hash' do
       it 'renders a single post' do
         get :show_with_hash, id: 1
+
         expect(response).to have_http_status :ok
+
         expect(response).to have_primary_data('posts')
         expect(response).to have_data_attributes(fields)
         expect(response).to have_relationships(relationships)
@@ -77,7 +100,9 @@ describe PostsController, type: :controller do
       context 'with conventional id' do
         it 'renders a 404 response' do
           get :show, user_id: user_id, id: 999
+
           expect(response).to have_http_status :not_found
+
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include('999')
           expect(error['code']).to eq('404')
@@ -89,7 +114,9 @@ describe PostsController, type: :controller do
 
         it 'renders a 404 response' do
           get :show, user_id: user_id, id: uuid
+
           expect(response).to have_http_status :not_found
+
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include(uuid)
           expect(error['code']).to eq('404')
@@ -101,7 +128,9 @@ describe PostsController, type: :controller do
 
         it 'renders a 404 response' do
           get :show, user_id: user_id, id: slug
+
           expect(response).to have_http_status :not_found
+
           expect(error['title']).to eq('Record not found')
           expect(error['detail']).to include(slug)
           expect(error['code']).to eq('404')
@@ -113,7 +142,9 @@ describe PostsController, type: :controller do
   describe '#create' do
     it 'creates a new post' do
       expect { post :create, post_params }.to change(Post, :count).by(1)
+
       expect(response).to have_http_status :created
+
       expect(response).to have_primary_data('posts')
       expect(response).to have_data_attributes(fields)
       expect(data['attributes']['title']).to eq(post_params[:data][:attributes][:title])

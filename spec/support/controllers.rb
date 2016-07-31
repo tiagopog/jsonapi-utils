@@ -17,8 +17,10 @@ class PostsController < BaseController
   # GET /index_with_hash
   def index_with_hash
     @posts = { data: [
-      { id: 1, title: 'Lorem Ipsum' },
-      { id: 2, title: 'Dolor Sit' }
+      { id: 1, title: 'Lorem Ipsum', body: 'Body 4' },
+      { id: 2, title: 'Dolor Sit', body: 'Body 2' },
+      { id: 3, title: 'Dolor Sit', body: 'Body 3' },
+      { id: 4, title: 'Dolor Sit', body: 'Body 1' }
     ]}
     # Example of response rendering from Hash + options:
     jsonapi_render json: @posts, options: { model: Post }

@@ -41,8 +41,8 @@ JSONAPI.configure do |config|
   config.allow_sort = true
   config.allow_filter = true
 
-  config.default_page_size = 2
-  config.maximum_page_size = 2
+  config.default_page_size = 10
+  config.maximum_page_size = 10
   config.default_paginator = :paged
   config.top_level_links_include_pagination = true
 

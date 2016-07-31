@@ -13,11 +13,12 @@ module JSONAPI
         end
 
         def sort_criteria
-          sort_params.reduce('') do |sum, (key, value)|
-            comparables = ["a[:#{key}]", "b[:#{key}]"]
-            comparables.reverse! if value == :desc
-            sum + "comp = comp == 0 ? #{comparables.join(' <=> ')} : comp; "
-          end
+          @sort_criteria ||=
+            sort_params.reduce('') do |sum, (key, value)|
+              comparables = ["a[:#{key}]", "b[:#{key}]"]
+              comparables.reverse! if value == :desc
+              sum + "comp = comp == 0 ? #{comparables.join(' <=> ')} : comp; "
+            end
         end
 
         def sort_params
