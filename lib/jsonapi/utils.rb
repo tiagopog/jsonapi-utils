@@ -10,6 +10,8 @@ module JSONAPI
     include Response
 
     def self.included(base)
+      base.include ActsAsResourceController
+
       if base.respond_to?(:before_action)
         base.before_action :jsonapi_request_handling
       end

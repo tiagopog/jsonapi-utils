@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 describe PostsController, type: :controller do
   include_context 'JSON API headers'
