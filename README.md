@@ -8,6 +8,8 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 
 JSONAPI::Utils (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
 
+## Contents
+
 * [Installation](#installation)
 * [How does it work?](#how-does-it-work)
 * [Usage](#usage)
@@ -278,7 +280,8 @@ end
 ```
 
 In our Rails controller we just need to include the `JSONAPI::Utils` module.
-Note that with JU some default rendering can be defined like `jsonapi_render_not_found` for when ActiveRecord doesn't find a record:
+
+> Note: with JU default rendering can be defined, like in the below example with `jsonapi_render_not_found` for when ActiveRecord doesn't find a record.
 
 ```ruby
 # app/controllers/base_controller.rb
