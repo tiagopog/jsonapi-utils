@@ -8,7 +8,36 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 
 JSONAPI::Utils (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
 
+* [Installation](#installation)
+* [How does it work?](#how-does-it-work)
+* [Usage](#usage)
+  * [Response](#response)
+    * [Rendes](#renders)
+    * [Formatters](#formatters)
+  * [Request](#request)
+    * [Params helpers](#params-helpers)
+* [Full example](#full-example)
+  * [Models](#models)
+  * [Resources](#resources)
+  * [Routes & Controllers](routes--controllers)
+  * [Initializer](#initializer)
+  * [Requests & Responses](requests--responses)
+    * [Index](#index)
+    * [Index (options)](#index-options)
+    * [Show](#show)
+    * [Show (options)](#show-options)
+    * [Relationships (identifier objects)](#relationships-identifier-objects)
+    * [Nested resources](#nested-resources)
+* [Development](#development)
+* [Contributing](#contributing)
+* [License](#license)
+
 ## Installation
+
+For:
+
+* Ruby ~> 2.0 with Rails ~> 4.0, use JU's `0.4.6` version (stable);
+* Ruby ~> 2.1 with Rails 5, use JU's `0.5.0.beta1` version.
 
 Add these lines to your application's Gemfile:
 
@@ -248,11 +277,12 @@ Rails.application.routes.draw do
 end
 ```
 
-In our base controller we need to include the `JSONAPI::Utils` module and define some default rendering:
+In our Rails controller we just need to include the `JSONAPI::Utils` module.
+Note that with JU some default rendering can be defined like `jsonapi_render_not_found` for when ActiveRecord doesn't find a record:
 
 ```ruby
 # app/controllers/base_controller.rb
-class BaseController < JSONAPI::ResourceController
+class BaseController < ActionController::Base
   include JSONAPI::Utils
   protect_from_forgery with: :null_session
   rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
@@ -263,43 +293,43 @@ Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we 
 
 ```ruby
 # app/controllers/users_controller.rb
-  # GET /users
-  def index
-    users = User.all
-    jsonapi_render json: users
-  end
+# GET /users
+def index
+  users = User.all
+  jsonapi_render json: users
+end
 
-  # GET /users/:id
-  def show
-    user = User.find(params[:id])
+# GET /users/:id
+def show
+  user = User.find(params[:id])
+  jsonapi_render json: user
+end
+
+# POST /users
+def create
+  user = User.new(resource_params)
+  if user.save
+    jsonapi_render json: user, status: :created
+  else
+    jsonapi_render_errors json: user, status: :unprocessable_entity
+  end
+end
+
+# PATCH /users/:id
+def update
+  user = User.find(params[:id])
+  if user.update(resource_params)
     jsonapi_render json: user
+  else
+    jsonapi_render_errors json: user, status: :unprocessable_entity
   end
+end
 
-  # POST /users
-  def create
-    user = User.new(resource_params)
-    if user.save
-      jsonapi_render json: user, status: :created
-    else
-      jsonapi_render_errors json: user, status: :unprocessable_entity
-    end
-  end
-
-  # PATCH /users/:id
-  def update
-    user = User.find(params[:id])
-    if user.update(resource_params)
-      jsonapi_render json: user
-    else
-      jsonapi_render_errors json: user, status: :unprocessable_entity
-    end
-  end
-  
-  # DELETE /users/:id
-  def destroy
-    User.find(params[:id]).destroy
-    head :no_content
-  end
+# DELETE /users/:id
+def destroy
+  User.find(params[:id]).destroy
+  head :no_content
+end
 ```
 
 And:
@@ -350,8 +380,6 @@ JSONAPI.configure do |config|
   config.json_key_format = :underscored_key
   config.route_format = :dasherized_route
 
-  config.operations_processor = :active_record
-
   config.allow_include = true
   config.allow_sort = true
   config.allow_filter = true
@@ -389,7 +417,7 @@ Here's some examples of requests – based on those sample [controllers](#routes
 * [Relationships (identifier objects)](#relationships-identifier-objects)
 * [Nested resources](#nested-resources)
 
-#### Collection
+#### Index
 
 Request:
 
@@ -459,7 +487,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-#### Collection (options)
+#### Index (options)
 
 Request:
 
@@ -544,7 +572,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-#### Single record
+#### Show
 
 Request:
 
@@ -584,7 +612,7 @@ Content-Type: application/vnd.api+json
 }
 ```
 
-#### Single record (options)
+#### Show (options)
 
 Request:
 
