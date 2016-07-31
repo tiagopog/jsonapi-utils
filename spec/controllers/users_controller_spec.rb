@@ -113,7 +113,7 @@ describe UsersController, type: :controller do
           it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
             get :index, page: { number: 1 }
             expect(response).to have_http_status :ok
-            expect(data.size).to eq(JSONAPI.configuration.default_page_size)
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
             expect(response).to have_meta_record_count(3)
           end
         end
@@ -175,7 +175,7 @@ describe UsersController, type: :controller do
           it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
             get :index, page: { offset: 1 }
             expect(response).to have_http_status :ok
-            expect(data.size).to eq(JSONAPI.configuration.default_page_size)
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
             expect(response).to have_meta_record_count(3)
           end
         end
