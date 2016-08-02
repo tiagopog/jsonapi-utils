@@ -6,7 +6,7 @@
 
 Simple yet powerful way to get your Rails API compliant with [JSON API](http://jsonapi.org).
 
-JSONAPI::Utils (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
+`JSONAPI::Utils` (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing a Rails way to build modern APIs with no or less learning curve.
 
 ## Contents
 
@@ -36,15 +36,15 @@ JSONAPI::Utils (JU) is built on top of [JSONAPI::Resources](https://github.com/c
 
 ## Installation
 
-For:
+Support:
 
-* Ruby ~> 2.0 with Rails ~> 4.0, use JU's `0.4.6` version (stable);
-* Ruby ~> 2.1 with Rails 5, use JU's `0.5.0.beta1` version.
+* Ruby ~> 2.0 with Rails ~> 4.0;
+* Ruby ~> 2.1 with Rails 5.
 
 Add these lines to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.6'
+gem 'jsonapi-utils', '~> 0.4.6' # or '0.5.0.beta1' for Rails 5
 ```
 
 And then execute:
@@ -55,9 +55,9 @@ $ bundle
 
 ## How does it work?
 
-One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in your controller actions so that developers can easily understand and maintain code. With this principle in mind, JU doesn't care about your controller operations and it deals only with the request and response layers thus letting the developer decides how to actually operate the actions (service objects, interactors or something).
+One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in controllers so that developers can easily understand and maintain code. Unlike `JSONAPI::Resources` (JR), JU doesn't care about controller operations – what happens with resources within actions – dealing only with the request validation and response rendering and providing some useful helpers. This way developers can decide how to actually operate their actions (service objects, interactors etc).
 
-In both layers (request and response) JU communicates with some `JSONAPI::Resources`' objects in order to validate requests and render responses properly.
+In both layers (request and response) JU communicates with some JR's objects in order to validate requests and render responses properly.
 
 ## Usage
 
@@ -150,13 +150,13 @@ jsonapi_render_errors json: errors, status: :unprocessable_entity
 
 #### Formatters
 
-In the backstage those are the guys which actually parse ActiveRecord/Hash objects and build a new Hash compliant with JSON API. They can be called anywhere in controllers being very useful if you need to generate the response body and do some work with it before actually rendering the response.
+In the backstage those are the guys which actually parse ActiveRecord/Hash objects and build a new Hash compliant with JSON API. They can be called anywhere in controllers being very useful if you need to do some work with the response's body before rendering the response.
 
-Note: the resulting Hash from those methods can not be passed as argument to `JSONAPI::Utils#jsonapi_render` or  `JSONAPI::Utils#jsonapi_render_error`, instead it needs to be rendered by the usual `ActionController#render`.
+> Note: the resulting Hash from those methods can not be passed as argument to `JSONAPI::Utils#jsonapi_render` or  `JSONAPI::Utils#jsonapi_render_error`, instead it needs to be rendered by the usual `ActionController#render`.
 
 **jsonapi_format**
 
-*Because of semantic reasons `JSONAPI::Utils#jsonapi_serialize` was renamed being now just an alias to `JSONAPI::Utils#jsonapi_format`.*
+> Because of semantic reasons `JSONAPI::Utils#jsonapi_serialize` was renamed to `JSONAPI::Utils#jsonapi_format`.
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -172,7 +172,7 @@ Arguments:
 
 ### Request
 
-Before your controller's action gets executed JU will validate request against JSON API specifications and eventual query string params against the resource's definitions. If something goes wrong with the request JU will render an error response like this:
+Before a controller's action gets executed, `JSONAPI::Utils` will validate the request against JSON API specifications as well as evaluating the eventual query string params to check if they match the resource's definition. If something goes wrong during the validation process, JU will render an error response like this examples below:
 
 ```json
 HTTP/1.1 400 Bad Request
@@ -204,7 +204,7 @@ Content-Type: application/vnd.api+json
 
 #### Params helpers
 
-JU brings helper methods as a shortcut to get values from permitted params based on the resource configuration.
+JU brings helper methods as a shortcut to get values from permitted params based on the resource's configuration.
 
 - `resource_params`:
   - Returns the permitted params present in the `attributes` JSON member;
@@ -217,14 +217,14 @@ JU brings helper methods as a shortcut to get values from permitted params based
 
 ## Full example
 
-In order to start working with JU after installing the gem you simply need to do the following:
+After installing the gem you simply need to:
 
-1. Include the gem (`include JSONAPI::Utils`) in the target controller or in a `BaseController`;
+1. Include its module (`include JSONAPI::Utils`) in controller (eg. `BaseController`);
 2. Define the resources for your models;
 3. Define routes;
-4. Use JU's render methods.
+4. Use JU's render/helper methods.
 
-Time for a full example, let's say we have a Rails application for a super simple blog:
+Ok, it's time for a more complete example. Let's say we have a Rails application for a super simple blog:
 
 ### Models
 
@@ -244,7 +244,7 @@ end
 
 ### Resources
 
-Here is where we define how the serialization will behave:
+Here is where we define how the models are exposed as resource on the API:
 
 ```ruby
 # app/resources/user_resource.rb
@@ -268,7 +268,7 @@ end
 
 ### Routes & Controllers
 
-Let's define our routes using the `jsonapi_resources` and `jsonapi_links` methods provied by the `jsonapi-resources` gem:
+Let's define the routes using the `jsonapi_resources` and `jsonapi_links` methods provided by JR:
 
 ```ruby
 Rails.application.routes.draw do
@@ -279,9 +279,9 @@ Rails.application.routes.draw do
 end
 ```
 
-In our Rails controller we just need to include the `JSONAPI::Utils` module.
+In controllers we just need to include the `JSONAPI::Utils` module.
 
-> Note: with JU default rendering can be defined, like in the below example with `jsonapi_render_not_found` for when ActiveRecord doesn't find a record.
+> Note: you may want to define some default rendering like the below example using `jsonapi_render_not_found` for when ActiveRecord doesn't find a record.
 
 ```ruby
 # app/controllers/base_controller.rb
@@ -411,7 +411,7 @@ You may want a different configuration for your API. For more information check 
 
 ### Requests & Responses
 
-Here's some examples of requests – based on those sample [controllers](#routes--controllers) – and their respective JSON responses.
+Here are examples of requests – based on those sample [controllers](#routes--controllers) – and their respective JSON responses.
 
 * [Collection](#collection)
 * [Collection (options)](#collection-options)
