@@ -6,7 +6,7 @@
 
 Simple yet powerful way to get your Rails API compliant with [JSON API](http://jsonapi.org).
 
-`JSONAPI::Utils` (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style to bring an easy way to build modern JSON APIs with no or less learning curve.
+`JSONAPI::Utils` (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing an easy way to build modern JSON APIs with no or less learning curve.
 
 ## Contents
 
