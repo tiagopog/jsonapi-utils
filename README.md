@@ -38,8 +38,8 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 
 Support:
 
-* Ruby => 2.0 with Rails ~> 4.0;
-* Ruby => 2.2.2 with Rails 5.
+* Ruby 2.x with Rails 4.x
+* Ruby 2.2.2+ with Rails 5
 
 For Rails 4.x add this to your application's Gemfile:
 
