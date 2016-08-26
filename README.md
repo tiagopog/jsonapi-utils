@@ -44,7 +44,7 @@ Support:
 Add these lines to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.6' # or '0.5.0.beta1' for Rails 5
+gem 'jsonapi-utils', '~> 0.4.6' # or '0.5.0.beta2' for Rails 5
 ```
 
 And then execute:
