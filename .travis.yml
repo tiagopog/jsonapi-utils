@@ -3,6 +3,7 @@ sudo: false
 env:
   - 'RAILS_VERSION=4.1.0'
   - 'RAILS_VERSION=4.2.0'
+  - 'RAILS_VERSION=5.0.0'
 rvm:
   - 2.2
 before_install: gem install bundler -v 1.10.4
