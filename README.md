@@ -38,13 +38,19 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 
 Support:
 
-* Ruby ~> 2.0 with Rails ~> 4.0;
-* Ruby ~> 2.1 with Rails 5.
+* Ruby 2.x with Rails 4.x
+* Ruby 2.2.2+ with Rails 5
 
-Add these lines to your application's Gemfile:
+For Rails 4.x add this to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.6' # or '0.5.0.beta1' for Rails 5
+gem 'jsonapi-utils', '~> 0.4.6'
+```
+
+For Rails 5, specify the beta version in the Gemfile:
+
+```ruby
+gem 'jsonapi-utils', '0.5.0.beta2'
 ```
 
 And then execute:
