@@ -22,14 +22,8 @@ module JSONAPI
 
         def pagination_params(records, options)
           @paginator ||= paginator(params)
-          if @paginator && JSONAPI.configuration.top_level_links_include_pagination
-            options = {}
-            @paginator.class.requires_record_count &&
-              options[:record_count] = count_records(records, options)
-            @paginator.links_page_params(options)
-          else
-            {}
-          end
+          return {} unless should_include_pagination?
+          @paginator.links_page_params(record_count: count_records(records, options))
         end
 
         def paginator(params)
@@ -42,6 +36,8 @@ module JSONAPI
               OffsetPaginator.new(page_params)
             end
         end
+
+        private
 
         def set_pagination
           page_params = ActionController::Parameters.new(@request.params[:page] || {})
@@ -69,6 +65,11 @@ module JSONAPI
             records = apply_filter(records, options) if params[:filter].present?
             records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
           end
+        end
+
+        def should_include_pagination?
+          JSONAPI.configuration.top_level_links_include_pagination
+            @paginator && @paginator.class.requires_record_count
         end
       end
     end

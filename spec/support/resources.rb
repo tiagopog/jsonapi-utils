@@ -10,8 +10,6 @@ end
 class UserResource < JSONAPI::Resource
   attributes :first_name, :last_name, :full_name
 
-  attribute :full_name
-
   has_many :posts
 
   filter :first_name

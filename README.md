@@ -8,7 +8,7 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 
 `JSONAPI::Utils` (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing an easy way to build modern JSON APIs with no or less learning curve.
 
-## Contents
+## Table of Contents
 
 * [Installation](#installation)
 * [How does it work?](#how-does-it-work)
@@ -256,7 +256,6 @@ Here is where we define how the models are exposed as resource on the API:
 # app/resources/user_resource.rb
 class UserResource < JSONAPI::Resource
   attributes :first_name, :last_name, :full_name, :birthday
-  attribute :full_name
 
   has_many :posts
 
