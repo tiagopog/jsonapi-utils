@@ -65,7 +65,16 @@ class UsersController < BaseController
   # GET /users
   def index
     users = User.all
-    jsonapi_render json: users
+
+    # If filtering by "full_name", it simulates a custom filter:
+    if full_name = params[:filter] && params[:filter][:full_name]
+      first_name, last_name = full_name.split
+      users = users.where(first_name: first_name, last_name: last_name)
+      jsonapi_render json: users, options: { filter: false }
+    # Otherwise, it renders the default user collection:
+    else
+      jsonapi_render json: users
+    end
   end
 
   # GET /users/:id

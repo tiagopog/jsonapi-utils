@@ -45,7 +45,9 @@ describe UsersController, type: :controller do
     end
 
     context 'with "filter"' do
-      let(:first_name) { User.first.first_name }
+      let(:user)       { User.first }
+      let(:first_name) { user.first_name }
+      let(:full_name)  { "#{user.first_name} #{user.last_name}" }
 
       it 'returns only results corresponding to the applied filter' do
         get :index, filter: { first_name: first_name }
@@ -53,6 +55,14 @@ describe UsersController, type: :controller do
         expect(response).to have_primary_data('users')
         expect(response).to have_meta_record_count(1)
         expect(data[0]['attributes']['first_name']).to eq(first_name)
+      end
+
+      it 'returns only results corresponding to the applied custom filter' do
+        get :index, filter: { full_name: full_name }
+        expect(response).to have_http_status :ok
+        expect(response).to have_primary_data('users')
+        expect(response).to have_meta_record_count(1)
+        expect(data[0]['attributes']['full_name']).to eq(full_name)
       end
     end
 
@@ -220,7 +230,7 @@ describe UsersController, type: :controller do
       expect(response).to have_http_status :ok
       expect(response).to have_primary_data('users')
       expect(response).to have_data_attributes(fields)
-      expect(data['attributes']['first_name']).to eq("User ##{user.id}")
+      expect(data['attributes']['first_name']).to eq("User##{user.id}")
     end
 
     context 'when resource was not found' do
