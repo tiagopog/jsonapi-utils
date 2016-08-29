@@ -12,7 +12,9 @@ class UserResource < JSONAPI::Resource
 
   has_many :posts
 
-  filters :first_name, :full_name
+  filters :first_name
+
+  custom_filters :full_name
 
   def full_name
     "#{@model.first_name} #{@model.last_name}"
