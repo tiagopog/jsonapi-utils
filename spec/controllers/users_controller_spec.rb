@@ -74,7 +74,7 @@ describe UsersController, type: :controller do
         end
 
         context 'at the first page' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { number: 1, size: 2 }
 
             expect(response).to have_http_status :ok
@@ -89,13 +89,13 @@ describe UsersController, type: :controller do
         end
 
         context 'at the middle' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { number: 2, size: 1 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -105,17 +105,34 @@ describe UsersController, type: :controller do
         end
 
         context 'at the last page' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { number: 3, size: 1 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
             expect(json['links']['last']).to be_present
+          end
+        end
+
+
+        context 'when filtering with pagination' do
+          let(:user)  { FactoryGirl.create(:user) }
+          let(:count) { User.where(user.slice(:first_name, :last_name)).count }
+
+          it 'returns paginated results according to the given filter' do
+            get :index, filter: { full_name: user.full_name }, page: { number: 1, size: 2 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(count)
+
+            expect(data[0]['attributes']['full_name']).to eq(user.full_name)
           end
         end
 
@@ -124,7 +141,7 @@ describe UsersController, type: :controller do
             get :index, page: { number: 1 }
             expect(response).to have_http_status :ok
             expect(data.size).to be <= JSONAPI.configuration.default_page_size
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
           end
         end
       end
@@ -136,13 +153,13 @@ describe UsersController, type: :controller do
         end
 
         context 'at the first page' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { offset: 0, limit: 2 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(2)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['next']).to be_present
@@ -151,13 +168,13 @@ describe UsersController, type: :controller do
         end
 
         context 'at the middle' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { offset: 1, limit: 1 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -173,7 +190,7 @@ describe UsersController, type: :controller do
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -186,7 +203,7 @@ describe UsersController, type: :controller do
             get :index, page: { offset: 1 }
             expect(response).to have_http_status :ok
             expect(data.size).to be <= JSONAPI.configuration.default_page_size
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
           end
         end
       end
