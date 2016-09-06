@@ -4,6 +4,7 @@ require 'jsonapi/utils/exceptions'
 require 'jsonapi/utils/request'
 require 'jsonapi/utils/response'
 require 'jsonapi/utils/support/filter/custom'
+require 'piped_ruby'
 
 JSONAPI::Resource.extend JSONAPI::Utils::Support::Filter::Custom
 
