@@ -21,9 +21,9 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 * [Full example](#full-example)
   * [Models](#models)
   * [Resources](#resources)
-  * [Routes & Controllers](routes--controllers)
+  * [Routes & Controllers](#routes--controllers)
   * [Initializer](#initializer)
-  * [Requests & Responses](requests--responses)
+  * [Requests & Responses](#requests--responses)
     * [Index](#index)
     * [Index (options)](#index-options)
     * [Show](#show)
@@ -50,7 +50,7 @@ gem 'jsonapi-utils', '~> 0.4.6'
 For Rails 5, specify the beta version in the Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '0.5.0.beta2'
+gem 'jsonapi-utils', '0.5.0.beta1'
 ```
 
 And then execute:
