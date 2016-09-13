@@ -15,7 +15,7 @@ module JSONAPI
         # @api public
         def apply_pagination(records, options = {})
           return records unless apply_pagination?(options)
-          records.is_a?(Array) ? records[pagination[:range]] : pagination[:paginator].apply(records, nil)
+          records.is_a?(Array) ? records[paginate_with(:range)] : paginate_with(:paginator).apply(records, nil)
         end
 
         # Mount pagination params for JSONAPI::ResourcesOperationResult.
@@ -58,7 +58,8 @@ module JSONAPI
         #
         # @api private
         def apply_pagination?(options)
-          JSONAPI.configuration.default_paginator != :none && (options[:paginate].nil? || options[:paginate])
+          JSONAPI.configuration.default_paginator != :none &&
+            (options[:paginate].nil? || options[:paginate])
         end
 
         # Creates an instance of ActionController::Parameters for page params.
@@ -70,27 +71,41 @@ module JSONAPI
           @page_params ||= ActionController::Parameters.new(@request.params[:page] || {})
         end
 
-        # Define the paginator and range according to the pagination strategy.
+        # Define the paginator or range according to the pagination strategy.
         #
-        # @return [Hash]
-        #   e.g.: {:paginator=>#<PagedPaginator:0x00561ed06dc5a0 @number=1, @size=2>, :range=>0..1}
+        # @param kind [Symbol] pagination object's kind
+        #   e.g.: :paginator or :range
+        #
+        # @return [PagedPaginator, OffsetPaginator, Range]
+        #   e.g.: #<PagedPaginator:0x00561ed06dc5a0 @number=1, @size=2>
+        #         0..9
         #
         # @api private
-        def pagination
+        def paginate_with(kind)
           @pagination ||=
-            if JSONAPI.configuration.default_paginator == :paged
-              @_paginator ||= PagedPaginator.new(page_params)
-              number = page_params['number'].to_i.nonzero? || 1
-              size   = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
-              { paginator: @_paginator, range: (number - 1) * size..number * size - 1 }
-            elsif JSONAPI.configuration.default_paginator == :offset
-              @_paginator ||= OffsetPaginator.new(page_params)
-              offset = page_params['offset'].to_i.nonzero? || 0
-              limit  = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
-              { paginator: @_paginator, range: offset..offset + limit - 1 }
-            else
-              {}
+            case kind
+            when :paginator then paginator
+            when :range     then pagination_range
             end
+        end
+
+        # Define a pagination range for objects which quack like Arrays.
+        #
+        # @return [Range]
+        #   e.g.: 0..9
+        #
+        # @api private
+        def pagination_range
+          case JSONAPI.configuration.default_paginator
+          when :paged
+            number = page_params['number'].to_i.nonzero? || 1
+            size   = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size
+            (number - 1) * size..number * size - 1
+          when :offset
+            offset = page_params['offset'].to_i.nonzero? || 0
+            limit  = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
+            offset..offset + limit - 1
+          end
         end
 
         # Count records in order to build a proper pagination and to fill up the "record_count" response's member.
