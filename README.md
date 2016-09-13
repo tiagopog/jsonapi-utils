@@ -1,8 +1,8 @@
 # JSONAPI::Utils
 
-[![Code Climate](https://codeclimate.com/github/b2beauty/jsonapi-utils/badges/gpa.svg)](https://codeclimate.com/github/b2beauty/jsonapi-utils)
+[![Code Climate](https://codeclimate.com/github/tiagopog/jsonapi-utils/badges/gpa.svg)](https://codeclimate.com/github/tiagopog/jsonapi-utils)
 [![Gem Version](https://badge.fury.io/rb/jsonapi-utils.svg)](https://badge.fury.io/rb/jsonapi-utils)
-[![Build Status](https://travis-ci.org/b2beauty/jsonapi-utils.svg?branch=master)](https://travis-ci.org/b2beauty/jsonapi-utils)
+[![Build Status](https://travis-ci.org/tiagopog/jsonapi-utils.svg?branch=master)](https://travis-ci.org/tiagopog/jsonapi-utils)
 
 Simple yet powerful way to get your Rails API compliant with [JSON API](http://jsonapi.org).
 
