@@ -10,11 +10,11 @@ end
 class UserResource < JSONAPI::Resource
   attributes :first_name, :last_name, :full_name
 
-  attribute :full_name
-
   has_many :posts
 
-  filter :first_name
+  filters :first_name
+
+  custom_filters :full_name
 
   def full_name
     "#{@model.first_name} #{@model.last_name}"

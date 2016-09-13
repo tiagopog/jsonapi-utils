@@ -65,6 +65,13 @@ class UsersController < BaseController
   # GET /users
   def index
     users = User.all
+
+    # Simulate a custom filter:
+    if full_name = params[:filter] && params[:filter][:full_name]
+      first_name, *last_name = full_name.split
+      users = users.where(first_name: first_name, last_name: last_name.join(' '))
+    end
+
     jsonapi_render json: users
   end
 

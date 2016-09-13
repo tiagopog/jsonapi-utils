@@ -11,8 +11,8 @@ FactoryGirl.define do
 
   factory :user, class: User do
     sequence(:id) { |n| n }
-    sequence(:first_name) { |n| "User ##{n}" }
-    sequence(:last_name) { |n| "Lastname ##{n}" }
+    sequence(:first_name) { |n| "User##{n}" }
+    sequence(:last_name) { |n| "Lastname##{n}" }
 
     trait :with_posts do
       transient { post_count 3 }
