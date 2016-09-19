@@ -14,7 +14,7 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
 * [How does it work?](#how-does-it-work)
 * [Usage](#usage)
   * [Response](#response)
-    * [Rendes](#renders)
+    * [Renders](#renders)
     * [Formatters](#formatters)
   * [Request](#request)
     * [Params helpers](#params-helpers)
@@ -139,7 +139,7 @@ It takes arguments and generates a JSON API-compliant error response.
 ```
 
 Arguments:
-  - Exception 
+  - Exception
   - `json`: object to be rendered as a JSON document: ActiveRecord, Exception, Array of Hashes or any object which implements the `errors` method;
   - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered from the error body.
 
@@ -759,7 +759,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jsonapi-utils. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/tiagopog/jsonapi-utils. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](https://contributor-covenant.org) code of conduct.
 
 
 ## License
