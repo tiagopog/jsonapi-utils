@@ -82,6 +82,7 @@ require 'support/models'
 require 'support/factories'
 require 'support/resources'
 require 'support/controllers'
+require 'support/paginators'
 
 ##
 # Routes

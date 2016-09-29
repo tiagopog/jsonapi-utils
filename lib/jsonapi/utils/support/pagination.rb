@@ -44,12 +44,16 @@ module JSONAPI
         #
         # @api private
         def paginator
-          @paginator ||=
-            if JSONAPI.configuration.default_paginator == :paged
-              PagedPaginator.new(page_params)
-            elsif JSONAPI.configuration.default_paginator == :offset
-              OffsetPaginator.new(page_params)
-            end
+          @paginator ||= paginator_klass.new(page_params)
+        end
+
+        # Returns the paginator class to be used in the response's pagination.
+        #
+        # @return [Paginator]
+        #
+        # @api private
+        def paginator_klass
+          "#{JSONAPI.configuration.default_paginator}_paginator".classify.constantize
         end
 
         # Check whether pagination should be applied to the response.
@@ -105,6 +109,8 @@ module JSONAPI
             offset = page_params['offset'].to_i.nonzero? || 0
             limit  = page_params['limit'].to_i.nonzero?  || JSONAPI.configuration.default_page_size
             offset..offset + limit - 1
+          else
+            paginator.pagination_range(page_params)
           end
         end
 
