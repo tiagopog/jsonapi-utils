@@ -72,7 +72,10 @@ module JSONAPI
         #
         # @api private
         def page_params
-          @page_params ||= ActionController::Parameters.new(@request.params[:page] || {})
+          @page_params ||= begin
+            page = @request.params.to_unsafe_hash['page'] || {}
+            ActionController::Parameters.new(page)
+          end
         end
 
         # Define the paginator or range according to the pagination strategy.
