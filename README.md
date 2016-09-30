@@ -16,6 +16,7 @@ Simple yet powerful way to get your Rails API compliant with [JSON API](http://j
   * [Response](#response)
     * [Renders](#renders)
     * [Formatters](#formatters)
+    * [Paginators](#paginators)
   * [Request](#request)
     * [Params helpers](#params-helpers)
 * [Full example](#full-example)
@@ -175,6 +176,28 @@ end
 Arguments:
   - First: ActiveRecord object, Hash or Array of Hashes;
   - Last: Hash of options (same as `JSONAPI::Utils#jsonapi_render`).
+
+#### Paginators
+
+If you are rendering a collection of hashes, you'll need to implement the `#pagination_range` method, which returns a range for your resources. For example:
+
+```ruby
+class CustomPaginator < JSONAPI::Paginator
+  def pagination_range(page_params)
+    offset = page_params['offset']
+    limit  = JSONAPI.configuration.default_page_size
+    offset..offset + limit - 1
+  end
+```
+
+And then it can be either set at the resource class level (e.g. UserResource.paginator :custom_paginator) or via config initializer:
+
+```ruby
+# config/initializers/jsonapi_resources.rb
+JSONAPI.configure do |config|
+  config.default_paginator = :custom_paginator
+end
+```
 
 ### Request
 

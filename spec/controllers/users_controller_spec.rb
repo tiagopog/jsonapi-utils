@@ -70,7 +70,6 @@ describe UsersController, type: :controller do
       context 'when using "paged" paginator' do
         before(:all) do
           JSONAPI.configuration.default_paginator = :paged
-          UserResource.paginator :paged
         end
 
         context 'at the first page' do
@@ -149,7 +148,67 @@ describe UsersController, type: :controller do
       context 'when using "offset" paginator' do
         before(:all) do
           JSONAPI.configuration.default_paginator = :offset
-          UserResource.paginator :offset
+        end
+
+        context 'at the first page' do
+          it 'returns paginated results' do
+            get :index, page: { offset: 0, limit: 2 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(2)
+            expect(response).to have_meta_record_count(User.count)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the middle' do
+          it 'returns paginated results' do
+            get :index, page: { offset: 1, limit: 1 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(User.count)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['prev']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the last page' do
+          it 'returns the paginated results' do
+            get :index, page: { offset: 2, limit: 1 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(User.count)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['prev']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'without "limit"' do
+          it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
+            get :index, page: { offset: 1 }
+            expect(response).to have_http_status :ok
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
+            expect(response).to have_meta_record_count(User.count)
+          end
+        end
+      end
+
+      context 'when using custom global paginator' do
+        before(:all) do
+          JSONAPI.configuration.default_paginator = :custom_offset
         end
 
         context 'at the first page' do

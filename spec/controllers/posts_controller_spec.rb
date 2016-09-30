@@ -65,6 +65,63 @@ describe PostsController, type: :controller do
 
         expect(data).to eq(sorted_data)
       end
+
+      context 'when using custom global paginator' do
+        before(:all) do
+          JSONAPI.configuration.default_paginator = :custom_offset
+        end
+
+        it 'returns paginated results' do
+          get :index_with_hash, page: { offset: 0, limit: 2 }
+
+          expect(response).to have_http_status :ok
+          expect(data.size).to eq(2)
+          expect(response).to have_meta_record_count(4)
+
+          expect(json['links']['first']).to be_present
+          expect(json['links']['next']).to be_present
+          expect(json['links']['last']).to be_present
+        end
+
+        context 'at the middle' do
+          it 'returns paginated results' do
+            get :index_with_hash, page: { offset: 1, limit: 1 }
+
+            expect(response).to have_http_status :ok
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(4)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['prev']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the last page' do
+          it 'returns the paginated results' do
+            get :index_with_hash, page: { offset: 3, limit: 1 }
+
+            expect(response).to have_http_status :ok
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(4)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['prev']).to be_present
+            expect(json['links']['next']).not_to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'without "limit"' do
+          it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
+            get :index_with_hash, page: { offset: 1 }
+            expect(response).to have_http_status :ok
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
+            expect(response).to have_meta_record_count(4)
+          end
+        end
+      end
     end
   end
 
