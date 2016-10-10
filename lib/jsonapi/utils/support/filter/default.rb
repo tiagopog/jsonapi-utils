@@ -46,8 +46,8 @@ module JSONAPI::Utils::Support::Filter
         case params[:filter]
         when Hash, ActionController::Parameters
           default_filters.each_with_object({}) do |field, hash|
-            unformatted_key = @request.unformat_key(field)
-            hash[unformatted_key] = params[:filter][field]
+            unformatted_field = @request.unformat_key(field)
+            hash[unformatted_field] = params[:filter][field]
           end
         end
     end
