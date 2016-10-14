@@ -51,7 +51,7 @@ gem 'jsonapi-utils', '~> 0.4.6'
 For Rails 5, specify the beta version in the Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '0.5.0.beta3'
+gem 'jsonapi-utils', '0.5.0.beta4'
 ```
 
 And then execute:
