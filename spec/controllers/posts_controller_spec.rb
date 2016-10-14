@@ -5,6 +5,10 @@ describe PostsController, type: :controller do
 
   before(:all) { FactoryGirl.create_list(:post, 3) }
 
+  before(:each) do
+    JSONAPI.configuration.json_key_format = :underscored_key
+  end
+
   let(:fields)        { (PostResource.fields - %i(id author)).map(&:to_s) }
   let(:relationships) { %w(author) }
   let(:first_post)    { Post.first }

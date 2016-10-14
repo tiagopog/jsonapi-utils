@@ -5,6 +5,10 @@ describe UsersController, type: :controller do
 
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
+  before(:each) do
+    JSONAPI.configuration.json_key_format = :underscored_key
+  end
+
   let(:fields)        { (UserResource.fields - %i(id posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
   let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
@@ -63,6 +67,32 @@ describe UsersController, type: :controller do
         expect(response).to have_primary_data('users')
         expect(response).to have_meta_record_count(1)
         expect(data[0]['attributes']['full_name']).to eq(full_name)
+      end
+
+      context 'when using "dasherized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :dasherized_key
+        end
+
+        it 'returns only results corresponding to the applied filter' do
+          get :index, filter: { 'first-name' => first_name }
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(data[0]['attributes']['first-name']).to eq(first_name)
+        end
+      end
+
+      context 'when using "camelized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :camelized_key
+        end
+
+        it 'returns only results corresponding to the applied filter' do
+          get :index, filter: { 'firstName' => first_name }
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(data[0]['attributes']['firstName']).to eq(first_name)
+        end
       end
     end
 
@@ -286,13 +316,47 @@ describe UsersController, type: :controller do
         it 'returns sorted results' do
           get :index, sort: '-first_name,-last_name'
 
-          first_name1, last_name1 = data[0]['attributes'].values_at('first_name', 'last_name')
-          first_name2, last_name2 = data[1]['attributes'].values_at('first_name', 'last_name')
-          sorted = first_name1 > first_name2 || (first_name1 == first_name2 && last_name1 >= last_name2)
+          first_name_1, last_name_1 = data[0]['attributes'].values_at('first_name', 'last_name')
+          first_name_2, last_name_2 = data[1]['attributes'].values_at('first_name', 'last_name')
+          sorted = first_name_1 > first_name_2 || (first_name_1 == first_name_2 && last_name_1 >= last_name_2)
 
           expect(response).to have_http_status :ok
           expect(response).to have_primary_data('users')
           expect(sorted).to be_truthy
+        end
+      end
+
+      context 'when using "dasherized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :dasherized_key
+        end
+
+        it 'returns sorted results' do
+          get :index, sort: 'first-name'
+
+          first_name_1 = data[0]['attributes']['first-name']
+          first_name_2 = data[1]['attributes']['first-name']
+
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(first_name_1 < first_name_2).to be_truthy
+        end
+      end
+
+      context 'when using "camelized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :camelized_key
+        end
+
+        it 'returns sorted results' do
+          get :index, sort: 'firstName'
+
+          first_name_1 = data[0]['attributes']['firstName']
+          first_name_2 = data[1]['attributes']['firstName']
+
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(first_name_1 < first_name_2).to be_truthy
         end
       end
     end
