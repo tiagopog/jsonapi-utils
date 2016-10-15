@@ -9,10 +9,11 @@ describe PostsController, type: :controller do
     JSONAPI.configuration.json_key_format = :underscored_key
   end
 
-  let(:fields)        { (PostResource.fields - %i(id author)).map(&:to_s) }
-  let(:relationships) { %w(author) }
+  let(:fields)        { (PostResource.fields - %i(id author category)).map(&:to_s) }
+  let(:relationships) { %w(author category) }
   let(:first_post)    { Post.first }
   let(:user_id)       { first_post.user_id }
+  let(:category_id)   { first_post.category_id }
 
   let(:attributes) do
     { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.' }
@@ -22,12 +23,16 @@ describe PostsController, type: :controller do
     { data: { type: 'users', id: user_id } }
   end
 
+  let(:category_params) do
+    { data: { type: 'categories', id: category_id } }
+  end
+
   let(:post_params) do
     {
       data: {
         type: 'posts',
         attributes: attributes,
-        relationships: { author: author_params }
+        relationships: { author: author_params, category: category_params }
       }
     }
   end
@@ -210,8 +215,8 @@ describe PostsController, type: :controller do
       expect(data['attributes']['title']).to eq(post_params[:data][:attributes][:title])
     end
 
-    context 'when validation fails' do
-      it 'render a 422 response' do
+    context 'when validation fails on an attribute' do
+      it 'renders a 422 response' do
         post_params[:data][:attributes][:title] = nil
 
         expect { post :create, post_params }.to change(Post, :count).by(0)
@@ -220,6 +225,56 @@ describe PostsController, type: :controller do
         expect(errors[0]['id']).to eq('title')
         expect(errors[0]['title']).to eq('Title can\'t be blank')
         expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/attributes/title')
+      end
+    end
+
+    context 'when validation fails on a relationship' do
+      it 'renders a 422 response' do
+        post_params[:data][:relationships][:author] = nil
+
+        expect { post :create, post_params }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('author')
+        expect(errors[0]['title']).to eq('Author can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/relationships/author')
+      end
+    end
+
+    context 'when validation fails on a foreign key' do
+      it 'renders a 422 response' do
+        post_params[:data][:relationships][:category] = nil
+
+        expect { post :create, post_params }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('category')
+        expect(errors[0]['title']).to eq('Category can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/relationships/category')
+      end
+    end
+  end
+
+  describe '#update' do
+    context 'when validation fails on base' do
+      let(:update_params) do
+        post_params.tap do |params|
+          params[:data][:id] = first_post.id
+          params[:id] = first_post.id
+        end
+      end
+
+      it 'renders a 422 response' do
+        expect { patch :update, update_params }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('base')
+        expect(errors[0]['title']).to eq('This is an error on the base')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data')
       end
     end
   end

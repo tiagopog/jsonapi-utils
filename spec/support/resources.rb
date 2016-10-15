@@ -1,6 +1,12 @@
+class CategoryResource < JSONAPI::Resource
+  attribute :title
+  has_many :posts
+end
+
 class PostResource < JSONAPI::Resource
   attributes :title, :body
   has_one :author
+  has_one :category
 end
 
 module V2
