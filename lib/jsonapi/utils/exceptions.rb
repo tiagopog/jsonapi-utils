@@ -35,18 +35,31 @@ module JSONAPI
         # See https://tools.ietf.org/html/rfc6901 for more information about
         # JSON pointers.
         def error_meta_for(key)
+          error_meta = {}
+
+          # Determine if this is a foreign key, which will need to look up its
+          # matching association name.
+          is_foreign_key = foreign_keys.include?(key)
+          error_meta[:id] = is_foreign_key ? associations.select { |a| a.foreign_key.to_sym == key }.first.name : key
+
+          key_formatter = JSONAPI.configuration.key_formatter
+          error_meta[:id] = key_formatter.format(error_meta[:id])
+
           # Pointer depends on whether we're using an association, foreign
           # key, base, or attribute.
-          if association_keys.include?(key)
-            { id: key, pointer: "/data/relationships/#{key}" }
-          elsif foreign_keys.include?(key)
-            error_key = associations.select { |a| a.foreign_key.to_sym == key }.first.name
-            { id: error_key, pointer: "/data/relationships/#{error_key}" }
-          elsif key == :base
-            { id: key, pointer: '/data' }
-          else
-            { id: key, pointer: "/data/attributes/#{key}" }
-          end
+          error_meta[:pointer] =
+            # Relationship
+            if is_foreign_key || association_keys.include?(key)
+              "/data/relationships/#{error_meta[:id]}"
+            # Base
+            elsif key == :base
+              '/data'
+            # Attribute
+            else
+              "/data/attributes/#{key}"
+            end
+
+          error_meta
         end
       end
 
