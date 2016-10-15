@@ -2,7 +2,7 @@ module JSONAPI
   module Utils
     module Support
       module Error
-        MEMBERS = %i(title detail id code source links status meta)
+        MEMBERS = %i(title detail id code source links status meta).freeze
 
         module_function
 

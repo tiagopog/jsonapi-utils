@@ -5,7 +5,11 @@ describe UsersController, type: :controller do
 
   before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
 
-  let(:fields)        { (UserResource.fetchable_fields - %i(id posts)).map(&:to_s) }
+  before(:each) do
+    JSONAPI.configuration.json_key_format = :underscored_key
+  end
+
+  let(:fields)        { (UserResource.fields - %i(id posts)).map(&:to_s) }
   let(:relationships) { %w(posts) }
   let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
 
@@ -45,7 +49,9 @@ describe UsersController, type: :controller do
     end
 
     context 'with "filter"' do
-      let(:first_name) { User.first.first_name }
+      let(:user)       { User.first }
+      let(:first_name) { user.first_name }
+      let(:full_name)  { "#{user.first_name} #{user.last_name}" }
 
       it 'returns only results corresponding to the applied filter' do
         get :index, filter: { first_name: first_name }
@@ -54,17 +60,50 @@ describe UsersController, type: :controller do
         expect(response).to have_meta_record_count(1)
         expect(data[0]['attributes']['first_name']).to eq(first_name)
       end
+
+      it 'returns only results corresponding to the applied custom filter' do
+        get :index, filter: { full_name: full_name }
+        expect(response).to have_http_status :ok
+        expect(response).to have_primary_data('users')
+        expect(response).to have_meta_record_count(1)
+        expect(data[0]['attributes']['full_name']).to eq(full_name)
+      end
+
+      context 'when using "dasherized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :dasherized_key
+        end
+
+        it 'returns only results corresponding to the applied filter' do
+          get :index, filter: { 'first-name' => first_name }
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(data[0]['attributes']['first-name']).to eq(first_name)
+        end
+      end
+
+      context 'when using "camelized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :camelized_key
+        end
+
+        it 'returns only results corresponding to the applied filter' do
+          get :index, filter: { 'firstName' => first_name }
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(data[0]['attributes']['firstName']).to eq(first_name)
+        end
+      end
     end
 
     context 'with "page"' do
       context 'when using "paged" paginator' do
         before(:all) do
           JSONAPI.configuration.default_paginator = :paged
-          UserResource.paginator :paged
         end
 
         context 'at the first page' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { number: 1, size: 2 }
 
             expect(response).to have_http_status :ok
@@ -79,13 +118,13 @@ describe UsersController, type: :controller do
         end
 
         context 'at the middle' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { number: 2, size: 1 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -95,13 +134,13 @@ describe UsersController, type: :controller do
         end
 
         context 'at the last page' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { number: 3, size: 1 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['prev']).to be_present
@@ -109,12 +148,29 @@ describe UsersController, type: :controller do
           end
         end
 
+
+        context 'when filtering with pagination' do
+          let(:user)  { FactoryGirl.create(:user) }
+          let(:count) { User.where(user.slice(:first_name, :last_name)).count }
+
+          it 'returns paginated results according to the given filter' do
+            get :index, filter: { full_name: user.full_name }, page: { number: 1, size: 2 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(count)
+
+            expect(data[0]['attributes']['full_name']).to eq(user.full_name)
+          end
+        end
+
         context 'without "size"' do
           it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
             get :index, page: { number: 1 }
             expect(response).to have_http_status :ok
-            expect(data.size).to eq(JSONAPI.configuration.default_page_size)
-            expect(response).to have_meta_record_count(3)
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
+            expect(response).to have_meta_record_count(User.count)
           end
         end
       end
@@ -122,17 +178,16 @@ describe UsersController, type: :controller do
       context 'when using "offset" paginator' do
         before(:all) do
           JSONAPI.configuration.default_paginator = :offset
-          UserResource.paginator :offset
         end
 
         context 'at the first page' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { offset: 0, limit: 2 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(2)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
             expect(json['links']['next']).to be_present
@@ -141,16 +196,16 @@ describe UsersController, type: :controller do
         end
 
         context 'at the middle' do
-          it 'returns the paginated results' do
+          it 'returns paginated results' do
             get :index, page: { offset: 1, limit: 1 }
 
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['next']).to be_present
             expect(json['links']['last']).to be_present
           end
@@ -163,10 +218,10 @@ describe UsersController, type: :controller do
             expect(response).to have_http_status :ok
             expect(response).to have_primary_data('users')
             expect(data.size).to eq(1)
-            expect(response).to have_meta_record_count(3)
+            expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['last']).to be_present
           end
         end
@@ -175,8 +230,69 @@ describe UsersController, type: :controller do
           it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
             get :index, page: { offset: 1 }
             expect(response).to have_http_status :ok
-            expect(data.size).to eq(JSONAPI.configuration.default_page_size)
-            expect(response).to have_meta_record_count(3)
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
+            expect(response).to have_meta_record_count(User.count)
+          end
+        end
+      end
+
+      context 'when using custom global paginator' do
+        before(:all) do
+          JSONAPI.configuration.default_paginator = :custom_offset
+        end
+
+        context 'at the first page' do
+          it 'returns paginated results' do
+            get :index, page: { offset: 0, limit: 2 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(2)
+            expect(response).to have_meta_record_count(User.count)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the middle' do
+          it 'returns paginated results' do
+            get :index, page: { offset: 1, limit: 1 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(User.count)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['prev']).to be_present
+            expect(json['links']['next']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'at the last page' do
+          it 'returns the paginated results' do
+            get :index, page: { offset: 2, limit: 1 }
+
+            expect(response).to have_http_status :ok
+            expect(response).to have_primary_data('users')
+            expect(data.size).to eq(1)
+            expect(response).to have_meta_record_count(User.count)
+
+            expect(json['links']['first']).to be_present
+            expect(json['links']['prev']).to be_present
+            expect(json['links']['last']).to be_present
+          end
+        end
+
+        context 'without "limit"' do
+          it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
+            get :index, page: { offset: 1 }
+            expect(response).to have_http_status :ok
+            expect(data.size).to be <= JSONAPI.configuration.default_page_size
+            expect(response).to have_meta_record_count(User.count)
           end
         end
       end
@@ -200,13 +316,47 @@ describe UsersController, type: :controller do
         it 'returns sorted results' do
           get :index, sort: '-first_name,-last_name'
 
-          first_name1, last_name1 = data[0]['attributes'].values_at('first_name', 'last_name')
-          first_name2, last_name2 = data[1]['attributes'].values_at('first_name', 'last_name')
-          sorted = first_name1 > first_name2 || (first_name1 == first_name2 && last_name1 >= last_name2)
+          first_name_1, last_name_1 = data[0]['attributes'].values_at('first_name', 'last_name')
+          first_name_2, last_name_2 = data[1]['attributes'].values_at('first_name', 'last_name')
+          sorted = first_name_1 > first_name_2 || (first_name_1 == first_name_2 && last_name_1 >= last_name_2)
 
           expect(response).to have_http_status :ok
           expect(response).to have_primary_data('users')
           expect(sorted).to be_truthy
+        end
+      end
+
+      context 'when using "dasherized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :dasherized_key
+        end
+
+        it 'returns sorted results' do
+          get :index, sort: 'first-name'
+
+          first_name_1 = data[0]['attributes']['first-name']
+          first_name_2 = data[1]['attributes']['first-name']
+
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(first_name_1 < first_name_2).to be_truthy
+        end
+      end
+
+      context 'when using "camelized_key"' do
+        before do
+          JSONAPI.configuration.json_key_format = :camelized_key
+        end
+
+        it 'returns sorted results' do
+          get :index, sort: 'firstName'
+
+          first_name_1 = data[0]['attributes']['firstName']
+          first_name_2 = data[1]['attributes']['firstName']
+
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(first_name_1 < first_name_2).to be_truthy
         end
       end
     end
@@ -220,7 +370,7 @@ describe UsersController, type: :controller do
       expect(response).to have_http_status :ok
       expect(response).to have_primary_data('users')
       expect(response).to have_data_attributes(fields)
-      expect(data['attributes']['first_name']).to eq("User ##{user.id}")
+      expect(data['attributes']['first_name']).to eq("User##{user.id}")
     end
 
     context 'when resource was not found' do
@@ -287,14 +437,14 @@ describe UsersController, type: :controller do
     let(:update_params) do
       user_params.tap do |params|
         params[:data][:id] = user.id
-        params[:data][:attributes].merge!(first_name: 'Yukihiro')
+        params[:data][:attributes][:first_name] = 'Yukihiro'
         params[:data][:relationships] = relationship_params
         params.merge!(id: user.id)
       end
     end
 
     let(:relationship_params) do
-      { posts: { data: [{ id: post.id, type: "posts" }] } }
+      { posts: { data: [{ id: post.id, type: 'posts' }] } }
     end
 
     it 'update an existing user' do

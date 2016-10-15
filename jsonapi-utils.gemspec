@@ -28,4 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec-rails', '~> 3.1'
   spec.add_development_dependency 'factory_girl', '~> 4.5'
   spec.add_development_dependency 'smart_rspec', '~> 0.1.4'
+  spec.add_development_dependency 'pry', '~> 0.10.3'
+  spec.add_development_dependency 'pry-byebug'
 end

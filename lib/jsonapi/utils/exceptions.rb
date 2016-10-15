@@ -23,20 +23,24 @@ module JSONAPI
       end
 
       class BadRequest < ::JSONAPI::Exceptions::Error
-        def code; '400' end
+        def code
+          '400'
+        end
 
         def errors
           [JSONAPI::Error.new(
-              code: code,
-              status: :bad_request,
-              title: 'Bad Request',
-              detail: 'This request is not supported.'
-            )]
+            code: code,
+            status: :bad_request,
+            title: 'Bad Request',
+            detail: 'This request is not supported.'
+          )]
         end
       end
 
       class InternalServerError < ::JSONAPI::Exceptions::Error
-        def code; '500' end
+        def code
+          '500'
+        end
 
         def errors
           [JSONAPI::Error.new(

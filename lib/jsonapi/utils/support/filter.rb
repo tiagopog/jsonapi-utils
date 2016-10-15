@@ -17,9 +17,11 @@ module JSONAPI
 
         def filter_params
           @_filter_params ||=
-            if params[:filter].is_a?(Hash)
-              params[:filter].keys.each_with_object({}) do |resource, hash|
-                hash[resource] = params[:filter][resource]
+            case params[:filter]
+            when Hash, ActionController::Parameters
+              default_filters.each_with_object({}) do |field, hash|
+                unformatted_field = @request.unformat_key(field)
+                hash[unformatted_field] = params[:filter][field]
               end
             end
         end
