@@ -44,6 +44,8 @@ shared_examples_for 'JSON API invalid request' do
 
     context 'with "page"' do
       context 'when using "paged" paginator' do
+        before(:all) { UserResource.paginator :paged }
+
         context 'with invalid number' do
           it 'renders a 400 response' do
             get :index, page: { number: 'foo' }
@@ -81,6 +83,44 @@ shared_examples_for 'JSON API invalid request' do
 
       context 'when using "offset" paginator' do
         before(:all) { UserResource.paginator :offset }
+
+        context 'with invalid offset' do
+          it 'renders a 400 response' do
+            get :index, page: { offset: -1 }
+            expect(response).to have_http_status :bad_request
+            expect(error['title']).to eq('Invalid page value')
+            expect(error['code']).to eq('118')
+          end
+        end
+
+        context 'with invalid limit' do
+          it 'renders a 400 response' do
+            get :index, page: { limit: 'foo' }
+            expect(response).to have_http_status :bad_request
+            expect(error['title']).to eq('Invalid page value')
+            expect(error['code']).to eq('118')
+          end
+        end
+
+        context 'with invalid page param' do
+          it 'renders a 400 response' do
+            get :index, page: { size: 1 }
+            expect(response).to have_http_status :ok
+          end
+        end
+
+        context 'with a "limit" greater than the max limit' do
+          it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"' do
+            get :index, page: { limit: 999 }
+            expect(response).to have_http_status :bad_request
+            expect(error['title']).to eq('Invalid page value')
+            expect(error['code']).to eq('118')
+          end
+        end
+      end
+
+      context 'when using "custom" paginator' do
+        before(:all) { UserResource.paginator :custom_offset }
 
         context 'with invalid offset' do
           it 'renders a 400 response' do

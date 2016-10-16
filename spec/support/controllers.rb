@@ -1,6 +1,6 @@
 require 'support/exceptions'
 
-class BaseController < JSONAPI::ResourceController
+class BaseController < ActionController::Base
   include JSONAPI::Utils
   protect_from_forgery with: :null_session
   rescue_from ActiveRecord::RecordNotFound, with: :jsonapi_render_not_found
@@ -17,8 +17,10 @@ class PostsController < BaseController
   # GET /index_with_hash
   def index_with_hash
     @posts = { data: [
-      { id: 1, title: 'Lorem Ipsum' },
-      { id: 2, title: 'Dolor Sit' }
+      { id: 1, title: 'Lorem Ipsum', body: 'Body 4' },
+      { id: 2, title: 'Dolor Sit', body: 'Body 2' },
+      { id: 3, title: 'Dolor Sit', body: 'Body 3' },
+      { id: 4, title: 'Dolor Sit', body: 'Body 1' }
     ]}
     # Example of response rendering from Hash + options:
     jsonapi_render json: @posts, options: { model: Post }
@@ -63,6 +65,13 @@ class UsersController < BaseController
   # GET /users
   def index
     users = User.all
+
+    # Simulate a custom filter:
+    if full_name = params[:filter] && params[:filter][:full_name]
+      first_name, *last_name = full_name.split
+      users = users.where(first_name: first_name, last_name: last_name.join(' '))
+    end
+
     jsonapi_render json: users
   end
 
@@ -86,7 +95,8 @@ class UsersController < BaseController
   # PATCH /users/:id
   def update
     user = User.find(params[:id])
-    if user.update(resource_params) && update_relationships(user)
+    if user.update(resource_params)
+      update_relationships(user)
       jsonapi_render json: user
     else
       # Example of error rendering for exceptions or any object
@@ -98,7 +108,8 @@ class UsersController < BaseController
   private
 
   def update_relationships(user)
-    return user if relationship_params[:posts].blank?
-    user.posts = Post.where(id: relationship_params[:posts])
+    if relationship_params[:posts].present?
+      user.post_ids = relationship_params[:posts]
+    end
   end
 end
