@@ -45,7 +45,7 @@ Support:
 For Rails 4.x add this to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.6'
+gem 'jsonapi-utils', '~> 0.4.7'
 ```
 
 For Rails 5, specify the beta version in the Gemfile:
