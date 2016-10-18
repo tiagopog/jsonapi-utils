@@ -12,6 +12,8 @@ FactoryGirl.define do
     sequence(:id) { |n| n }
     sequence(:title) { |n| "Title for Post #{n}" }
     sequence(:body) { |n| "Body for Post #{n}" }
+    content_type :article
+    hidden 'Hidden'
   end
 
   factory :user, class: User do

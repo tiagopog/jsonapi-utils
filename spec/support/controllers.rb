@@ -41,6 +41,7 @@ class PostsController < BaseController
   # POST /posts
   def create
     post = Post.new(post_params)
+    post.hidden = 1
     if post.save
       jsonapi_render json: post, status: :created
     else

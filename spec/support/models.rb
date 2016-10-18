@@ -10,6 +10,8 @@ ActiveRecord::Schema.define do
   create_table :posts, force: true do |t|
     t.string   :title
     t.text     :body
+    t.string   :content_type
+    t.string   :hidden
     t.integer  :user_id
     t.integer  :category_id
     t.timestamps null: false
@@ -39,7 +41,14 @@ end
 class Post < ActiveRecord::Base
   belongs_to :author, class_name: 'User', foreign_key: :user_id
   belongs_to :category
-  validates :title, :body, :author, :category_id, presence: true
+  validates :title, :body, :content_type, :hidden, :author, :category_id, presence: true
+  validate :trip_hidden_error
+
+  private
+
+  def trip_hidden_error
+    errors.add(:hidden, 'error was tripped') if title == 'Fail Hidden'
+  end
 end
 
 class Category < ActiveRecord::Base

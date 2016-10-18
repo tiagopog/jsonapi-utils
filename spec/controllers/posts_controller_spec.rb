@@ -16,7 +16,7 @@ describe PostsController, type: :controller do
   let(:category_id)   { first_post.category_id }
 
   let(:attributes) do
-    { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.' }
+    { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.', content_type: 'article' }
   end
 
   let(:author_params) do
@@ -254,6 +254,40 @@ describe PostsController, type: :controller do
         expect(errors[0]['title']).to eq('Category can\'t be blank')
         expect(errors[0]['code']).to eq('100')
         expect(errors[0]['source']['pointer']).to eq('/data/relationships/category')
+      end
+    end
+
+    context 'when validation fails on a private attribute' do
+      it 'renders a 422 response' do
+        post_params[:data][:attributes][:title] = 'Fail Hidden'
+
+        expect { post :create, post_params }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('hidden')
+        expect(errors[0]['title']).to eq('Hidden error was tripped')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']).to be_nil
+      end
+    end
+
+    context 'when validation fails with a formatted attribute key' do
+      let!(:key_format_was) { JSONAPI.configuration.json_key_format }
+      before { JSONAPI.configure { |config| config.json_key_format = :dasherized_key } }
+      after { JSONAPI.configure { |config| config.json_key_format = key_format_was } }
+
+      let(:attributes) do
+        { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.' }
+      end
+
+      it 'renders a 422 response' do
+        expect { post :create, post_params }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('content-type')
+        expect(errors[0]['title']).to eq('Content type can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/attributes/content-type')
       end
     end
   end

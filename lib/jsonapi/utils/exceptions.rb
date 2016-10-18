@@ -4,62 +4,58 @@ module JSONAPI
   module Utils
     module Exceptions
       class ActiveRecord < ::JSONAPI::Exceptions::Error
-        attr_accessor :object, :associations, :association_keys, :foreign_keys
+        attr_accessor :object, :resource, :relationships, :relationship_keys, :foreign_keys
 
-        def initialize(object)
+        def initialize(object, request, context)
           @object = object
+          request = request
+          resource_klass = request.resource_klass
+          @resource = resource_klass.new(object, context)
 
           # Need to reflect on object's associations for error reporting.
-          @associations     = @object.class.reflect_on_all_associations(:belongs_to)
-          @association_keys = @associations.map(&:name)
-          @foreign_keys     = @associations.map(&:foreign_key).map(&:to_sym)
+          @relationships     = resource_klass._relationships.values
+          @relationship_keys = @relationships.map(&:name).map(&:to_sym)
+          @foreign_keys      = @relationships.map(&:foreign_key).map(&:to_sym)
         end
 
         def errors
           object.errors.keys.map do |key|
-            error_meta = error_meta_for(key)
-
-            JSONAPI::Error.new(
+            error_meta = {
               code: JSONAPI::VALIDATION_ERROR,
               status: :unprocessable_entity,
-              id: error_meta[:id],
-              title: object.errors.full_messages_for(key).first,
-              source: { pointer: error_meta[:pointer] }
-            )
-          end
-        end
+              title: object.errors.full_messages_for(key).first
+            }
 
-        private
+            # Determine if this is a foreign key, which will need to look up its
+            # matching association name.
+            is_foreign_key = foreign_keys.include?(key)
+            id = is_foreign_key ? relationships.select { |r| r.foreign_key == key }.first.name : key
+            id = id.to_sym
 
-        # Returns JSON pointer for a given error key.
-        # See https://tools.ietf.org/html/rfc6901 for more information about
-        # JSON pointers.
-        def error_meta_for(key)
-          error_meta = {}
+            key_formatter = JSONAPI.configuration.key_formatter
+            error_meta[:id] = key_formatter.format(id).to_sym
 
-          # Determine if this is a foreign key, which will need to look up its
-          # matching association name.
-          is_foreign_key = foreign_keys.include?(key)
-          error_meta[:id] = is_foreign_key ? associations.select { |a| a.foreign_key.to_sym == key }.first.name : key
+            # Pointer should only be created for whitelisted attributes.
+            if resource.fetchable_fields.include?(id) || key == :base
+              error_meta[:source] = {}
 
-          key_formatter = JSONAPI.configuration.key_formatter
-          error_meta[:id] = key_formatter.format(error_meta[:id])
-
-          # Pointer depends on whether we're using an association, foreign
-          # key, base, or attribute.
-          error_meta[:pointer] =
-            # Relationship
-            if is_foreign_key || association_keys.include?(key)
-              "/data/relationships/#{error_meta[:id]}"
-            # Base
-            elsif key == :base
-              '/data'
-            # Attribute
-            else
-              "/data/attributes/#{key}"
+              # Pointer depends on whether we're using an association, foreign
+              # key, base, or attribute.
+              error_meta[:source][:pointer] =
+                # Relationship
+                if is_foreign_key || relationship_keys.include?(id)
+                  "/data/relationships/#{error_meta[:id]}"
+                # Base
+                elsif key == :base
+                  '/data'
+                # Attribute
+                else
+                  "/data/attributes/#{error_meta[:id]}"
+                end
             end
 
-          error_meta
+            JSONAPI::Error.new(error_meta)
+          end
         end
       end
 

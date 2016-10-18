@@ -4,7 +4,7 @@ class CategoryResource < JSONAPI::Resource
 end
 
 class PostResource < JSONAPI::Resource
-  attributes :title, :body
+  attributes :title, :content_type, :body
   has_one :author
   has_one :category
 end
