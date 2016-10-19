@@ -7,7 +7,7 @@ class BaseController < ActionController::Base
 end
 
 class PostsController < BaseController
-  before_action :load_user, except: %i(create index_with_hash show_with_hash)
+  before_action :load_user, except: %i(create index_with_hash show_with_hash update)
 
   # GET /users/:user_id/posts
   def index
@@ -41,19 +41,26 @@ class PostsController < BaseController
   # POST /posts
   def create
     post = Post.new(post_params)
+    post.hidden = 1
     if post.save
       jsonapi_render json: post, status: :created
     else
-      # Example of error rendering for Array of Hashes:
-      errors = [{ id: 'title', title: 'Title can\'t be blank', code: '100' }]
-      jsonapi_render_errors json: errors, status: :unprocessable_entity
+      jsonapi_render_errors json: post, status: :unprocessable_entity
     end
+  end
+
+  # PATCH /posts/:id
+  def update
+    post = Post.find(params[:id])
+    # Example of response rendering with error on base
+    post.errors.add(:base, 'This is an error on the base')
+    jsonapi_render_errors json: post, status: :unprocessable_entity
   end
 
   private
 
   def post_params
-    resource_params.merge(user_id: relationship_params[:author])
+    resource_params.merge(user_id: relationship_params[:author], category_id: relationship_params[:category])
   end
 
   def load_user
@@ -87,8 +94,13 @@ class UsersController < BaseController
     if user.save
       jsonapi_render json: user, status: :created
     else
-      # Example of error rendering for ActiveRecord objects:
-      jsonapi_render_errors json: user, status: :unprocessable_entity
+      # Example of error rendering for Array of Hashes:
+      errors = [
+        { id: 'first_name', title: 'First name can\'t be blank', code: '100' },
+        { id: 'last_name',  title: 'Last name can\'t be blank',  code: '100' }
+      ]
+
+      jsonapi_render_errors json: errors, status: :unprocessable_entity
     end
   end
 

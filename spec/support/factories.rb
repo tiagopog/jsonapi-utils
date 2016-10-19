@@ -1,12 +1,19 @@
 require 'factory_girl'
 
 FactoryGirl.define do
+  factory :category, class: Category do
+    sequence(:title) { |n| "Title for Category #{n}" }
+  end
+
   factory :post, class: Post do
     association :author, factory: :user
+    category
 
     sequence(:id) { |n| n }
     sequence(:title) { |n| "Title for Post #{n}" }
     sequence(:body) { |n| "Body for Post #{n}" }
+    content_type :article
+    hidden 'Hidden'
   end
 
   factory :user, class: User do
