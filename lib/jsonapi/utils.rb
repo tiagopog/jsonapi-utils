@@ -9,11 +9,10 @@ JSONAPI::Resource.extend JSONAPI::Utils::Support::Filter::Custom
 
 module JSONAPI
   module Utils
-    include Request
-    include Response
-
     def self.included(base)
       base.include ActsAsResourceController
+      base.include Request
+      base.include Response
 
       if base.respond_to?(:before_action)
         base.before_action :jsonapi_request_handling
