@@ -92,10 +92,8 @@ JSONAPI.configuration.route_format = :dasherized_route
 
 TestApp.routes.draw do
   jsonapi_resources :users do
-    jsonapi_resources :posts, only: %i(index show)
+    jsonapi_resources :posts, shallow: true
   end
-
-  jsonapi_resources :posts, only: %i(create)
 
   get :index_with_hash, to: 'posts#index_with_hash'
   get :show_with_hash,  to: 'posts#show_with_hash'
