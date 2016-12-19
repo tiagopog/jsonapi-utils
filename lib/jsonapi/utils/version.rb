@@ -1,5 +1,5 @@
 module JSONAPI
   module Utils
-    VERSION = '0.5.0.beta4'.freeze
+    VERSION = '0.5.0.beta5'.freeze
   end
 end
