@@ -128,7 +128,8 @@ describe PostsController, type: :controller do
 
         context 'without "limit"' do
           let(:offset) { 1 }
-          let(:limit)  { nil }
+
+          before { params[:page].delete(:limit) }
 
           it 'returns the amount of results based on "JSONAPI.configuration.default_page_size"' do
             expect(subject).to have_http_status :ok

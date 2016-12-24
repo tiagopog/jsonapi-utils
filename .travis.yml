@@ -1,7 +1,7 @@
 language: ruby
 sudo: false
 env:
-  - 'RAILS_VERSION=5.0.0'
+  - 'RAILS_VERSION=5.0.1'
 rvm:
   - 2.3.3
 matrix:
