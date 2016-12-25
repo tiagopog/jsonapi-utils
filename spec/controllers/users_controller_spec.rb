@@ -411,7 +411,7 @@ describe UsersController, type: :controller do
     end
 
     context 'when validation fails' do
-      it 'render a 422 response' do
+      it 'renders a 422 response' do
         user_params[:data][:attributes].merge!(first_name: nil, last_name: nil)
 
         expect { post :create, user_params }.to change(User, :count).by(0)

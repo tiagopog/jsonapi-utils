@@ -95,6 +95,8 @@ TestApp.routes.draw do
     jsonapi_resources :posts, shallow: true
   end
 
+  patch :update_with_error_on_base, to: 'posts#update_with_error_on_base'
+
   get :index_with_hash, to: 'posts#index_with_hash'
   get :show_with_hash,  to: 'posts#show_with_hash'
 end

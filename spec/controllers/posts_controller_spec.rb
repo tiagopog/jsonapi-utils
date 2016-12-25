@@ -9,17 +9,22 @@ describe PostsController, type: :controller do
     JSONAPI.configuration.json_key_format = :underscored_key
   end
 
-  let(:fields)        { (PostResource.fields - %i(id author)).map(&:to_s) }
-  let(:relationships) { %w(author) }
+  let(:fields)        { (PostResource.fields - %i(id author category)).map(&:to_s) }
+  let(:relationships) { %w(author category) }
   let(:resource)      { Post.first }
   let(:parent_id)     { resource.user_id }
+  let(:category_id)   { resource.category_id }
 
   let(:attributes) do
-    { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.' }
+    { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.', content_type: 'article' }
   end
 
   let(:author) do
     { data: { type: 'users', id: parent_id } }
+  end
+
+  let(:category) do
+    { data: { type: 'categories', id: category_id } }
   end
 
   let(:body) do
@@ -27,7 +32,7 @@ describe PostsController, type: :controller do
       data: {
         type: 'posts',
         attributes: attributes,
-        relationships: { author: author }
+        relationships: { author: author, category: category }
       }
     }
   end
@@ -213,37 +218,136 @@ describe PostsController, type: :controller do
 
     it 'creates a new post' do
       expect { subject }.to change(Post, :count).by(1)
-      expect(response).to have_http_status :created
-      expect(response).to have_primary_data('posts')
-      expect(response).to have_data_attributes(fields)
+      expect(subject).to have_http_status :created
+      expect(subject).to have_primary_data('posts')
+      expect(subject).to have_data_attributes(fields)
       expect(data.dig('attributes', 'title')).to eq(body.dig(:data, :attributes, :title))
     end
 
-    context 'when validation fails' do
+    context 'when validation fails on an attribute' do
       subject { post :create, params.merge(invalid_body) }
 
       let(:invalid_body) do
         body.tap { |b| b[:data][:attributes][:title] = nil }
       end
 
-      it 'render a 422 response' do
+      it 'renders a 422 response' do
         expect { subject }.to change(Post, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
         expect(errors[0]['id']).to eq('title')
         expect(errors[0]['title']).to eq('Title can\'t be blank')
         expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/attributes/title')
+      end
+    end
+
+    context 'when validation fails on a relationship' do
+      subject { post :create, params.merge(invalid_body) }
+
+      let(:invalid_body) do
+        body.tap { |b| b[:data][:relationships][:author] = nil }
+      end
+
+      it 'renders a 422 response' do
+        expect { subject }.to change(Post, :count).by(0)
+        expect(subject).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('author')
+        expect(errors[0]['title']).to eq('Author can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/relationships/author')
+      end
+    end
+
+    context 'when validation fails on a foreign key' do
+      subject { post :create, params.merge(invalid_body) }
+
+      let(:invalid_body) do
+        body.tap { |b| b[:data][:relationships][:category] = nil }
+      end
+
+      it 'renders a 422 response' do
+        expect { subject }.to change(Post, :count).by(0)
+        expect(subject).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('category')
+        expect(errors[0]['title']).to eq('Category can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/relationships/category')
+      end
+    end
+
+    context 'when validation fails on a private attribute' do
+      subject { post :create, params.merge(invalid_body) }
+
+      let(:invalid_body) do
+        body.tap { |b| b[:data][:attributes][:title] = 'Fail Hidden' }
+      end
+
+      it 'renders a 422 response' do
+        expect { subject }.to change(Post, :count).by(0)
+        expect(subject).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('hidden_field')
+        expect(errors[0]['title']).to eq('Hidden field error was tripped')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']).to be_nil
+      end
+    end
+
+    context 'when validation fails with a formatted attribute key' do
+      subject { post :create, params.merge(invalid_body) }
+
+      let(:invalid_body) do
+        body.tap { |b| b[:data][:attributes][:title] = 'Fail Hidden' }
+      end
+
+      let!(:key_format_was) { JSONAPI.configuration.json_key_format }
+
+      before { JSONAPI.configure { |config| config.json_key_format = :dasherized_key } }
+      after  { JSONAPI.configure { |config| config.json_key_format = key_format_was } }
+
+      let(:attributes) do
+        { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.' }
+      end
+
+      it 'renders a 422 response' do
+        expect { subject }.to change(Post, :count).by(0)
+        expect(subject).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('content-type')
+        expect(errors[0]['title']).to eq('Content type can\'t be blank')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data/attributes/content-type')
       end
     end
   end
 
   describe 'PATCH #update' do
-    context 'when using JR\'s default action' do
-      subject { patch :update, params.merge(body) }
+    shared_context 'update request' do |action:|
+      subject { patch action, params.merge(body) }
 
       let(:params) { { id: 1 } }
       let(:body)   { { data: { id: 1, type: 'posts', attributes: { title: 'Foo' } } } }
+    end
 
+    context 'when using JR\'s default action' do
+      include_context 'update request', action: :update
       it { expect(response).to have_http_status :ok }
+    end
+
+    context 'when validation fails on base' do
+      include_context 'update request', action: :update_with_error_on_base
+
+      it 'renders a 422 response' do
+        expect { subject }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+
+        expect(errors[0]['id']).to eq('base')
+        expect(errors[0]['title']).to eq('This is an error on the base')
+        expect(errors[0]['code']).to eq('100')
+        expect(errors[0]['source']['pointer']).to eq('/data')
+      end
     end
   end
 end
