@@ -13,7 +13,7 @@ FactoryGirl.define do
     sequence(:title) { |n| "Title for Post #{n}" }
     sequence(:body) { |n| "Body for Post #{n}" }
     content_type :article
-    hidden 'Hidden'
+    hidden_field 'It\'s a hidden field!'
   end
 
   factory :user, class: User do

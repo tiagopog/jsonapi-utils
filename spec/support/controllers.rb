@@ -7,14 +7,14 @@ class BaseController < ActionController::Base
 end
 
 class PostsController < BaseController
-  before_action :load_user, except: %i(create index_with_hash show_with_hash update)
+  before_action :load_user, only: %i(index)
 
   # GET /users/:user_id/posts
   def index
     jsonapi_render json: @user.posts, options: { count: 100 }
   end
 
-  # GET /index_with_hash
+  # GET /users/:user_id//index_with_hash
   def index_with_hash
     @posts = { data: [
       { id: 1, title: 'Lorem Ipsum', body: 'Body 4' },
@@ -26,9 +26,9 @@ class PostsController < BaseController
     jsonapi_render json: @posts, options: { model: Post }
   end
 
-  # GET /users/:user_id/posts/:id
+  # GET /posts/:id
   def show
-    jsonapi_render json: @user.posts.find(params[:id])
+    jsonapi_render json: Post.find(params[:id])
   end
 
   # GET /show_with_hash/:id
@@ -38,10 +38,10 @@ class PostsController < BaseController
                    options: { model: Post, resource: ::V2::PostResource }
   end
 
-  # POST /posts
+  # POST /users/:user_id/posts
   def create
     post = Post.new(post_params)
-    post.hidden = 1
+    post.hidden_field = 1
     if post.save
       jsonapi_render json: post, status: :created
     else
@@ -50,7 +50,7 @@ class PostsController < BaseController
   end
 
   # PATCH /posts/:id
-  def update
+  def update_with_error_on_base
     post = Post.find(params[:id])
     # Example of response rendering with error on base
     post.errors.add(:base, 'This is an error on the base')

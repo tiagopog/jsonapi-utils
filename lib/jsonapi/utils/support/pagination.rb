@@ -47,7 +47,7 @@ module JSONAPI
           @paginator ||= paginator_klass.new(page_params)
         end
 
-        # Returns the paginator class to be used in the response's pagination.
+        # Return the paginator class to be used in the response's pagination.
         #
         # @return [Paginator]
         #
