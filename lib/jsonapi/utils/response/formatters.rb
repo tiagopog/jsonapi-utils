@@ -14,12 +14,16 @@ module JSONAPI
         alias_method :jsonapi_serialize, :jsonapi_format
 
         def jsonapi_format_errors(data)
-          data   = JSONAPI::Utils::Exceptions::ActiveRecord.new(data, @request.resource_klass, context) if data.is_a?(ActiveRecord::Base)
+          data = JSONAPI::Utils::Exceptions::ActiveRecord.new(data, @request.resource_klass, context) if active_record_obj?(data)
           errors = data.respond_to?(:errors) ? data.errors : data
           JSONAPI::Utils::Support::Error.sanitize(errors).uniq
         end
 
         private
+
+        def active_record_obj?(data)
+          data.is_a?(ActiveRecord::Base)|| data.singleton_class.include?(ActiveModel::Model)
+        end
 
         def build_response_document(records, options)
           results = JSONAPI::OperationResults.new
