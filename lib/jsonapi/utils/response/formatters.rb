@@ -14,7 +14,9 @@ module JSONAPI
         alias_method :jsonapi_serialize, :jsonapi_format
 
         def jsonapi_format_errors(data)
-          data   = JSONAPI::Utils::Exceptions::ActiveRecord.new(data, @request.resource_klass, context) if data.is_a?(ActiveRecord::Base)
+          if data.is_a?(ActiveRecord::Base)|| data.singleton_class.include?(ActiveModel::Model)
+            data = JSONAPI::Utils::Exceptions::ActiveRecord.new(data, @request.resource_klass, context)
+          end
           errors = data.respond_to?(:errors) ? data.errors : data
           JSONAPI::Utils::Support::Error.sanitize(errors).uniq
         end

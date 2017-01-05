@@ -55,3 +55,9 @@ class Category < ActiveRecord::Base
   has_many :posts
   validates :title, presence: true
 end
+
+class Profile
+  include ActiveModel::Model
+  attr_accessor :id, :location
+  validates :location, presence: true
+end

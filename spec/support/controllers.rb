@@ -125,3 +125,20 @@ class UsersController < BaseController
     end
   end
 end
+
+class ProfileController < BaseController
+  # GET /profile
+  def show
+    profile = Profile.new
+    profile.id = '1234'
+    profile.location = 'Springfield, USA'
+    jsonapi_render json: profile
+  end
+
+  # PATCH /profile
+  def update
+    profile = Profile.new
+    profile.valid?
+    jsonapi_render_errors json: profile, status: :unprocessable_entity
+  end
+end
