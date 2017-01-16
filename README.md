@@ -6,14 +6,19 @@
 
 Simple yet powerful way to get your Rails API compliant with [JSON API](http://jsonapi.org).
 
-`JSONAPI::Utils` (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources) taking advantage of its resource-driven style and bringing an easy way to build modern JSON APIs with no or less learning curve.
+`JSONAPI::Utils` (JU) is built on top of [JSONAPI::Resources](https://github.com/cerebris/jsonapi-resources)
+taking advantage of its resource-driven style and bringing a set of helpers to easily build modern JSON APIs 
+with no or less learning curve.
 
 After installing the gem and defining the resources/routes, it's as simple as calling a render helper:
 
 ```ruby
-# app/controllers/users_controller.rb
-def index
-  jsonapi_render json: User.all
+class UsersController < ActionController::Base
+  include JSONAPI::Utils
+
+  def index
+    jsonapi_render json: User.all
+  end
 end
 ```
 
@@ -57,10 +62,10 @@ For Rails 4.x add this to your application's Gemfile:
 gem 'jsonapi-utils', '~> 0.4.7'
 ```
 
-For Rails 5, specify the beta version in the Gemfile:
+For Rails 5, specify the `0.5.x` version in the Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '0.5.0.beta5'
+gem 'jsonapi-utils', '0.5.0'
 ```
 
 And then execute:
