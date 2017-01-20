@@ -53,19 +53,19 @@ end
 
 Support:
 
-* Ruby 2.x with Rails 4.x
+* Ruby 1.9+ with Rails 4
 * Ruby 2.3+ with Rails 5
 
-For Rails 4.x add this to your application's Gemfile:
+For Rails 4 add this to your application's Gemfile:
 
 ```ruby
 gem 'jsonapi-utils', '~> 0.4.8'
 ```
 
-For Rails 5, specify the `0.5.x` version in the Gemfile:
+For Rails 5:
 
 ```ruby
-gem 'jsonapi-utils', '0.5.1'
+gem 'jsonapi-utils', '~> 0.5.1'
 ```
 
 And then execute:
