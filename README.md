@@ -76,9 +76,9 @@ $ bundle
 
 ## Why JSONAPI::Utils?
 
-One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in controllers (no hidden actions) so that developers can easily understand and maintain their code. 
+One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in controllers (no hidden actions :-) so that developers can easily understand and maintain their code. 
 
-Unlike `JSONAPI::Resources` (JR), JU doesn't care about how you will operate your controller's actions. The gem deals only with the request validation and response rendering (via JR's objects) and provides a set of useful helpers along the way. Developers can then decide how to actually operate their actions: service objects, interactors etc.
+Unlike `JSONAPI::Resources` (JR), JU doesn't care about how you will operate your controller actions. The gem deals only with the request validation and response rendering (via JR's objects) and provides a set of helpers (renders, formatters etc) along the way. Thus developers can decide how to actually operate their actions: service objects, interactors etc.
 
 ## Usage
 
@@ -93,7 +93,7 @@ JU brings two main renders to the game, working pretty much the same way as Rail
 
 **jsonapi_render**
 
-It takes the arguments and generates a JSON API-compliant response.
+It renders a JSON API-compliant response.
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -138,7 +138,7 @@ jsonapi_render json: { data: [{ id: 1, first_name: 'Tiago' }, { id: 2, first_nam
 
 **jsonapi_render_errors**
 
-It takes arguments and generates a JSON API-compliant error response.
+It renders a JSON API-compliant error response.
 
 ```ruby
 # app/controllers/users_controller.rb
@@ -171,7 +171,7 @@ jsonapi_render_errors json: errors, status: :unprocessable_entity
 
 #### Formatters
 
-In the backstage those are the guys which actually parse ActiveRecord/Hash objects and build a new Hash compliant with JSON API. They can be called anywhere in controllers being very useful if you need to do some work with the response's body before rendering the response.
+In the backstage these are the guys which actually parse the ActiveRecord/Hash object to build a new Hash compliant with JSON API's specs. Formatters can be called anywhere in controllers being very useful if you need to do some work with the response's body before rendering the actual response.
 
 > Note: the resulting Hash from those methods can not be passed as argument to `JSONAPI::Utils#jsonapi_render` or  `JSONAPI::Utils#jsonapi_render_error`, instead it needs to be rendered by the usual `ActionController#render`.
 
@@ -193,14 +193,35 @@ Arguments:
 
 #### Paginators
 
-If you are rendering a collection of hashes, you'll need to implement the `#pagination_range` method, which returns a range for your resources. For example:
+Pagination works out of the box on JU, you just need to decide which kind of paginator you'd like to use.
+
+It's really easy to work with pagination on JU, actually it's just a matter of chosing the [paginator you wish](http://jsonapi-resources.com/v0.8/guide/configuration.html#Defaults) in your JR's config file:
+
+```ruby
+# config/initializers/jsonapi_resources.rb
+JSONAPI.configure do |config|
+  # :none, :offset, :paged, or a custom paginator name
+  config.default_paginator = :paged
+
+  # Output pagination links at top level
+  config.top_level_links_include_pagination = true
+  
+  # Default sizes
+  config.default_page_size = 70
+  config.maximum_page_size = 100
+end
+```
+
+As you may have noticed above, it's possible to use custom paginators. In order to create your own paginator your just need to define a class which inherits from `JSONAPI::Paginator` and implements the `#pagination_range` method which in turn must return the range to be applied over the resulting collection.
+
+For example, if you would like to paginate over a collection of hashes, you may implement the `#pagination_range` method as below:
 
 ```ruby
 class CustomPaginator < JSONAPI::Paginator
   def pagination_range(page_params)
     offset = page_params['offset']
     limit  = JSONAPI.configuration.default_page_size
-    offset..offset + limit - 1
+    offset..offset + limit - 1 # resulting range
   end
 ```
 
@@ -215,7 +236,7 @@ end
 
 ### Request
 
-Before a controller's action gets executed, `JSONAPI::Utils` will validate the request against JSON API specifications as well as evaluating the eventual query string params to check if they match the resource's definition. If something goes wrong during the validation process, JU will render an error response like this examples below:
+Before a controller action gets executed, `JSONAPI::Utils` will validate the request against JSON API's specs as well as evaluating the eventual query string params to check if they match the resource's definition. If something goes wrong during the validation process, JU will render an error response like this examples below:
 
 ```json
 HTTP/1.1 400 Bad Request
