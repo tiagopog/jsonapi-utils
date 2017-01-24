@@ -80,9 +80,6 @@ One of the main motivations behind `JSONAPI::Utils` is to keep things explicit i
 
 Unlike `JSONAPI::Resources` (JR), JU doesn't care about how you will operate your controller's actions. The gem deals only with the request validation and response rendering (via JR's objects) and provides a set of useful helpers along the way. Developers can then decide how to actually operate their actions: service objects, interactors etc.
 
-
-In both layers (request and response) JU communicates with some JR's objects in order to validate requests and render responses properly.
-
 ## Usage
 
 ### Response
