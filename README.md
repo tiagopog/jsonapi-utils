@@ -25,7 +25,7 @@ end
 ## Table of Contents
 
 * [Installation](#installation)
-* [How does it work?](#how-does-it-work)
+* [Why JSONAPI::Utils?](#why-jsonapi-utils)
 * [Usage](#usage)
   * [Response](#response)
     * [Renders](#renders)
@@ -74,7 +74,7 @@ And then execute:
 $ bundle
 ```
 
-## How and why JU?
+## Why JSONAPI::Utils?
 
 One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in controllers (no hidden actions) so that developers can easily understand and maintain their code. 
 
