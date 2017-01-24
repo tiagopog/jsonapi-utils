@@ -74,9 +74,12 @@ And then execute:
 $ bundle
 ```
 
-## How does it work?
+## How and why JU?
 
-One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in controllers so that developers can easily understand and maintain code. Unlike `JSONAPI::Resources` (JR), JU doesn't care about controller operations – what happens with resources within actions – dealing only with the request validation and response rendering and providing some useful helpers. This way developers can decide how to actually operate their actions (service objects, interactors etc).
+One of the main motivations behind `JSONAPI::Utils` is to keep things explicit in controllers (no hidden actions) so that developers can easily understand and maintain their code. 
+
+Unlike `JSONAPI::Resources` (JR), JU doesn't care about how you will operate your controller's actions. The gem deals only with the request validation and response rendering (via JR's objects) and provides a set of useful helpers along the way. Developers can then decide how to actually operate their actions: service objects, interactors etc.
+
 
 In both layers (request and response) JU communicates with some JR's objects in order to validate requests and render responses properly.
 
