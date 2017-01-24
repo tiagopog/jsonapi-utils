@@ -338,48 +338,51 @@ Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we 
 
 ```ruby
 # app/controllers/users_controller.rb
-# GET /users
-def index
-  users = User.all
-  jsonapi_render json: users
-end
-
-# GET /users/:id
-def show
-  user = User.find(params[:id])
-  jsonapi_render json: user
-end
-
-# POST /users
-def create
-  user = User.new(resource_params)
-  if user.save
-    jsonapi_render json: user, status: :created
-  else
-    jsonapi_render_errors json: user, status: :unprocessable_entity
+class UsersController < BaseController
+  # GET /users
+  def index
+    users = User.all
+    jsonapi_render json: users
   end
-end
 
-# PATCH /users/:id
-def update
-  user = User.find(params[:id])
-  if user.update(resource_params)
+  # GET /users/:id
+  def show
+    user = User.find(params[:id])
     jsonapi_render json: user
-  else
-    jsonapi_render_errors json: user, status: :unprocessable_entity
   end
-end
 
-# DELETE /users/:id
-def destroy
-  User.find(params[:id]).destroy
-  head :no_content
+  # POST /users
+  def create
+    user = User.new(resource_params)
+    if user.save
+      jsonapi_render json: user, status: :created
+    else
+      jsonapi_render_errors json: user, status: :unprocessable_entity
+    end
+  end
+
+  # PATCH /users/:id
+  def update
+    user = User.find(params[:id])
+    if user.update(resource_params)
+      jsonapi_render json: user
+    else
+      jsonapi_render_errors json: user, status: :unprocessable_entity
+    end
+  end
+
+  # DELETE /users/:id
+  def destroy
+    User.find(params[:id]).destroy
+    head :no_content
+  end
 end
 ```
 
 And:
 
 ```ruby
+# app/controllers/posts_controller.rb
 class PostsController < BaseController
   before_action :load_user, except: :create
 
@@ -393,7 +396,7 @@ class PostsController < BaseController
     jsonapi_render json: @user.posts.find(params[:id])
   end
 
-  # POST /users
+  # POST /posts
   def create
     post = Post.new(post_params)
     if post.save
