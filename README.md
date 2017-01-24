@@ -25,7 +25,7 @@ end
 ## Table of Contents
 
 * [Installation](#installation)
-* [Why JSONAPI::Utils?](#why-jsonapi-utils)
+* [Why JSONAPI::Utils?](#why-jsonapiutils)
 * [Usage](#usage)
   * [Response](#response)
     * [Renders](#renders)
