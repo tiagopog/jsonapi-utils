@@ -96,7 +96,7 @@ describe PostsController, type: :controller do
             expect(response).to have_meta_record_count(4)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['next']).to be_present
             expect(json['links']['last']).to be_present
           end
@@ -111,7 +111,7 @@ describe PostsController, type: :controller do
             expect(response).to have_meta_record_count(4)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['next']).not_to be_present
             expect(json['links']['last']).to be_present
           end

@@ -17,16 +17,28 @@ ActiveRecord::Schema.define do
     t.boolean  :admin
     t.timestamps null: false
   end
+
+  create_table :profiles, force: true do |t|
+    t.string :nickname
+    t.references :user, index: true, foreign_key: true
+    t.timestamps null: false
+  end
 end
 
 # Models
 class User < ActiveRecord::Base
+  has_one :profile
   has_many :posts
+
   validates :first_name, :last_name, presence: true
 
   def full_name
     "#{first_name} #{last_name}"
   end
+end
+
+class Profile < ActiveRecord::Base
+  belongs_to :user
 end
 
 class Post < ActiveRecord::Base
