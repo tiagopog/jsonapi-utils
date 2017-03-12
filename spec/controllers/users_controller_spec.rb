@@ -205,7 +205,7 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['next']).to be_present
             expect(json['links']['last']).to be_present
           end
@@ -221,7 +221,7 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['last']).to be_present
           end
         end
@@ -266,7 +266,7 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['next']).to be_present
             expect(json['links']['last']).to be_present
           end
@@ -282,7 +282,7 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(User.count)
 
             expect(json['links']['first']).to be_present
-            expect(json['links']['previous']).to be_present
+            expect(json['links']['prev']).to be_present
             expect(json['links']['last']).to be_present
           end
         end
