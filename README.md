@@ -59,13 +59,13 @@ Support:
 For Rails 4 add this to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.4.8'
+gem 'jsonapi-utils', '~> 0.4.9'
 ```
 
 For Rails 5:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.5.1'
+gem 'jsonapi-utils', '~> 0.5.2'
 ```
 
 And then execute:
