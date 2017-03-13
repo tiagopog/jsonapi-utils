@@ -3,7 +3,8 @@ require 'spec_helper'
 describe ProfileController, type: :controller do
   include_context 'JSON API headers'
 
-  let(:fields)     { (ProfileResource.fields - %i(id)).map(&:to_s) }
+  let(:relationships) { ProfileResource._relationships.keys.map(&:to_s) }
+  let(:fields)        { ProfileResource.fields.reject { |e| e == :id }.map(&:to_s) - relationships }
   let(:attributes) { { nickname: 'Foobar', location: 'Springfield, USA' } }
 
   let(:body) do

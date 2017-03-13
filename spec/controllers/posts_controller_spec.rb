@@ -3,17 +3,19 @@ require 'spec_helper'
 describe PostsController, type: :controller do
   include_context 'JSON API headers'
 
-  before(:all) { FactoryGirl.create_list(:post, 3) }
+  before(:all) do
+    @post = FactoryGirl.create_list(:post, 3).first
+  end
 
   before(:each) do
     JSONAPI.configuration.json_key_format = :underscored_key
   end
 
-  let(:fields)        { (PostResource.fields - %i(id author category)).map(&:to_s) }
-  let(:relationships) { %w(author category) }
-  let(:resource)      { Post.first }
-  let(:parent_id)     { resource.user_id }
-  let(:category_id)   { resource.category_id }
+  let(:relationships) { PostResource._relationships.keys.map(&:to_s) }
+  let(:fields)        { PostResource.fields.reject { |e| e == :id }.map(&:to_s) - relationships }
+  let(:blog_post)     { @post }
+  let(:parent_id)     { blog_post.user_id }
+  let(:category_id)   { blog_post.category_id }
 
   let(:attributes) do
     { title: 'Lorem ipsum', body: 'Lorem ipsum dolor sit amet.', content_type: 'article' }
@@ -38,7 +40,7 @@ describe PostsController, type: :controller do
   end
 
   describe 'GET #index' do
-    subject { get :index, params }
+    subject { get :index, params: params }
 
     let(:params) { { user_id: parent_id } }
 
@@ -53,7 +55,7 @@ describe PostsController, type: :controller do
     end
 
     context 'with Hash' do
-      subject { get :index_with_hash, params }
+      subject { get :index_with_hash, params: params }
 
       it 'renders a collection of users' do
         expect(subject).to have_http_status :ok
@@ -148,19 +150,19 @@ describe PostsController, type: :controller do
 
   describe 'GET #show' do
     context 'with ActiveRecord' do
-      subject { get :show, id: resource.id  }
+      subject { get :show, params: { id: blog_post.id  } }
 
       it 'renders a single post' do
         expect(subject).to have_http_status :ok
         expect(subject).to have_primary_data('posts')
         expect(subject).to have_data_attributes(fields)
         expect(subject).to have_relationships(relationships)
-        expect(data.dig('attributes', 'title')).to eq("Title for Post #{resource.id}")
+        expect(data.dig('attributes', 'title')).to eq("Title for Post #{blog_post.id}")
       end
     end
 
     context 'with Hash' do
-      subject { get :show_with_hash, id: resource.id }
+      subject { get :show_with_hash, params: { id: blog_post.id } }
 
       it 'renders a single post' do
         expect(subject).to have_http_status :ok
@@ -173,7 +175,7 @@ describe PostsController, type: :controller do
 
     context 'when resource was not found' do
       context 'with conventional id' do
-        subject { get :show, id: 999 }
+        subject { get :show, params: { id: 999 } }
 
         it 'renders a 404 response' do
           expect(subject).to have_http_status :not_found
@@ -184,7 +186,7 @@ describe PostsController, type: :controller do
       end
 
       context 'with uuid' do
-        subject { get :show, id: uuid }
+        subject { get :show, params: { id: uuid } }
 
         let(:uuid) { SecureRandom.uuid }
 
@@ -197,7 +199,7 @@ describe PostsController, type: :controller do
       end
 
       context 'with slug' do
-        subject { get :show, id: slug }
+        subject { get :show, params: { id: slug } }
 
         let(:slug) { 'some-awesome-slug' }
 
@@ -212,7 +214,7 @@ describe PostsController, type: :controller do
   end
 
   describe 'POST #create' do
-    subject { post :create, params.merge(body) }
+    subject { post :create, params: params.merge(body) }
 
     let (:params) { { user_id: parent_id } }
 
@@ -225,7 +227,7 @@ describe PostsController, type: :controller do
     end
 
     context 'when validation fails on an attribute' do
-      subject { post :create, params.merge(invalid_body) }
+      subject { post :create, params: params.merge(invalid_body) }
 
       let(:invalid_body) do
         body.tap { |b| b[:data][:attributes][:title] = nil }
@@ -234,15 +236,15 @@ describe PostsController, type: :controller do
       it 'renders a 422 response' do
         expect { subject }.to change(Post, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
-        expect(errors[0]['id']).to eq('title')
-        expect(errors[0]['title']).to eq('Title can\'t be blank')
-        expect(errors[0]['code']).to eq('100')
-        expect(errors[0]['source']['pointer']).to eq('/data/attributes/title')
+        expect(errors.dig(0, 'id')).to eq('title')
+        expect(errors.dig(0, 'title')).to eq('Title can\'t be blank')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/title')
       end
     end
 
     context 'when validation fails on a relationship' do
-      subject { post :create, params.merge(invalid_body) }
+      subject { post :create, params: params.merge(invalid_body) }
 
       let(:invalid_body) do
         body.tap { |b| b[:data][:relationships][:author] = nil }
@@ -252,15 +254,15 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(subject).to have_http_status :unprocessable_entity
 
-        expect(errors[0]['id']).to eq('author')
-        expect(errors[0]['title']).to eq('Author can\'t be blank')
-        expect(errors[0]['code']).to eq('100')
-        expect(errors[0]['source']['pointer']).to eq('/data/relationships/author')
+        expect(errors.dig(0, 'id')).to eq('author')
+        expect(errors.dig(0, 'title')).to eq('Author can\'t be blank')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to eq('/data/relationships/author')
       end
     end
 
     context 'when validation fails on a foreign key' do
-      subject { post :create, params.merge(invalid_body) }
+      subject { post :create, params: params.merge(invalid_body) }
 
       let(:invalid_body) do
         body.tap { |b| b[:data][:relationships][:category] = nil }
@@ -270,15 +272,15 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(subject).to have_http_status :unprocessable_entity
 
-        expect(errors[0]['id']).to eq('category')
-        expect(errors[0]['title']).to eq('Category can\'t be blank')
-        expect(errors[0]['code']).to eq('100')
-        expect(errors[0]['source']['pointer']).to eq('/data/relationships/category')
+        expect(errors.dig(0, 'id')).to eq('category')
+        expect(errors.dig(0, 'title')).to eq('Category can\'t be blank')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to eq('/data/relationships/category')
       end
     end
 
     context 'when validation fails on a private attribute' do
-      subject { post :create, params.merge(invalid_body) }
+      subject { post :create, params: params.merge(invalid_body) }
 
       let(:invalid_body) do
         body.tap { |b| b[:data][:attributes][:title] = 'Fail Hidden' }
@@ -288,15 +290,15 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(subject).to have_http_status :unprocessable_entity
 
-        expect(errors[0]['id']).to eq('hidden_field')
-        expect(errors[0]['title']).to eq('Hidden field error was tripped')
-        expect(errors[0]['code']).to eq('100')
-        expect(errors[0]['source']).to be_nil
+        expect(errors.dig(0, 'id')).to eq('hidden_field')
+        expect(errors.dig(0, 'title')).to eq('Hidden field error was tripped')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to be_nil
       end
     end
 
     context 'when validation fails with a formatted attribute key' do
-      subject { post :create, params.merge(invalid_body) }
+      subject { post :create, params: params.merge(invalid_body) }
 
       let(:invalid_body) do
         body.tap { |b| b[:data][:attributes][:title] = 'Fail Hidden' }
@@ -315,17 +317,17 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(subject).to have_http_status :unprocessable_entity
 
-        expect(errors[0]['id']).to eq('content-type')
-        expect(errors[0]['title']).to eq('Content type can\'t be blank')
-        expect(errors[0]['code']).to eq('100')
-        expect(errors[0]['source']['pointer']).to eq('/data/attributes/content-type')
+        expect(errors.dig(0, 'id')).to eq('content-type')
+        expect(errors.dig(0, 'title')).to eq('Content type can\'t be blank')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/content-type')
       end
     end
   end
 
   describe 'PATCH #update' do
     shared_context 'update request' do |action:|
-      subject { patch action, params.merge(body) }
+      subject { patch action, params: params.merge(body) }
 
       let(:params) { { id: 1 } }
       let(:body)   { { data: { id: 1, type: 'posts', attributes: { title: 'Foo' } } } }
@@ -343,10 +345,10 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
 
-        expect(errors[0]['id']).to eq('base')
-        expect(errors[0]['title']).to eq('This is an error on the base')
-        expect(errors[0]['code']).to eq('100')
-        expect(errors[0]['source']['pointer']).to eq('/data')
+        expect(errors.dig(0, 'id')).to eq('base')
+        expect(errors.dig(0, 'title')).to eq('This is an error on the base')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to eq('/data')
       end
     end
   end
