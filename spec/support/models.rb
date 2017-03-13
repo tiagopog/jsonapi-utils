@@ -26,10 +26,18 @@ ActiveRecord::Schema.define do
     t.boolean  :admin
     t.timestamps null: false
   end
+
+  create_table :profiles, force: true do |t|
+    t.references :user, index: true, foreign_key: true
+    t.string   :nickname
+    t.string   :location
+    t.timestamps null: false
+  end
 end
 
 # Models
 class User < ActiveRecord::Base
+  has_one :profile
   has_many :posts
   validates :first_name, :last_name, presence: true
 
@@ -56,8 +64,7 @@ class Category < ActiveRecord::Base
   validates :title, presence: true
 end
 
-class Profile
-  include ActiveModel::Model
-  attr_accessor :id, :location
-  validates :location, presence: true
+class Profile < ActiveRecord::Base
+  belongs_to :user
+  validates :nickname, :location, presence: true
 end

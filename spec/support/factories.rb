@@ -21,11 +21,20 @@ FactoryGirl.define do
     sequence(:first_name) { |n| "User##{n}" }
     sequence(:last_name) { |n| "Lastname##{n}" }
 
+    after(:create) { |user| create(:profile, user: user) }
+
     trait :with_posts do
       transient { post_count 3 }
       after(:create) do |user, e|
         create_list(:post, e.post_count, author: user)
       end
     end
+  end
+
+  factory :profile, class: Profile do
+    user
+    sequence(:id)       { |n| n }
+    sequence(:nickname) { |n| "Nickname##{n}" }
+    sequence(:location) { |n| "Location##{n}" }
   end
 end

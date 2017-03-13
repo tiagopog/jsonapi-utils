@@ -92,6 +92,7 @@ JSONAPI.configuration.route_format = :dasherized_route
 
 TestApp.routes.draw do
   jsonapi_resources :users do
+    jsonapi_links :profile
     jsonapi_resources :posts, shallow: true
   end
 

@@ -3,9 +3,9 @@ require 'spec_helper'
 describe ProfileController, type: :controller do
   include_context 'JSON API headers'
 
-  let(:fields)     { (ProfileResource.fields - %i(id)).map(&:to_s) }
-  let(:resource)   { Profile }
-  let(:attributes) { { location: 'Springfield, USA' } }
+  let(:relationships) { ProfileResource._relationships.keys.map(&:to_s) }
+  let(:fields)        { ProfileResource.fields.reject { |e| e == :id }.map(&:to_s) - relationships }
+  let(:attributes) { { nickname: 'Foobar', location: 'Springfield, USA' } }
 
   let(:body) do
     {
@@ -30,10 +30,10 @@ describe ProfileController, type: :controller do
     it 'renders a 422 response' do
       patch :update, params: body
       expect(response).to have_http_status :unprocessable_entity
-      expect(errors[0]['id']).to eq('location')
-      expect(errors[0]['title']).to eq("Location can't be blank")
-      expect(errors[0]['code']).to eq('100')
-      expect(errors[0]['source']['pointer']).to eq('/data/attributes/location')
+      expect(errors.dig(0, 'id')).to eq('nickname')
+      expect(errors.dig(0, 'title')).to eq("Nickname can't be blank")
+      expect(errors.dig(0, 'code')).to eq('100')
+      expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/nickname')
     end
   end
 end

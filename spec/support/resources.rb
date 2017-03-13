@@ -16,6 +16,8 @@ end
 class UserResource < JSONAPI::Resource
   attributes :first_name, :last_name, :full_name
 
+  has_one :profile, class_name: 'Profile'
+
   has_many :posts
 
   filters :first_name
@@ -28,5 +30,6 @@ class UserResource < JSONAPI::Resource
 end
 
 class ProfileResource < JSONAPI::Resource
-  attribute :location
+  attributes :nickname, :location
+   has_one :user, class_name: 'User', foreign_key: 'user_id'
 end

@@ -3,7 +3,7 @@ shared_examples_for 'JSON API invalid request' do
     context 'with "include"' do
       context 'when resource does not exist' do
         it 'renders a 400 response' do
-          get :index, include: :foobar
+          get :index, params: { include: :foobar }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid field')
           expect(error['code']).to eq('112')
@@ -14,7 +14,7 @@ shared_examples_for 'JSON API invalid request' do
     context 'with "fields"' do
       context 'when resource does not exist' do
         it 'renders a 400 response' do
-          get :index, fields: { foo: 'bar' }
+          get :index, params: { fields: { foo: 'bar' } }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid resource')
           expect(error['code']).to eq('101')
@@ -23,7 +23,7 @@ shared_examples_for 'JSON API invalid request' do
 
       context 'when field does not exist' do
         it 'renders a 400 response' do
-          get :index, fields: { users: 'bar' }
+          get :index, params: { fields: { users: 'bar' } }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid field')
           expect(error['code']).to eq('104')
@@ -34,7 +34,7 @@ shared_examples_for 'JSON API invalid request' do
     context 'with "filter"' do
       context 'when filter is not allowed' do
         it 'renders a 400 response' do
-          get :index, filter: { foo: 'bar' }
+          get :index, params: { filter: { foo: 'bar' } }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Filter not allowed')
           expect(error['code']).to eq('102')
@@ -48,7 +48,7 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid number' do
           it 'renders a 400 response' do
-            get :index, page: { number: 'foo' }
+            get :index, params: { page: { number: 'foo' } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -57,7 +57,7 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid size' do
           it 'renders a 400 response' do
-            get :index, page: { size: 'foo' }
+            get :index, params: { page: { size: 'foo' } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -66,14 +66,14 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid page param' do
           it 'renders a 400 response' do
-            get :index, page: { offset: 1 }
+            get :index, params: { page: { offset: 1 } }
             expect(response).to have_http_status :ok
           end
         end
 
         context 'with a "size" greater than the max limit' do
           it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"' do
-            get :index, page: { size: 999 }
+            get :index, params: { page: { size: 999 } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -86,7 +86,7 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid offset' do
           it 'renders a 400 response' do
-            get :index, page: { offset: -1 }
+            get :index, params: { page: { offset: -1 } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -95,7 +95,7 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid limit' do
           it 'renders a 400 response' do
-            get :index, page: { limit: 'foo' }
+            get :index, params: { page: { limit: 'foo' } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -104,14 +104,14 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid page param' do
           it 'renders a 400 response' do
-            get :index, page: { size: 1 }
+            get :index, params: { page: { size: 1 } }
             expect(response).to have_http_status :ok
           end
         end
 
         context 'with a "limit" greater than the max limit' do
           it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"' do
-            get :index, page: { limit: 999 }
+            get :index, params: { page: { limit: 999 } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -124,7 +124,7 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid offset' do
           it 'renders a 400 response' do
-            get :index, page: { offset: -1 }
+            get :index, params: { page: { offset: -1 } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -133,7 +133,7 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid limit' do
           it 'renders a 400 response' do
-            get :index, page: { limit: 'foo' }
+            get :index, params: { page: { limit: 'foo' } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -142,14 +142,14 @@ shared_examples_for 'JSON API invalid request' do
 
         context 'with invalid page param' do
           it 'renders a 400 response' do
-            get :index, page: { size: 1 }
+            get :index, params: { page: { size: 1 } }
             expect(response).to have_http_status :ok
           end
         end
 
         context 'with a "limit" greater than the max limit' do
           it 'returns the amount of results based on "JSONAPI.configuration.maximum_page_size"' do
-            get :index, page: { limit: 999 }
+            get :index, params: { page: { limit: 999 } }
             expect(response).to have_http_status :bad_request
             expect(error['title']).to eq('Invalid page value')
             expect(error['code']).to eq('118')
@@ -161,7 +161,7 @@ shared_examples_for 'JSON API invalid request' do
     context 'with "sort"' do
       context 'when sort criteria is invalid' do
         it 'renders a 400 response' do
-          get :index, sort: 'foo'
+          get :index, params: { sort: 'foo' }
           expect(response).to have_http_status :bad_request
           expect(error['title']).to eq('Invalid sort criteria')
           expect(error['code']).to eq('114')
