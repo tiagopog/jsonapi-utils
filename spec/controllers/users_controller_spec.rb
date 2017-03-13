@@ -1,16 +1,21 @@
 require 'spec_helper'
+require 'pry'
 
 describe UsersController, type: :controller do
   include_context 'JSON API headers'
 
-  before(:all) { FactoryGirl.create_list(:user, 3, :with_posts) }
+  before(:all) do
+    @user = FactoryGirl.create_list(:user, 3, :with_posts).first
+  end
+
+  let(:user) { @user }
 
   before(:each) do
     JSONAPI.configuration.json_key_format = :underscored_key
   end
 
-  let(:fields)        { (UserResource.fields - %i(id posts)).map(&:to_s) }
-  let(:relationships) { %w(posts) }
+  let(:fields)        { (UserResource.fields - %i(id profile posts)).map(&:to_s) }
+  let(:relationships) { %w(profile posts) }
   let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
 
   let(:user_params) do
@@ -30,7 +35,7 @@ describe UsersController, type: :controller do
 
     context 'with "include"' do
       it 'returns only the required relationships in the "included" member' do
-        get :index, include: :posts
+        get :index, include: 'profile,posts'
         expect(response).to have_http_status :ok
         expect(response).to have_primary_data('users')
         expect(response).to have_data_attributes(fields)
@@ -478,6 +483,16 @@ describe UsersController, type: :controller do
         expect(errors[0]['title']).to eq('My custom error message')
         expect(errors[0]['code']).to eq('125')
         expect(errors[0]['source']).to be_nil
+      end
+    end
+  end
+
+  describe 'use of JSONAPI::Resources\' default actions' do
+    describe '#show_relationship' do
+      it do
+        get :show_relationship, user_id: user.id, relationship: 'profile'
+        expect(response).to have_http_status :ok
+        expect(response).to have_primary_data('profiles')
       end
     end
   end
