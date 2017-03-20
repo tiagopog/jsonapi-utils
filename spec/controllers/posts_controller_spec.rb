@@ -323,6 +323,26 @@ describe PostsController, type: :controller do
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/content-type')
       end
     end
+
+    context 'when validation fails with a locale other than :en' do
+      subject { post :create, params: params.merge(invalid_body) }
+
+      let(:invalid_body) do
+        body.tap { |b| b[:data][:attributes][:title] = nil }
+      end
+
+      before { I18n.locale = :ru }
+      after { I18n.locale = :en }
+
+      it 'renders a 422 response' do
+        expect { subject }.to change(Post, :count).by(0)
+        expect(response).to have_http_status :unprocessable_entity
+        expect(errors.dig(0, 'id')).to eq('title')
+        expect(errors.dig(0, 'title')).to eq('Заголовок не может быть пустым')
+        expect(errors.dig(0, 'code')).to eq('100')
+        expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/title')
+      end
+    end
   end
 
   describe 'PATCH #update' do
