@@ -1,0 +1,8 @@
+ru:
+  activerecord:
+    attributes:
+      post:
+        title: "Заголовок"
+    errors:
+      messages:
+        blank: "не может быть пустым"

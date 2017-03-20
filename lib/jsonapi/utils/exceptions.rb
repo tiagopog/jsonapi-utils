@@ -76,8 +76,12 @@ module JSONAPI
             message
           else
             resource_key = resource_key_for(key)
-            [resource_key.to_s.tr('.', '_').humanize, message].join(' ')
+            [translation_for(resource_key), message].join(' ')
           end
+        end
+
+        def translation_for(key)
+          object.class.human_attribute_name(key)
         end
 
         def error_base
