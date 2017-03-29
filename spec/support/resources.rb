@@ -16,7 +16,7 @@ end
 class UserResource < JSONAPI::Resource
   attributes :first_name, :last_name, :full_name
 
-  has_one :profile, class_name: 'Profile'
+  has_one :profile, class_name: 'Profile', foreign_key_on: :related
 
   has_many :posts
 
