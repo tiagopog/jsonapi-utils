@@ -16,12 +16,10 @@ end
 class UserResource < JSONAPI::Resource
   attributes :first_name, :last_name, :full_name
 
-  has_one :profile, class_name: 'Profile', foreign_key_on: :related
-
+  has_one :profile, foreign_key_on: :related
   has_many :posts
 
   filters :first_name
-
   custom_filters :full_name
 
   def full_name
@@ -31,5 +29,5 @@ end
 
 class ProfileResource < JSONAPI::Resource
   attributes :nickname, :location
-   has_one :user, class_name: 'User', foreign_key: 'user_id'
+  has_one :user, class_name: 'User', foreign_key: 'user_id'
 end
