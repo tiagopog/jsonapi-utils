@@ -38,8 +38,12 @@ module JSONAPI::Utils
     #
     # @api public
     def process_request
-      process_operations
-      render_results(@operation_results)
+      operations = @request.operations
+      unless JSONAPI.configuration.resource_cache.nil?
+        operations.each {|op| op.options[:cache_serializer] = resource_serializer }
+      end
+      results = process_operations(operations)
+      render_results(results)
     rescue => e
       handle_exceptions(e)
     end
