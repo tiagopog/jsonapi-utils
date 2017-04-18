@@ -283,7 +283,7 @@ JU brings helper methods as a shortcut to get values from permitted params based
 
 After installing the gem you simply need to:
 
-1. Include the gem module (`include JSONAPI::Utils`) in a controller (eg. `BaseController`);
+1. Include the gem's module (`include JSONAPI::Utils`) in a controller (eg. `BaseController`);
 2. Define the resources which will be exposed via REST API;
 3. Define the application's routes;
 4. Use JSONAPI Utils' helper methods (eg. renders, formatters, params helpers etc).
@@ -308,7 +308,7 @@ end
 
 ### Resources
 
-Here is where we define how the models are exposed as resource on the API:
+Here is where we define how our models are exposed as resources on the API:
 
 ```ruby
 # app/resources/user_resource.rb
@@ -331,7 +331,7 @@ end
 
 ### Routes & Controllers
 
-Let's define the routes using the `jsonapi_resources` and `jsonapi_links` methods provided by JR:
+Let's define the routes using the `jsonapi_resources` method provided by JR:
 
 ```ruby
 Rails.application.routes.draw do
@@ -343,7 +343,7 @@ end
 
 In controllers we just need to include the `JSONAPI::Utils` module.
 
-> Note: you may want to define some default rendering like the below example using `jsonapi_render_not_found` for when ActiveRecord doesn't find a record.
+> Note: some default rendering can be set like the below example where `jsonapi_render_not_found` is used when a record is not found in the database.
 
 ```ruby
 # app/controllers/base_controller.rb
@@ -354,7 +354,7 @@ class BaseController < ActionController::Base
 end
 ```
 
-Finally, having inhirited `JSONAPI::Utils` methods from the `BaseController` we could write our actions as the following:
+With the helper methods inhirited from `JSONAPI::Utils` in our `BaseController`, now it's all about to write our actions like the following:
 
 ```ruby
 # app/controllers/users_controller.rb
