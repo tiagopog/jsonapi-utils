@@ -283,12 +283,12 @@ JU brings helper methods as a shortcut to get values from permitted params based
 
 After installing the gem you simply need to:
 
-1. Include its module (`include JSONAPI::Utils`) in controller (eg. `BaseController`);
-2. Define the resources for your models;
-3. Define routes;
-4. Use JU's render/helper methods.
+1. Include the gem module (`include JSONAPI::Utils`) in a controller (eg. `BaseController`);
+2. Define the resources which will be exposed via REST API;
+3. Define the application's routes;
+4. Use JSONAPI Utils' helper methods (eg. renders, formatters, params helpers etc).
 
-Ok, it's time for a more complete example. Let's say we have a Rails application for a super simple blog:
+Ok, now it's time to start our complete example. So, let's say we have a Rails application for a super simple blog:
 
 ### Models
 
@@ -299,7 +299,7 @@ class User < ActiveRecord::Base
   validates :first_name, :last_name, presence: true
 end
 
-# app/models/user.rb
+# app/models/post.rb
 class Post < ActiveRecord::Base
   belongs_to :author, class_name: 'User', foreign_key: 'user_id'
   validates :title, :body, presence: true
@@ -337,7 +337,6 @@ Let's define the routes using the `jsonapi_resources` and `jsonapi_links` method
 Rails.application.routes.draw do
   jsonapi_resources :users do
     jsonapi_resources :posts
-    jsonapi_links :posts
   end
 end
 ```
