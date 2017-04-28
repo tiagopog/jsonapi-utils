@@ -22,7 +22,7 @@ module JSONAPI
         private
 
         def active_record_obj?(data)
-          data.is_a?(ActiveRecord::Base)|| data.singleton_class.include?(ActiveModel::Model)
+          defined?(ActiveRecord::Base) && (data.is_a?(ActiveRecord::Base) || data.singleton_class.include?(ActiveModel::Model))
         end
 
         def build_response_document(records, options)
