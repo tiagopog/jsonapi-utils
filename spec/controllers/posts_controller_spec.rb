@@ -237,7 +237,8 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
         expect(errors.dig(0, 'id')).to eq('title')
-        expect(errors.dig(0, 'title')).to eq('Title can\'t be blank')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('Title can\'t be blank')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/title')
       end
@@ -255,7 +256,8 @@ describe PostsController, type: :controller do
         expect(subject).to have_http_status :unprocessable_entity
 
         expect(errors.dig(0, 'id')).to eq('author')
-        expect(errors.dig(0, 'title')).to eq('Author can\'t be blank')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('Author can\'t be blank')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data/relationships/author')
       end
@@ -273,7 +275,8 @@ describe PostsController, type: :controller do
         expect(subject).to have_http_status :unprocessable_entity
 
         expect(errors.dig(0, 'id')).to eq('category')
-        expect(errors.dig(0, 'title')).to eq('Category can\'t be blank')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('Category can\'t be blank')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data/relationships/category')
       end
@@ -291,7 +294,8 @@ describe PostsController, type: :controller do
         expect(subject).to have_http_status :unprocessable_entity
 
         expect(errors.dig(0, 'id')).to eq('hidden_field')
-        expect(errors.dig(0, 'title')).to eq('Hidden field error was tripped')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('Hidden field error was tripped')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to be_nil
       end
@@ -318,7 +322,8 @@ describe PostsController, type: :controller do
         expect(subject).to have_http_status :unprocessable_entity
 
         expect(errors.dig(0, 'id')).to eq('content-type')
-        expect(errors.dig(0, 'title')).to eq('Content type can\'t be blank')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('Content type can\'t be blank')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/content-type')
       end
@@ -338,7 +343,8 @@ describe PostsController, type: :controller do
         expect { subject }.to change(Post, :count).by(0)
         expect(response).to have_http_status :unprocessable_entity
         expect(errors.dig(0, 'id')).to eq('title')
-        expect(errors.dig(0, 'title')).to eq('Заголовок не может быть пустым')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('Заголовок не может быть пустым')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/title')
       end
@@ -366,7 +372,8 @@ describe PostsController, type: :controller do
         expect(response).to have_http_status :unprocessable_entity
 
         expect(errors.dig(0, 'id')).to eq('base')
-        expect(errors.dig(0, 'title')).to eq('This is an error on the base')
+        expect(errors.dig(0, 'title')).to eq('Error')
+        expect(errors.dig(0, 'detail')).to eq('This is an error on the base')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source', 'pointer')).to eq('/data')
       end
