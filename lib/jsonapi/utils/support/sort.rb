@@ -43,9 +43,9 @@ module JSONAPI::Utils::Support
       @_sort_params ||=
         if params[:sort].present?
           params[:sort].split(',').each_with_object({}) do |field, hash|
-            unformatted_field = @request.unformat_key(field)
-            desc, field       = unformatted_field.to_s.match(/^([-_])?(\w+)$/i)[1..2]
-            hash[field]       = desc.present? ? :desc : :asc
+            unformatted_field  = @request.unformat_key(field)
+            desc, field        = unformatted_field.to_s.match(/^([-_])?(\w+)$/i)[1..2]
+            hash[field.to_sym] = desc.present? ? :desc : :asc
           end
         end
     end
