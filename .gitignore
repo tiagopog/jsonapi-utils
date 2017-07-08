@@ -21,3 +21,5 @@
 test_db
 Gemfile.lock
 
+.ruby-version
+.ruby-gemset

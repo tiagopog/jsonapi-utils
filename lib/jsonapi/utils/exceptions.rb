@@ -20,7 +20,8 @@ module JSONAPI
           object.errors.messages.flat_map do |key, messages|
             messages.map do |message|
               error_meta = error_base
-                .merge(title: title_member(key, message))
+                .merge(title: 'Error')
+                .merge(detail: title_member(key, message))
                 .merge(id: id_member(key))
                 .merge(source_member(key))
 

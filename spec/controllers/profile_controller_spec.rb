@@ -31,7 +31,8 @@ describe ProfileController, type: :controller do
       patch :update, params: body
       expect(response).to have_http_status :unprocessable_entity
       expect(errors.dig(0, 'id')).to eq('nickname')
-      expect(errors.dig(0, 'title')).to eq("Nickname can't be blank")
+      expect(errors.dig(0, 'title')).to eq('Error')
+      expect(errors.dig(0, 'detail')).to eq("Nickname can't be blank")
       expect(errors.dig(0, 'code')).to eq('100')
       expect(errors.dig(0, 'source', 'pointer')).to eq('/data/attributes/nickname')
     end
