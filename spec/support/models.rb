@@ -1,7 +1,23 @@
 require 'active_record'
 
+ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+
 # Tables
 ActiveRecord::Schema.define do
+  create_table :users do |t|
+    t.string   :first_name
+    t.string   :last_name
+    t.boolean  :admin
+    t.timestamps null: false
+  end
+
+  create_table :profiles, force: true do |t|
+    t.references :user, index: true, foreign_key: true
+    t.string   :nickname
+    t.string   :location
+    t.timestamps null: false
+  end
+
   create_table :categories, force: true do |t|
     t.string :title
     t.timestamps null: false
@@ -19,20 +35,6 @@ ActiveRecord::Schema.define do
 
   add_index :posts, :user_id
   add_index :posts, :category_id
-
-  create_table :users, force: true do |t|
-    t.string   :first_name
-    t.string   :last_name
-    t.boolean  :admin
-    t.timestamps null: false
-  end
-
-  create_table :profiles, force: true do |t|
-    t.references :user, index: true, foreign_key: true
-    t.string   :nickname
-    t.string   :location
-    t.timestamps null: false
-  end
 end
 
 # Models

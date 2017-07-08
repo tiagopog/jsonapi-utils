@@ -4,5 +4,8 @@ ru:
       post:
         title: "Заголовок"
     errors:
-      messages:
-        blank: "не может быть пустым"
+      models:
+        post:
+          attributes:
+            title:
+              blank: "не может быть пустым"

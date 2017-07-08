@@ -26,7 +26,7 @@ RSpec.configure do |config|
   end
 
   config.before(:all) do
-    %w(users posts).each do |table_name|
+    %w(posts categories profiles users).each do |table_name|
       ActiveRecord::Base.connection.execute("DELETE FROM #{table_name}; VACUUM;")
     end
   end
@@ -72,9 +72,12 @@ class TestApp < Rails::Application
   # Turn off millisecond precision to maintain Rails 4.0 and 4.1 compatibility in test results
   Rails::VERSION::MAJOR >= 4 && Rails::VERSION::MINOR >= 1 &&
     ActiveSupport::JSON::Encoding.time_precision = 0
-end
 
-TestApp.initialize!
+  I18n.enforce_available_locales = false
+  I18n.available_locales = [:en, :ru]
+  I18n.default_locale = :en
+  I18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+end
 
 Dir[Rails.root.join('support/shared/**/*.rb')].each { |f| require f }
 
