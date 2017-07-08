@@ -332,7 +332,7 @@ describe PostsController, type: :controller do
       end
 
       before { I18n.locale = :ru }
-      after { I18n.locale = :en }
+      after  { I18n.locale = :en }
 
       it 'renders a 422 response' do
         expect { subject }.to change(Post, :count).by(0)
