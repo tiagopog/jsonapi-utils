@@ -1,5 +1,3 @@
-require 'jsonapi/utils/version'
-
 module JSONAPI
   module Utils
     module Exceptions
@@ -19,12 +17,13 @@ module JSONAPI
         def errors
           object.errors.messages.flat_map do |key, messages|
             messages.map do |message|
-              error_meta = error_base
-                .merge(title: title_member(key, message))
-                .merge(id: id_member(key))
-                .merge(source_member(key))
-
-              JSONAPI::Error.new(error_meta)
+              error = error_base
+                .merge(
+                  id: id_member(key),
+                  title: message,
+                  detail: detail_member(key, message)
+                 ).merge(source_member(key))
+              JSONAPI::Error.new(error)
             end
           end
         end
@@ -71,7 +70,7 @@ module JSONAPI
           end
         end
 
-        def title_member(key, message)
+        def detail_member(key, message)
           if key == :base
             message
           else
