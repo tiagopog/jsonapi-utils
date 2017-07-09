@@ -419,12 +419,14 @@ describe UsersController, type: :controller do
         expect(response).to have_http_status :unprocessable_entity
 
         expect(errors.dig(0, 'id')).to eq('first_name')
-        expect(errors.dig(0, 'title')).to eq('First name can\'t be blank')
+        expect(errors.dig(0, 'title')).to eq('can\'t be blank')
+        expect(errors.dig(0, 'detail')).to eq('First name can\'t be blank')
         expect(errors.dig(0, 'code')).to eq('100')
         expect(errors.dig(0, 'source')).to be_nil
 
         expect(errors.dig(1, 'id')).to eq('last_name')
-        expect(errors.dig(1, 'title')).to eq('Last name can\'t be blank')
+        expect(errors.dig(1, 'title')).to eq('can\'t be blank')
+        expect(errors.dig(1, 'detail')).to eq('Last name can\'t be blank')
         expect(errors.dig(1, 'code')).to eq('100')
         expect(errors.dig(1, 'source')).to be_nil
       end
