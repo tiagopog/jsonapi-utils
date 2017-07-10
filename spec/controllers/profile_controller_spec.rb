@@ -30,7 +30,7 @@ describe ProfileController, type: :controller do
     it 'renders a 422 response' do
       patch :update, params: body
       expect(response).to have_http_status :unprocessable_entity
-      expect(errors.dig(0, 'id')).to eq('nickname')
+      expect(errors.dig(0, 'id')).to eq('nickname#blank')
       expect(errors.dig(0, 'title')).to eq("can't be blank")
       expect(errors.dig(0, 'detail')).to eq("Nickname can't be blank")
       expect(errors.dig(0, 'code')).to eq('100')

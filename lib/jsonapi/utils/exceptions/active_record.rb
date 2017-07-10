@@ -23,7 +23,8 @@ module JSONAPI
           @relationships      = resource_klass._relationships.values
           @relationship_names = @relationships.map(&:name).map(&:to_sym)
           @foreign_keys       = @relationships.map(&:foreign_key).map(&:to_sym)
-          @resource_key_for  = {}
+          @resource_key_for   = {}
+          @formatted_key      = {}
         end
 
         # Decorate errors from AR invalid objects.
@@ -35,7 +36,9 @@ module JSONAPI
         # @api public
         def errors
           object.errors.messages.flat_map do |field, messages|
-            messages.map { |message| build_error(field, message) }
+            messages.map.with_index do |message, index|
+              build_error(field, message, index)
+            end
           end
         end
 
@@ -49,13 +52,15 @@ module JSONAPI
         # @param message [String] Error message
         #   e.g.: "can't be blank"
         #
+        # @param index [Integer] Index of the error detail
+        #
         # @return [JSONAPI::Error]
         #
         # @api private
-        def build_error(field, message)
+        def build_error(field, message, index = 0)
           error = error_base
             .merge(
-              id: id_member(field),
+              id: id_member(field, index),
               title: message,
               detail: detail_member(field, message)
             ).merge(source_member(field))
@@ -63,10 +68,37 @@ module JSONAPI
         end
 
         # Build the "id" member value for the JSON API error object.
-        #  e.g.: for :first_name => :"first-name"
+        #   e.g.: for :first_name, :too_short => "first-name#too-short"
         #
         # @note The returned value depends on the key formatter type defined
-        #   via configuration: config.json_key_format = :dasherized_key
+        #   via configuration, e.g.: config.json_key_format = :dasherized_key
+        #
+        # @param field [Symbol] Name of the invalid field
+        #   e.g.: :first_name
+        #
+        # @param index [Integer] Index of the error detail
+        #
+        # @return [String]
+        #
+        # @api private
+        def id_member(field, index)
+          [
+            key_format(field),
+            key_format(
+              object.errors.details
+                .dig(field, index, :error)
+                .to_s.downcase
+                .split
+                .join('_')
+            )
+          ].join('#')
+        end
+
+        # Bring the formatted resource key for a given field.
+        #   e.g.: for :first_name => :"first-name"
+        #
+        # @note The returned value depends on the key formatter type defined
+        #   via configuration, e.g.: config.json_key_format = :dasherized_key
         #
         # @param field [Symbol] Name of the invalid field
         #   e.g.: :title
@@ -74,15 +106,15 @@ module JSONAPI
         # @return [Symbol]
         #
         # @api private
-        def id_member(field)
-          @id_member ||= JSONAPI.configuration
+        def key_format(field)
+          @formatted_key[field] ||= JSONAPI.configuration
             .key_formatter
             .format(resource_key_for(field))
             .to_sym
         end
 
         # Build the "source" member value for the JSON API error object.
-        #  e.g.: :title => "/data/attributes/title"
+        #   e.g.: :title => "/data/attributes/title"
         #
         # @param field [Symbol] Name of the invalid field
         #   e.g.: :title
@@ -93,7 +125,7 @@ module JSONAPI
         def source_member(field)
           resource_key = resource_key_for(field)
           return {} unless field == :base || resource.fetchable_fields.include?(resource_key)
-          id = id_member(field)
+          id = key_format(field)
 
           pointer =
             if field == :base                               then '/data'
@@ -105,7 +137,7 @@ module JSONAPI
         end
 
         # Build the "detail" member value for the JSON API error object.
-        #  e.g.: :first_name, "can't be blank" => "First name can't be blank"
+        #   e.g.: :first_name, "can't be blank" => "First name can't be blank"
         #
         # @param field [Symbol] Name of the invalid field
         #   e.g.: :first_name
@@ -120,7 +152,7 @@ module JSONAPI
         end
 
         # Return the resource's attribute or relationship key name for a given field name.
-        # e.g.: :title => :title, :user_id => :author
+        #   e.g.: :title => :title, :user_id => :author
         #
         # @param field [Symbol] Name of the invalid field
         #   e.g.: :title
@@ -136,7 +168,7 @@ module JSONAPI
         end
 
         # Turn the field name into human-friendly one.
-        # e.g.: :first_name => "First name"
+        #   e.g.: :first_name => "First name"
         #
         # @param field [Symbol] Name of the invalid field
         #   e.g.: :first_name

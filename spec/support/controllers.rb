@@ -99,7 +99,7 @@ class UsersController < BaseController
         { id: 'first_name', code: '100', title: 'can\'t be blank', detail: 'First name can\'t be blank' },
         { id: 'last_name', code: '100', title: 'can\'t be blank',  detail: 'Last name can\'t be blank' }
       ]
-      jsonapi_render_errors json: errors, status: :unprocessable_entity
+      jsonapi_render_errors json: errors
     end
   end
 

@@ -7,12 +7,11 @@ describe UsersController, type: :controller do
     @user = FactoryGirl.create_list(:user, 3, :with_posts).first
   end
 
-  let(:user) { @user }
-
   before(:each) do
     JSONAPI.configuration.json_key_format = :underscored_key
   end
 
+  let(:user)          { @user }
   let(:relationships) { UserResource._relationships.keys.map(&:to_s) }
   let(:fields)        { UserResource.fields.reject { |e| e == :id }.map(&:to_s) - relationships }
   let(:attributes)    { { first_name: 'Yehuda', last_name: 'Katz' } }
@@ -411,12 +410,12 @@ describe UsersController, type: :controller do
       it_behaves_like '400 response', admin: true
     end
 
-    context 'when validation fails' do
+    context 'with validation error and no status code set' do
       before { user_params.dig(:data, :attributes).merge!(first_name: nil, last_name: nil) }
 
-      it 'renders a 422 response' do
+      it 'renders a 400 response by default' do
         expect { post :create, params: user_params }.to change(User, :count).by(0)
-        expect(response).to have_http_status :unprocessable_entity
+        expect(response).to have_http_status :bad_request
 
         expect(errors.dig(0, 'id')).to eq('first_name')
         expect(errors.dig(0, 'title')).to eq('can\'t be blank')
