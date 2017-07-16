@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Tiago Guedes', 'Douglas André']
   spec.email         = ['tiagopog@gmail.com', 'douglas@beautydate.com.br']
 
-  spec.summary       = "JSON::Utils is a simple way to get a full-featured JSON API serialization for your controller's responses."
-  spec.description   = "A Rails way to get your API's data serialized through JSON API's specs (http://jsosapi.org)"
+  spec.summary       = "JSON::Utils is a simple way to get a full-featured JSON API on your Rails application."
+  spec.description   = "Build JSON API-compliant APIs on Rails with no (or less) learning curve."
   spec.homepage      = 'https://github.com/b2beauty/jsonapi-utils'
   spec.license       = 'MIT'
 
