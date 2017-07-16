@@ -18,6 +18,6 @@
 *.a
 *.gem
 .DS_Store
+.byebug_history
 test_db
 Gemfile.lock
-

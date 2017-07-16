@@ -45,7 +45,7 @@ class PostsController < BaseController
     if post.save
       jsonapi_render json: post, status: :created
     else
-      jsonapi_render_errors json: post, status: :unprocessable_entity
+      jsonapi_render_errors json: post
     end
   end
 
@@ -54,7 +54,7 @@ class PostsController < BaseController
     post = Post.find(params[:id])
     # Example of response rendering with error on base
     post.errors.add(:base, 'This is an error on the base')
-    jsonapi_render_errors json: post, status: :unprocessable_entity
+    jsonapi_render_errors json: post
   end
 
   private
@@ -96,11 +96,10 @@ class UsersController < BaseController
     else
       # Example of error rendering for Array of Hashes:
       errors = [
-        { id: 'first_name', title: 'First name can\'t be blank', code: '100' },
-        { id: 'last_name',  title: 'Last name can\'t be blank',  code: '100' }
+        { id: 'first_name', code: '100', title: 'can\'t be blank', detail: 'First name can\'t be blank' },
+        { id: 'last_name', code: '100', title: 'can\'t be blank',  detail: 'Last name can\'t be blank' }
       ]
-
-      jsonapi_render_errors json: errors, status: :unprocessable_entity
+      jsonapi_render_errors json: errors
     end
   end
 
@@ -139,6 +138,6 @@ class ProfileController < BaseController
   def update
     profile = Profile.new
     profile.valid?
-    jsonapi_render_errors json: profile, status: :unprocessable_entity
+    jsonapi_render_errors json: profile
   end
 end
