@@ -67,8 +67,8 @@ module JSONAPI
 
         def build_collection(records, options = {})
           records = apply_filter(records, options)
-          records = apply_pagination(records, options)
           records = apply_sort(records)
+          records = apply_pagination(records, options)          
           records.respond_to?(:to_ary) ? records.map { |record| turn_into_resource(record, options) } : []
         end
 
