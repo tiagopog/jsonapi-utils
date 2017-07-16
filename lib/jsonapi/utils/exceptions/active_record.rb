@@ -27,7 +27,7 @@ module JSONAPI
           @formatted_key      = {}
         end
 
-        # Decorate errors from AR invalid objects.
+        # Decorate errors for AR invalid objects.
         #
         # @note That's the method used by formatters to build the response's error body.
         #
