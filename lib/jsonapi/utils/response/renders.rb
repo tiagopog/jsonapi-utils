@@ -12,15 +12,15 @@ module JSONAPI
         # @param status [Integer, String, Symbol] HTTP status code
         #   e.g.: 201, '201', :created
         #
-        # @option options [JSONAPI::Resource] resource: it tells the render the resource
-        #   class that should be used rather than infered (default)
+        # @option options [JSONAPI::Resource] resource: it tells the render which resource
+        #   class to be used rather than use an infered one (default behaviour)
         #
         # @option options [ActiveRecord::Base] model: ActiveRecord model class to be instantiated
         #   when a Hash or Array of Hashes is passed to the "json" key argument
         #
-        # @option options [Integer] count: if it's rendering a collection of resource, the default
-        #   gem's counting method could be bypassed by the use of this options. It's used to show
-        #   the total records a request would retrieve and also to calculate the pagination.
+        # @option options [Integer] count: if it's rendering a collection of resources, the default
+        #   gem's counting method can be bypassed by the use of this options. It's shows then the total
+        #   records resulting from that request and also calculates the pagination.
         #
         # @return [String]
         #
