@@ -65,7 +65,7 @@ gem 'jsonapi-utils', '~> 0.4.9'
 For Rails 5:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.6.0.beta'
+gem 'jsonapi-utils', '~> 0.7.0'
 ```
 
 And then execute:
@@ -110,8 +110,8 @@ end
 
 Arguments:
 
-  - `json`: object to be rendered as a JSON document: ActiveRecord object, Hash or Array of Hashes;
-  - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered;
+  - `json`: object to be rendered as a JSON document: ActiveRecord object, Hash or Array<Hash>;
+  - `status`: HTTP status code (Integer, String or Symbol). If ommited a status code will be automatically infered;
   - `options`:
     - `resource`: explicitly points the resource to be used in the serialization. By default, JU will select resources by inferencing from controller's name.
     - `count`: explicitly points the total count of records for the request in order to build a proper pagination. By default, JU will count the total number of records.
@@ -155,8 +155,8 @@ It renders a JSON API-compliant error response.
 
 Arguments:
   - Exception
-  - `json`: object to be rendered as a JSON document: ActiveRecord, Exception, Array of Hashes or any object which implements the `errors` method;
-  - `status`: HTTP status code (Integer or Symbol). If ommited a status code will be automatically infered from the error body.
+  - `json`: object to be rendered as a JSON document: ActiveRecord, Exception, Array<Hash> or any object which implements the `errors` method;
+  - `status`: HTTP status code (Integer, String or Symbol). If ommited a status code will be automatically infered from the error body.
 
 Other examples:
 
@@ -164,7 +164,7 @@ Other examples:
 # Render errors from a custom exception:
 jsonapi_render_errors Exceptions::MyCustomError.new(user)
 
-# Render errors from an Array of Hashes:
+# Render errors from an Array<Hash>:
 errors = [{ id: 'validation', title: 'Something went wrong', code: '100' }]
 jsonapi_render_errors json: errors, status: :unprocessable_entity
 ```
@@ -188,7 +188,7 @@ end
 ```
 
 Arguments:
-  - First: ActiveRecord object, Hash or Array of Hashes;
+  - First: ActiveRecord object, Hash or Array<Hash>;
   - Last: Hash of options (same as `JSONAPI::Utils#jsonapi_render`).
 
 #### Paginators
