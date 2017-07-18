@@ -16,8 +16,9 @@ module JSONAPI
         #   class to be used rather than use an infered one (default behaviour)
         # 
         # @option options [JSONAPI::Resource] source_resource: it tells the render that this response is from a related resource
+        #   and the result should be interpreted as a related resources response
         #
-        # @option options [JSONAPI::Resource] relationship_type: it tells that the render which relationship the data is from
+        # @option options [String, Symbol] relationship_type: it tells that the render which relationship the data is from
         #
         # @option options [ActiveRecord::Base] model: ActiveRecord model class to be instantiated
         #   when a Hash or Array of Hashes is passed to the "json" key argument

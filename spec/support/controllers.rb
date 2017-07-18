@@ -49,6 +49,23 @@ class PostsController < BaseController
     end
   end
 
+  # GET /users/:user_id/posts
+  def get_related_resources
+    if params[:source] == "users" && params[:relationship] == "posts"
+      # Example for custom method to fetch related resources
+      @user = User.find(params[:user_id])
+      @posts = @user.posts
+
+      jsonapi_render json: @posts, options: {
+        source_resource: UserResource.new(@user, context),
+        relationship_type: :posts
+      }
+    else
+      # handle other requests with default method
+      process_request
+    end
+  end
+
   # PATCH /posts/:id
   def update_with_error_on_base
     post = Post.find(params[:id])

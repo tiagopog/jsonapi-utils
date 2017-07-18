@@ -15,6 +15,11 @@ module JSONAPI
         # @option options [JSONAPI::Resource] resource: it tells the formatter which resource
         #   class to be used rather than use an infered one (default behaviour)
         #
+        # @option options [JSONAPI::Resource] source_resource: it tells the formatter that this response is from a related resource
+        #   and the result should be interpreted as a related resources response
+        #
+        # @option options [String, Symbol] relationship_type: it tells that the formatter which relationship the data is from
+        #
         # @option options [ActiveRecord::Base] model: ActiveRecord model class to be instantiated
         #   when a Hash or Array of Hashes is passed as the "object" argument
         #
@@ -83,6 +88,11 @@ module JSONAPI
         #
         # @option options [JSONAPI::Resource] resource: it tells the builder which resource
         #   class to be used rather than use an infered one (default behaviour)
+        #
+        # @option options [JSONAPI::Resource] source_resource: it tells the builder that this response is from a related resource
+        #   and the result should be interpreted as a related resources response
+        #
+        # @option options [String, Symbol] relationship_type: it tells that the builder which relationship the data is from
         #
         # @option options [Integer] count: if it's rendering a collection of resources, the default
         #   gem's counting method can be bypassed by the use of this options. It's shows then the total

@@ -103,6 +103,7 @@ TestApp.routes.draw do
 
   patch :update_with_error_on_base, to: 'posts#update_with_error_on_base'
 
+  get :get_related_resources, to: 'posts#get_related_resources'
   get :index_with_hash, to: 'posts#index_with_hash'
   get :show_with_hash,  to: 'posts#show_with_hash'
 end

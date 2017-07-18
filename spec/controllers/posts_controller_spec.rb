@@ -351,6 +351,21 @@ describe PostsController, type: :controller do
     end
   end
 
+  describe 'GET #related_resource' do
+    subject { 
+      get :get_related_resources, params: params
+    }
+
+    let (:params) { { source: "users", user_id: parent_id, relationship: "posts" } }
+
+    it 'loads all posts of a user' do
+      expect(subject).to have_http_status :ok
+      expect(subject).to have_primary_data('posts')
+      expect(subject).to have_data_attributes(fields)
+      expect(subject).to have_relationships(relationships)
+    end
+  end
+
   describe 'PATCH #update' do
     shared_context 'update request' do |action:|
       subject { patch action, params: params.merge(body) }
