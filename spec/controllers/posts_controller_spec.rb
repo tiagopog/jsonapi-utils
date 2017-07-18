@@ -363,6 +363,10 @@ describe PostsController, type: :controller do
       expect(subject).to have_primary_data('posts')
       expect(subject).to have_data_attributes(fields)
       expect(subject).to have_relationships(relationships)
+      
+      # it should use nested url
+      expect(json.dig('links', 'first')).to include("/users/#{parent_id}/posts")
+      expect(json.dig('links', 'last')).to include("/users/#{parent_id}/posts")
     end
   end
 
