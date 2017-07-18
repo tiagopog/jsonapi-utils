@@ -98,7 +98,7 @@ module JSONAPI
             records = build_collection(object, options)
 
             if options[:source_resource].present? && options[:relationship_type].present?
-              result.add_result(JSONAPI::RelatedResourcesOperationResult.new(:ok,
+              results.add_result(JSONAPI::RelatedResourcesOperationResult.new(:ok,
                                                           options[:source_resource],
                                                           options[:relationship_type],
                                                           records,
