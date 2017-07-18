@@ -96,9 +96,18 @@ module JSONAPI
 
           if object.respond_to?(:to_ary)
             records = build_collection(object, options)
-            results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, records, result_options(object, options)))
+
+            if options[:source_resource].present? && options[:relationship_type].present?
+              result.add_result(JSONAPI::RelatedResourcesOperationResult.new(:ok,
+                                                          options[:source_resource],
+                                                          options[:relationship_type],
+                                                          records,
+                                                          result_options(object, options)))
+            else
+              results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, records, result_options(object, options)))
+            end
           else
-            record = turn_into_resource(object, options)
+            record = turn_into_resource(object, options)         
             results.add_result(JSONAPI::ResourceOperationResult.new(:ok, record))
           end
 
