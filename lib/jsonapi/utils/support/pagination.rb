@@ -139,6 +139,16 @@ module JSONAPI
             records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
           end
         end
+
+        def count_pages(records, options)
+          record_count = count_records(records, options)
+
+          case JSONAPI.configuration.default_paginator
+          when :paged
+            size = page_params['size'].to_i.nonzero? || JSONAPI.configuration.default_page_size
+            (record_count.to_f / size).ceil
+          end
+        end
       end
     end
   end

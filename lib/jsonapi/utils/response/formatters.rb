@@ -194,6 +194,10 @@ module JSONAPI
             if JSONAPI.configuration.top_level_meta_include_record_count
               data[:record_count] = count_records(records, options)
             end
+
+            if JSONAPI.configuration.top_level_meta_include_page_count
+              data[:page_count] = count_pages(records, options)
+            end
           end
         end
 
