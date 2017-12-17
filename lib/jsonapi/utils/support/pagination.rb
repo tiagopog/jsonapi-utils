@@ -2,6 +2,8 @@ module JSONAPI
   module Utils
     module Support
       module Pagination
+        RecordCountError = Class.new(ArgumentError)
+
         # Apply proper pagination to the records.
         #
         # @param records [ActiveRecord::Relation, Array] collection of records
@@ -130,14 +132,34 @@ module JSONAPI
         #
         # @api private
         def count_records(records, options)
-          if options[:count].present?
-            options[:count]
-          elsif records.is_a?(Array)
-            records.length
-          else
-            records = apply_filter(records, options) if params[:filter].present?
-            records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
+          return options[:count].to_i if options[:count].is_a?(Numeric)
+
+          case records
+          when ActiveRecord::Relation then count_records_from_database(records, options)
+          when Array                  then records.length
+          else raise RecordCountError, "Can't count records with the given options"
           end
+        end
+
+        # Count records from the datatase applying the given request filters
+        # and skipping things like eager loading, grouping and sorting.
+        #
+        # @param records [ActiveRecord::Relation, Array] collection of records
+        #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
+        #
+        # @param options [Hash] JU's options
+        #   e.g.: { resource: V2::UserResource, count: 100 }
+        #
+        # @return [Integer]
+        #   e.g.: 42
+        #
+        # @api private
+        def count_records_from_database(records, options)
+          records = apply_filter(records, options) if params[:filter].present?
+          count   = -> (records, except: []) { records.except(*except).distinct.count }
+          count.(records, except: %i(includes group order))
+        rescue ActiveRecord::StatementInvalid
+          count.(records, except: %i(group order))
         end
       end
     end
