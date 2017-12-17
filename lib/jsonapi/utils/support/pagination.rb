@@ -35,7 +35,23 @@ module JSONAPI
         # @api public
         def pagination_params(records, options)
           return {} unless JSONAPI.configuration.top_level_links_include_pagination
-          paginator.links_page_params(record_count: count_records(records, options))
+          paginator.links_page_params(record_count: record_count_for(records, options))
+        end
+
+        # Apply memoization to the record count result avoiding then duplicate counts.
+        #
+        # @param records [ActiveRecord::Relation, Array] collection of records
+        #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
+        #
+        # @param options [Hash] JU's options
+        #   e.g.: { resource: V2::UserResource, count: 100 }
+        #
+        # @return [Integer]
+        #   e.g.: 42
+        #
+        # @api public
+        def record_count_for(records, options)
+          @record_count ||= count_records(records, options)
         end
 
         private
