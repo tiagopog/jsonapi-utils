@@ -172,10 +172,16 @@ module JSONAPI
         # @api private
         def count_records_from_database(records, options)
           records = apply_filter(records, options) if params[:filter].present?
-          count   = -> (records, except: []) { records.except(*except).distinct.count }
+          count   = -> (records, except: []) do
+            records.except(*except).count(distinct_count_sql(records))
+          end
           count.(records, except: %i(includes group order))
         rescue ActiveRecord::StatementInvalid
           count.(records, except: %i(group order))
+        end
+
+        def distinct_count_sql(records)
+          "DISTINCT #{records.table_name}.#{records.primary_key}"
         end
       end
     end
