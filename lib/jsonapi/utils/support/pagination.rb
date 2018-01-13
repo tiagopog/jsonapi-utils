@@ -38,7 +38,7 @@ module JSONAPI
           paginator.links_page_params(record_count: record_count_for(records, options))
         end
 
-        # Apply memoization to the record count result avoiding then duplicate counts.
+        # Apply memoization to the record count result avoiding duplicate counts.
         #
         # @param records [ActiveRecord::Relation, Array] collection of records
         #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
@@ -172,7 +172,7 @@ module JSONAPI
         # @api private
         def count_records_from_database(records, options)
           records = apply_filter(records, options) if params[:filter].present?
-          count   = -> (records, except: []) do
+          count   = -> (records, except:) do
             records.except(*except).count(distinct_count_sql(records))
           end
           count.(records, except: %i(includes group order))
@@ -180,6 +180,15 @@ module JSONAPI
           count.(records, except: %i(group order))
         end
 
+        # Build the SQL distinct count with some reflection on the "records" object.
+        #
+        # @param records [ActiveRecord::Relation] collection of records
+        #   e.g.: User.all
+        #
+        # @return [String]
+        #   e.g.: "DISTINCT users.id"
+        #
+        # @api private
         def distinct_count_sql(records)
           "DISTINCT #{records.table_name}.#{records.primary_key}"
         end
