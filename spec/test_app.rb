@@ -56,8 +56,6 @@ class TestApp < Rails::Application
   I18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 end
 
-Dir[Rails.root.join('support/shared/**/*.rb')].each { |f| require f }
-
 ##
 # Routes
 ##
