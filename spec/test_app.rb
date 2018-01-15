@@ -2,14 +2,6 @@
 # General configs
 ##
 
-RSpec.configure do |config|
-  config.before(:all) do
-    %w[posts categories profiles users].each do |table_name|
-      ActiveRecord::Base.connection.execute("DELETE FROM #{table_name}; VACUUM;")
-    end
-  end
-end
-
 JSONAPI.configure do |config|
   config.json_key_format = :underscored_key
 
@@ -31,7 +23,6 @@ end
 ##
 
 Rails.env = 'test'
-puts "Rails version: #{Rails.version}"
 
 class TestApp < Rails::Application
   config.eager_load = false
@@ -60,18 +51,22 @@ end
 # Routes
 ##
 
-JSONAPI.configuration.route_format = :dasherized_route
+def TestApp.draw_app_routes
+  JSONAPI.configuration.route_format = :dasherized_route
 
-TestApp.routes.draw do
-  jsonapi_resources :users do
-    jsonapi_links :profile
-    jsonapi_resources :posts, shallow: true
+  TestApp.routes.draw do
+    jsonapi_resources :users do
+      jsonapi_links :profile
+      jsonapi_resources :posts, shallow: true
+    end
+
+    jsonapi_resource :profile
+
+    patch :update_with_error_on_base, to: 'posts#update_with_error_on_base'
+
+    get :index_with_hash, to: 'posts#index_with_hash'
+    get :show_with_hash,  to: 'posts#show_with_hash'
   end
-
-  jsonapi_resource :profile
-
-  patch :update_with_error_on_base, to: 'posts#update_with_error_on_base'
-
-  get :index_with_hash, to: 'posts#index_with_hash'
-  get :show_with_hash,  to: 'posts#show_with_hash'
 end
+
+puts "\nRunning Rails #{Rails.version} on #{Rails.env} environment"

@@ -17,3 +17,14 @@ require 'support/shared/jsonapi_errors'
 require 'support/shared/jsonapi_request'
 
 require 'test_app'
+
+RSpec.configure do |config|
+  config.before(:all) do
+    TestApp.draw_app_routes
+
+    %w[posts categories profiles users].each do |table_name|
+      ActiveRecord::Base.connection.execute("DELETE FROM #{table_name}; VACUUM;")
+    end
+  end
+end
+

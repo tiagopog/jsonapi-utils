@@ -33,13 +33,17 @@ class RecordCountTestController < BaseController
 end
 
 # Routes
-TestApp.routes.draw do
-  controller :record_count_test do
-    get :explicit_count
-    get :array_count
-    get :active_record_count
-    get :active_record_count_with_eager_load
-    get :active_record_count_with_eager_load_and_where_clause
+def TestApp.draw_record_count_test_routes
+  JSONAPI.configuration.json_key_format = :underscored_key
+
+  TestApp.routes.draw do
+    controller :record_count_test do
+      get :explicit_count
+      get :array_count
+      get :active_record_count
+      get :active_record_count_with_eager_load
+      get :active_record_count_with_eager_load_and_where_clause
+    end
   end
 end
 
@@ -51,7 +55,7 @@ describe RecordCountTestController, type: :controller do
   include_context 'JSON API headers'
 
   before(:all) do
-    JSONAPI.configuration.json_key_format = :underscored_key
+    TestApp.draw_record_count_test_routes
     FactoryGirl.create_list(:user, 3, :with_posts)
   end
 
