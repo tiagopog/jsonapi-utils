@@ -192,6 +192,16 @@ module JSONAPI
         def distinct_count_sql(records)
           "DISTINCT #{records.table_name}.#{records.primary_key}"
         end
+
+        def count_pages(records, options)
+          record_count = count_records(records, options)
+
+          case JSONAPI.configuration.default_paginator
+          when :paged
+            size = page_params['size'].to_i.nonzero? || JSONAPI.configuration.default_page_size
+            (record_count.to_f / size).ceil
+          end
+        end
       end
     end
   end
