@@ -157,6 +157,23 @@ module JSONAPI
           end
         end
 
+        # Count pages in order to build a proper pagination and to fill up the "page_count" response's member.
+        #
+        # @param record_count [Integer] number of records
+        #   e.g.: 42
+        #
+        # @return [Integer]
+        #   e.g 5
+        #
+        # @api private
+        def page_count_for(record_count)
+          return 0 if record_count.to_i < 1
+
+          size = page_params['size'] || page_params['limit']
+          size = JSONAPI.configuration.default_page_size unless size.to_i.nonzero?
+          (record_count.to_f / size.to_i).ceil
+        end
+
         # Count records from the datatase applying the given request filters
         # and skipping things like eager loading, grouping and sorting.
         #
