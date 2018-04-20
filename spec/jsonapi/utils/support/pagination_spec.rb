@@ -77,6 +77,43 @@ describe JSONAPI::Utils::Support::Pagination do
     end
   end
 
+  describe '#count_pages_for' do
+    shared_examples_for 'counting pages' do
+      it 'returns the correct page count' do
+        allow(subject).to receive(:page_params).and_return(page_params)
+        expect(subject.send(:page_count_for, record_count)).to eq(page_count)
+      end
+    end
+
+    context 'with paged paginator' do
+      let(:record_count) { 10 }
+      let(:page_count) { 2 }
+      let(:page_params) { { 'size' => 5 } }
+      it_behaves_like 'counting pages'
+    end
+
+    context 'with offset paginator' do
+      let(:record_count) { 10 }
+      let(:page_count) { 2 }
+      let(:page_params) { { 'limit' => 5 } }
+      it_behaves_like 'counting pages'
+    end
+
+    context 'with 0 records'  do
+      let(:record_count) { 0 }
+      let(:page_count) { 0 }
+      let(:page_params) { {} }
+      it_behaves_like 'counting pages'
+    end
+
+    context 'with no limit param' do
+      let(:record_count) { 10 }
+      let(:page_count) { 1 }
+      let(:page_params) { {} }
+      it_behaves_like 'counting pages'
+    end
+  end
+
   describe '#count_records_from_database' do
     shared_examples_for 'skipping eager load SQL when counting records' do
       it 'skips any eager load for the SQL count query (default)' do
