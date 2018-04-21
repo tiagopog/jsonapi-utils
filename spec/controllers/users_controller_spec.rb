@@ -113,6 +113,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(2)
             expect(response).to have_meta_record_count(3)
 
+            expect(json.dig('meta', 'page_count')).to eq(2)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'next')).to be_present
             expect(json.dig('links', 'last')).to be_present
@@ -128,6 +129,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(3)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'prev')).to be_present
             expect(json.dig('links', 'next')).to be_present
@@ -144,6 +146,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(3)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'prev')).to be_present
             expect(json.dig('links', 'last')).to be_present
@@ -162,6 +165,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(count)
 
+            expect(json.dig('meta', 'page_count')).to eq(1)
             expect(data.dig(0, 'attributes', 'full_name')).to eq(user.full_name)
           end
         end
@@ -172,6 +176,7 @@ describe UsersController, type: :controller do
             expect(response).to have_http_status :ok
             expect(data.size).to be <= JSONAPI.configuration.default_page_size
             expect(response).to have_meta_record_count(User.count)
+            expect(json.dig('meta', 'page_count')).to eq(1)
           end
         end
       end
@@ -190,6 +195,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(2)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(2)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'next')).to be_present
             expect(json.dig('links', 'last')).to be_present
@@ -205,6 +211,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(3)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'prev')).to be_present
             expect(json.dig('links', 'next')).to be_present
@@ -221,6 +228,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(3)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'prev')).to be_present
             expect(json.dig('links', 'last')).to be_present
@@ -233,6 +241,7 @@ describe UsersController, type: :controller do
             expect(response).to have_http_status :ok
             expect(data.size).to be <= JSONAPI.configuration.default_page_size
             expect(response).to have_meta_record_count(User.count)
+            expect(json.dig('meta', 'page_count')).to eq(1)
           end
         end
       end
@@ -251,6 +260,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(2)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(2)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'next')).to be_present
             expect(json.dig('links', 'last')).to be_present
@@ -266,6 +276,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(3)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'prev')).to be_present
             expect(json.dig('links', 'next')).to be_present
@@ -282,6 +293,7 @@ describe UsersController, type: :controller do
             expect(data.size).to eq(1)
             expect(response).to have_meta_record_count(User.count)
 
+            expect(json.dig('meta', 'page_count')).to eq(3)
             expect(json.dig('links', 'first')).to be_present
             expect(json.dig('links', 'prev')).to be_present
             expect(json.dig('links', 'last')).to be_present
@@ -294,6 +306,7 @@ describe UsersController, type: :controller do
             expect(response).to have_http_status :ok
             expect(data.size).to be <= JSONAPI.configuration.default_page_size
             expect(response).to have_meta_record_count(User.count)
+            expect(json.dig('meta', 'page_count')).to eq(1)
           end
         end
       end
