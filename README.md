@@ -65,7 +65,7 @@ gem 'jsonapi-utils', '~> 0.4.9'
 For Rails 5:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.7.0'
+gem 'jsonapi-utils', '~> 0.7.2'
 ```
 
 And then execute:
