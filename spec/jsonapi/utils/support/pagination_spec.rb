@@ -20,7 +20,7 @@ describe JSONAPI::Utils::Support::Pagination do
       let(:records) { User.all.to_a }
 
       it 'applies memoization on the record count' do
-        expect(records).to receive(:length).and_return(records.length).once
+        expect(records).to receive(:count).and_return(records.count).once
         2.times { subject.record_count_for(records, options) }
       end
     end
@@ -55,7 +55,7 @@ describe JSONAPI::Utils::Support::Pagination do
 
     context 'with array' do
       let(:records) { User.all.to_a }
-      let(:count)   { records.length }
+      let(:count)   { records.count }
       it_behaves_like 'counting records'
     end
 
@@ -113,8 +113,13 @@ describe JSONAPI::Utils::Support::Pagination do
       it_behaves_like 'counting pages'
     end
   end
+end
 
-  describe '#count_records_from_database' do
+describe JSONAPI::Utils::Support::Pagination::RecordCounter::ActiveRecordCounter do
+  let(:options) { {} }
+
+  subject { described_class.new( records, options ) }
+  describe '#count' do
     shared_examples_for 'skipping eager load SQL when counting records' do
       it 'skips any eager load for the SQL count query (default)' do
         expect(records).to receive(:except)
@@ -126,7 +131,7 @@ describe JSONAPI::Utils::Support::Pagination do
           .and_return(User.all)
           .exactly(0)
           .times
-        subject.send(:count_records_from_database, records, options)
+        subject.send(:count)
       end
     end
 
@@ -152,7 +157,7 @@ describe JSONAPI::Utils::Support::Pagination do
           .with(:group, :order)
           .and_return(User.all)
           .once
-        subject.send(:count_records_from_database, records, options)
+        subject.send(:count)
       end
     end
   end
@@ -162,6 +167,27 @@ describe JSONAPI::Utils::Support::Pagination do
 
     it 'builds the distinct count SQL query' do
       expect(subject.send(:distinct_count_sql, records)).to eq('DISTINCT foos.id')
+    end
+  end
+end
+
+describe JSONAPI::Utils::Support::Pagination::RecordCounter do
+
+  describe '#add' do
+    context 'when adding an unusable counter type' do
+      it "doesn't explode" do
+        expect{ described_class.add( BogusCounter ) }.to_not raise_error( )
+      end
+    end
+
+    context 'when adding good counter type' do
+      subject { described_class.add( StringCounter ) }
+      it 'should add it' do
+        expect{ subject }.to_not( raise_error )
+      end
+      it 'should count' do
+        expect( described_class.send( :count, "lol" ) ).to eq( 3 )
+      end
     end
   end
 end

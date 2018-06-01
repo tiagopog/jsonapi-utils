@@ -150,11 +150,9 @@ module JSONAPI
         def count_records(records, options)
           return options[:count].to_i if options[:count].is_a?(Numeric)
 
-          case records
-          when ActiveRecord::Relation then count_records_from_database(records, options)
-          when Array                  then records.length
-          else raise RecordCountError, "Can't count records with the given options"
-          end
+          records = apply_filter(records, options) if params[:filter].present?
+
+          RecordCounter.count( records, options )
         end
 
         # Count pages in order to build a proper pagination and to fill up the "page_count" response's member.
@@ -170,44 +168,97 @@ module JSONAPI
           return 0 if record_count.to_i < 1
 
           size = (page_params['size'] || page_params['limit']).to_i
-          size = JSONAPI.configuration.default_page_size unless size.nonzero?
+          size = JSONAPI.configuration.default_page_size if size.zero?
           (record_count.to_f / size).ceil
         end
 
-        # Count records from the datatase applying the given request filters
-        # and skipping things like eager loading, grouping and sorting.
-        #
-        # @param records [ActiveRecord::Relation, Array] collection of records
-        #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
-        #
-        # @param options [Hash] JU's options
-        #   e.g.: { resource: V2::UserResource, count: 100 }
-        #
-        # @return [Integer]
-        #   e.g.: 42
-        #
-        # @api private
-        def count_records_from_database(records, options)
-          records = apply_filter(records, options) if params[:filter].present?
-          count   = -> (records, except:) do
-            records.except(*except).count(distinct_count_sql(records))
-          end
-          count.(records, except: %i(includes group order))
-        rescue ActiveRecord::StatementInvalid
-          count.(records, except: %i(group order))
-        end
+        module RecordCounter
+          @counter_mappings = {}
 
-        # Build the SQL distinct count with some reflection on the "records" object.
-        #
-        # @param records [ActiveRecord::Relation] collection of records
-        #   e.g.: User.all
-        #
-        # @return [String]
-        #   e.g.: "DISTINCT users.id"
-        #
-        # @api private
-        def distinct_count_sql(records)
-          "DISTINCT #{records.table_name}.#{records.primary_key}"
+          class << self
+
+            def add(counter_class)
+              @counter_mappings ||= {}
+              @counter_mappings[counter_class.type] = counter_class
+            end
+
+            def count(records, options = {})
+              @counter_mappings.each do |counted_class, counter_class|
+                if records.is_a? counted_class
+                  return counter_class.new(records, options).count
+                end
+              end
+
+              raise RecordCountError, "Can't count records with the given options"
+            end
+          end
+
+          class BaseCounter
+            attr_accessor :records, :options
+
+            def initialize(records, options = {})
+              @records = records
+              @options = options
+            end
+
+            class << self
+
+              attr_accessor :type
+
+              def counts(type)
+                self.type = type.camelize.constantize
+                RecordCounter.add self
+              rescue NameError
+                Rails.logger.warn "Unable to register #{self}: uninitialized constant #{type.camelize}" if Rails.logger.present?
+              end
+            end
+          end
+
+          class ArrayCounter < BaseCounter
+            counts "array"
+
+            delegate :count, to: :records
+          end
+
+
+          class ActiveRecordCounter < BaseCounter
+            counts "active_record/relation"
+
+            # Count records from the datatase applying the given request filters
+            # and skipping things like eager loading, grouping and sorting.
+            #
+            # @records [ActiveRecord::Relation, Array] collection of records
+            #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
+            #
+            # @options [Hash] JU's options
+            #   e.g.: { resource: V2::UserResource, count: 100 }
+            #
+            # @return [Integer]
+            #   e.g.: 42
+            #
+            # @api private
+            def count
+              count   = -> (records, except:) do
+                records.except(*except).count(distinct_count_sql(records))
+              end
+              count.(@records, except: %i(includes group order))
+            rescue ActiveRecord::StatementInvalid
+              count.(@records, except: %i(group order))
+            end
+
+            # Build the SQL distinct count with some reflection on the "records" object.
+            #
+            # @param records [ActiveRecord::Relation] collection of records
+            #   e.g.: User.all
+            #
+            # @return [String]
+            #   e.g.: "DISTINCT users.id"
+            #
+            # @api private
+            def distinct_count_sql(records)
+              "DISTINCT #{records.table_name}.#{records.primary_key}"
+            end
+          end
         end
       end
     end

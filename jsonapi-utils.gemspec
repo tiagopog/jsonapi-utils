@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'smart_rspec', '~> 0.1.6'
   spec.add_development_dependency 'pry', '~> 0.10.3'
   spec.add_development_dependency 'pry-byebug'
+  spec.add_development_dependency 'simplecov'
 end

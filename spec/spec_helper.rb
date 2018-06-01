@@ -1,6 +1,8 @@
 require 'smart_rspec'
 require 'factory_girl'
 require 'support/helpers'
+require 'simplecov'
+SimpleCov.start
 
 RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
