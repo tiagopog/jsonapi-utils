@@ -150,9 +150,7 @@ module JSONAPI
         def count_records(records, options)
           return options[:count].to_i if options[:count].is_a?(Numeric)
 
-          records = apply_filter(records, options) if params[:filter].present?
-
-          RecordCounter.count( records, options )
+          RecordCounter.count( records, params, options )
         end
 
         # Count pages in order to build a proper pagination and to fill up the "page_count" response's member.
@@ -182,7 +180,7 @@ module JSONAPI
               @counter_mappings[counter_class.type] = counter_class
             end
 
-            def count(records, options = {})
+            def count(records, params = {}, options = {})
               @counter_mappings.each do |counted_class, counter_class|
                 if records.is_a? counted_class
                   return counter_class.new(records, options).count
@@ -194,10 +192,11 @@ module JSONAPI
           end
 
           class BaseCounter
-            attr_accessor :records, :options
+            attr_accessor :records, :params, :options
 
-            def initialize(records, options = {})
+            def initialize(records, params = {}, options = {})
               @records = records
+              @params  = params
               @options = options
             end
 
@@ -238,6 +237,7 @@ module JSONAPI
             #
             # @api private
             def count
+              @records = apply_filter(records, options) if params[:filter].present?
               count   = -> (records, except:) do
                 records.except(*except).count(distinct_count_sql(records))
               end
