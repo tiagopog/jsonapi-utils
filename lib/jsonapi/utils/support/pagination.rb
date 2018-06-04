@@ -150,6 +150,7 @@ module JSONAPI
         def count_records(records, options)
           return options[:count].to_i if options[:count].is_a?(Numeric)
 
+          records = apply_filter(records, options) if params[:filter].present?
           RecordCounter.count( records, params, options )
         end
 
@@ -237,7 +238,6 @@ module JSONAPI
             #
             # @api private
             def count
-              @records = apply_filter(records, options) if params[:filter].present?
               count   = -> (records, except:) do
                 records.except(*except).count(distinct_count_sql(records))
               end
