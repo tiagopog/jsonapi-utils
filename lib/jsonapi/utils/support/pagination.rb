@@ -172,18 +172,44 @@ module JSONAPI
         end
 
         module RecordCounter
+          # mapping of record collenction types to classes responsible for counting them
+          #
+          # @api private
           @counter_mappings = {}
 
           class << self
 
+            # Add a new counter class to the mappings hash
+            #
+            # @param counter_class [ < BaseCounter] class to register with RecordCounter
+            #   e.g.: ActiveRecordCounter
+            #
+            # @api public
             def add(counter_class)
               @counter_mappings ||= {}
               @counter_mappings[counter_class.type] = counter_class
             end
 
+            # Execute the appropriate counting call for a collection with controller params and opts
+            #
+            # @param records [ActiveRecord::Relation, Array] collection of records
+            #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
+            #
+            # @param params [Hash] Rails params
+            #
+            # @param options [Hash] JU's options
+            #   e.g.: { resource: V2::UserResource, count: 100 }
+            #
+            # @return [Integer]
+            #   e.g.: 42
+            #
+            #@api public
             def count(records, params = {}, options = {})
+              # Go through the counter types to see if there's a counter class that
+              #   knows how to handle the current record set type
               @counter_mappings.each do |counted_class, counter_class|
                 if records.is_a? counted_class
+                  # counter class found; execute the call
                   return counter_class.new(records, options).count
                 end
               end
@@ -205,6 +231,15 @@ module JSONAPI
 
               attr_accessor :type
 
+
+              # Register the class with RecordCounter to let it know that this class
+              # is responsible for counting the type
+              #
+              # @param @type: [String] snake_cased modultarized name of the record type the
+              #     counter class is responsible for handling
+              #   e.g.: 'arcive_record/relation'
+              #
+              # @api public
               def counts(type)
                 self.type = type.camelize.constantize
                 RecordCounter.add self
@@ -227,16 +262,16 @@ module JSONAPI
             # Count records from the datatase applying the given request filters
             # and skipping things like eager loading, grouping and sorting.
             #
-            # @records [ActiveRecord::Relation, Array] collection of records
+            # @param records [ActiveRecord::Relation, Array] collection of records
             #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
             #
-            # @options [Hash] JU's options
+            # @param options [Hash] JU's options
             #   e.g.: { resource: V2::UserResource, count: 100 }
             #
             # @return [Integer]
             #   e.g.: 42
             #
-            # @api private
+            # @api public
             def count
               count   = -> (records, except:) do
                 records.except(*except).count(distinct_count_sql(records))
