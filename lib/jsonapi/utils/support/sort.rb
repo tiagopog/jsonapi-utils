@@ -16,6 +16,8 @@ module JSONAPI::Utils::Support
         records.sort { |a, b| comp = 0; eval(sort_criteria) }
       elsif records.respond_to?(:order)
         records.order(sort_params)
+      else
+        records
       end
     end
 
