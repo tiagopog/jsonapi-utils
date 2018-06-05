@@ -73,6 +73,7 @@ module JSONAPI
               # @api public
               def counts(type)
                 self.type = type.camelize.constantize
+                Rails.logger.info "Registered #{self} to count #{type.camelize}" if Rails.logger.present?
                 RecordCounter.add self
               rescue NameError
                 Rails.logger.warn "Unable to register #{self}: uninitialized constant #{type.camelize}" if Rails.logger.present?
