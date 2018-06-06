@@ -18,3 +18,19 @@ class StringCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCo
     @records.length
   end
 end
+
+class HashParamCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCounter
+  counts "Hash"
+
+  def count
+    @params
+  end
+end
+
+class HashOptionsCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCounter
+  counts "Hash"
+
+  def count
+    @options
+  end
+end

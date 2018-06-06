@@ -41,7 +41,7 @@ module JSONAPI
               @counter_mappings.each do |counted_class, counter_class|
                 if records.is_a? counted_class
                   # counter class found; execute the call
-                  return counter_class.new(records, options).count
+                  return counter_class.new(records, params, options).count
                 end
               end
 

@@ -190,4 +190,22 @@ describe JSONAPI::Utils::Support::Pagination::RecordCounter do
       end
     end
   end
+  describe "#count" do
+    context "when params are present" do
+      let( :params ){ { a: :b } }
+      it "passes them into the counters" do
+        described_class.add HashParamCounter
+
+        expect( described_class.send( :count, {}, params, {} ) ).to eq( { a: :b } )
+      end
+    end
+    context "when options are present" do
+      let( :options ) { { a: :b } }
+      it "passes them into the counters" do
+        described_class.add HashOptionsCounter
+
+        expect( described_class.send( :count, {}, {}, options ) ).to eq( { a: :b } )
+      end
+    end
+  end
 end
