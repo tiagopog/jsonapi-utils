@@ -65,7 +65,7 @@ gem 'jsonapi-utils', '~> 0.4.9'
 For Rails 5:
 
 ```ruby
-gem 'jsonapi-utils', '~> 0.7.0'
+gem 'jsonapi-utils', '~> 0.7.2'
 ```
 
 And then execute:
@@ -463,6 +463,9 @@ JSONAPI.configure do |config|
 
   config.top_level_meta_include_record_count = true
   config.top_level_meta_record_count_key = :record_count
+
+  config.top_level_meta_include_page_count = true
+  config.top_level_meta_page_count_key = :page_count
 
   config.use_text_errors = false
 

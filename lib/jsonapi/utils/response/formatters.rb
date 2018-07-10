@@ -190,7 +190,7 @@ module JSONAPI
           end
         end
 
-        # Apply some result options like pagination params and count to a collection response.
+        # Apply some result options like pagination params and record count to collection responses.
         #
         # @param records [ActiveRecord::Relation, Hash, Array<Hash>]
         #   Object to be formatted into JSON
@@ -211,7 +211,11 @@ module JSONAPI
             end
 
             if JSONAPI.configuration.top_level_meta_include_record_count
-              data[:record_count] = count_records(records, options)
+              data[:record_count] = record_count_for(records, options)
+            end
+
+            if JSONAPI.configuration.top_level_meta_include_page_count
+              data[:page_count] = page_count_for(data[:record_count])
             end
           end
         end

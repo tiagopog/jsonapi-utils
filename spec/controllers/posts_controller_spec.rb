@@ -351,7 +351,7 @@ describe PostsController, type: :controller do
     end
   end
 
-  describe 'GET #related_resource' do
+  describe 'GET #related_resources' do
     subject { 
       get :get_related_resources, params: params
     }

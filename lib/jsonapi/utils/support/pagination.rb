@@ -2,6 +2,8 @@ module JSONAPI
   module Utils
     module Support
       module Pagination
+        RecordCountError = Class.new(ArgumentError)
+
         # Apply proper pagination to the records.
         #
         # @param records [ActiveRecord::Relation, Array] collection of records
@@ -33,7 +35,23 @@ module JSONAPI
         # @api public
         def pagination_params(records, options)
           return {} unless JSONAPI.configuration.top_level_links_include_pagination
-          paginator.links_page_params(record_count: count_records(records, options))
+          paginator.links_page_params(record_count: record_count_for(records, options))
+        end
+
+        # Apply memoization to the record count result avoiding duplicate counts.
+        #
+        # @param records [ActiveRecord::Relation, Array] collection of records
+        #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
+        #
+        # @param options [Hash] JU's options
+        #   e.g.: { resource: V2::UserResource, count: 100 }
+        #
+        # @return [Integer]
+        #   e.g.: 42
+        #
+        # @api public
+        def record_count_for(records, options)
+          @record_count ||= count_records(records, options)
         end
 
         private
@@ -130,14 +148,66 @@ module JSONAPI
         #
         # @api private
         def count_records(records, options)
-          if options[:count].present?
-            options[:count]
-          elsif records.is_a?(Array)
-            records.length
-          else
-            records = apply_filter(records, options) if params[:filter].present?
-            records.except(:group, :order).count("DISTINCT #{records.table.name}.id")
+          return options[:count].to_i if options[:count].is_a?(Numeric)
+
+          case records
+          when ActiveRecord::Relation then count_records_from_database(records, options)
+          when Array                  then records.length
+          else raise RecordCountError, "Can't count records with the given options"
           end
+        end
+
+        # Count pages in order to build a proper pagination and to fill up the "page_count" response's member.
+        #
+        # @param record_count [Integer] number of records
+        #   e.g.: 42
+        #
+        # @return [Integer]
+        #   e.g 5
+        #
+        # @api private
+        def page_count_for(record_count)
+          return 0 if record_count.to_i < 1
+
+          size = (page_params['size'] || page_params['limit']).to_i
+          size = JSONAPI.configuration.default_page_size unless size.nonzero?
+          (record_count.to_f / size).ceil
+        end
+
+        # Count records from the datatase applying the given request filters
+        # and skipping things like eager loading, grouping and sorting.
+        #
+        # @param records [ActiveRecord::Relation, Array] collection of records
+        #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
+        #
+        # @param options [Hash] JU's options
+        #   e.g.: { resource: V2::UserResource, count: 100 }
+        #
+        # @return [Integer]
+        #   e.g.: 42
+        #
+        # @api private
+        def count_records_from_database(records, options)
+          records = apply_filter(records, options) if params[:filter].present?
+          count   = -> (records, except:) do
+            records.except(*except).count(distinct_count_sql(records))
+          end
+          count.(records, except: %i(includes group order))
+        rescue ActiveRecord::StatementInvalid
+          count.(records, except: %i(group order))
+        end
+
+        # Build the SQL distinct count with some reflection on the "records" object.
+        #
+        # @param records [ActiveRecord::Relation] collection of records
+        #   e.g.: User.all
+        #
+        # @return [String]
+        #   e.g.: "DISTINCT users.id"
+        #
+        # @api private
+        def distinct_count_sql(records)
+          "DISTINCT #{records.table_name}.#{records.primary_key}"
         end
       end
     end
