@@ -89,10 +89,10 @@ module JSONAPI
         # @option options [JSONAPI::Resource] resource: it tells the builder which resource
         #   class to be used rather than use an infered one (default behaviour)
         #
-        # @option options [JSONAPI::Resource] source_resource: it tells the builder that this response is from a related resource
+        # @option options [ActiveRecord::Base, JSONAPI::Resource] source: it tells the builder that this response is from a related resource
         #   and the result should be interpreted as a related resources response
         #
-        # @option options [String, Symbol] relationship_type: it tells that the builder which relationship the data is from
+        # @option options [String, Symbol] relationship: it tells that the builder which relationship the data is from
         #
         # @option options [Integer] count: if it's rendering a collection of resources, the default
         #   gem's counting method can be bypassed by the use of this options. It's shows then the total
