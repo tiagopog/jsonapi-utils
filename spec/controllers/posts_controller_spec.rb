@@ -352,21 +352,76 @@ describe PostsController, type: :controller do
   end
 
   describe 'GET #related_resources' do
-    subject { 
-      get :get_related_resources, params: params
-    }
+    shared_context 'related_resources request' do |use_resource:, explicit_relationship:|
+      subject { get :get_related_resources, params: params }
+      let (:params) { {
+        source: "users",
+        user_id: parent_id,
+        relationship: "posts",
+        use_resource: use_resource,
+        explicit_relationship: explicit_relationship
+      } }
+    end
 
-    let (:params) { { source: "users", user_id: parent_id, relationship: "posts" } }
+    context 'using model as source' do
+      include_context 'related_resources request', use_resource: false, explicit_relationship: false
 
-    it 'loads all posts of a user' do
-      expect(subject).to have_http_status :ok
-      expect(subject).to have_primary_data('posts')
-      expect(subject).to have_data_attributes(fields)
-      expect(subject).to have_relationships(relationships)
-      
-      # it should use nested url
-      expect(json.dig('links', 'first')).to include("/users/#{parent_id}/posts")
-      expect(json.dig('links', 'last')).to include("/users/#{parent_id}/posts")
+      it 'loads all posts of a user' do
+        expect(subject).to have_http_status :ok
+        expect(subject).to have_primary_data('posts')
+        expect(subject).to have_data_attributes(fields)
+        expect(subject).to have_relationships(relationships)
+
+        # it should use nested url
+        expect(json.dig('links', 'first')).to include("/users/#{parent_id}/posts")
+        expect(json.dig('links', 'last')).to include("/users/#{parent_id}/posts")
+      end
+    end
+
+    context 'using model as source and relationship from options' do
+      include_context 'related_resources request', use_resource: false, explicit_relationship: true
+
+      it 'loads all posts of a user' do
+        expect(subject).to have_http_status :ok
+        expect(subject).to have_primary_data('posts')
+        expect(subject).to have_data_attributes(fields)
+        expect(subject).to have_relationships(relationships)
+
+        # it should use nested url
+        expect(json.dig('links', 'first')).to include("/users/#{parent_id}/posts")
+        expect(json.dig('links', 'last')).to include("/users/#{parent_id}/posts")
+      end
+    end
+
+
+    context 'using resource as source' do
+      include_context 'related_resources request', use_resource: true, explicit_relationship: false
+
+      it 'loads all posts of a user' do
+        expect(subject).to have_http_status :ok
+        expect(subject).to have_primary_data('posts')
+        expect(subject).to have_data_attributes(fields)
+        expect(subject).to have_relationships(relationships)
+
+        # it should use nested url
+        expect(json.dig('links', 'first')).to include("/users/#{parent_id}/posts")
+        expect(json.dig('links', 'last')).to include("/users/#{parent_id}/posts")
+      end
+    end
+
+    context 'using resource as source and relationship from options' do
+      include_context 'related_resources request', use_resource: true, explicit_relationship: true
+
+      it 'loads all posts of a user' do
+        expect(subject).to have_http_status :ok
+        expect(subject).to have_primary_data('posts')
+        expect(subject).to have_data_attributes(fields)
+        expect(subject).to have_relationships(relationships)
+
+        # it should use nested url
+        expect(json.dig('links', 'first')).to include("/users/#{parent_id}/posts")
+        expect(json.dig('links', 'last')).to include("/users/#{parent_id}/posts")
+      end
     end
   end
 

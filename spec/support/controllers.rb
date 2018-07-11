@@ -7,7 +7,7 @@ class BaseController < ActionController::Base
 end
 
 class PostsController < BaseController
-  before_action :load_user, only: %i(index)
+  before_action :load_user, only: %i(index get_related_resources)
 
   # GET /users/:user_id/posts
   def index
@@ -53,12 +53,11 @@ class PostsController < BaseController
   def get_related_resources
     if params[:source] == "users" && params[:relationship] == "posts"
       # Example for custom method to fetch related resources
-      @user = User.find(params[:user_id])
       @posts = @user.posts
 
       jsonapi_render json: @posts, options: {
-        source_resource: UserResource.new(@user, context),
-        relationship_type: :posts
+        source: (params[:use_resource] == "true") ? UserResource.new(@user, context) : @user,
+        relationship: (params[:explicit_relationship] == "true") ? 'posts' : nil
       }
     else
       # handle other requests with default method

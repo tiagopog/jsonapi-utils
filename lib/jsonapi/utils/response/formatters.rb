@@ -56,7 +56,7 @@ module JSONAPI
         # @api public
         def jsonapi_format_errors(object)
           if active_record_obj?(object)
-            object = JSONAPI::Utils::Exceptions::ActiveRecord.new(object, @request.resource_klass, context) 
+            object = JSONAPI::Utils::Exceptions::ActiveRecord.new(object, @request.resource_klass, context)
           end
           errors = object.respond_to?(:errors) ? object.errors : object
           JSONAPI::Utils::Support::Error.sanitize(errors).uniq
@@ -107,17 +107,20 @@ module JSONAPI
           if object.respond_to?(:to_ary)
             records = build_collection(object, options)
 
-            if options[:source_resource].present? && options[:relationship_type].present?
+            if params[:source].present? && params[:relationship].present?
+              source_resource = turn_source_into_resource(options[:source], options)
+              relationship_type = get_source_relationship(options)
+
               results.add_result(JSONAPI::RelatedResourcesOperationResult.new(:ok,
-                                                          options[:source_resource],
-                                                          options[:relationship_type],
+                                                          source_resource,
+                                                          relationship_type,
                                                           records,
                                                           result_options(object, options)))
             else
               results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, records, result_options(object, options)))
             end
           else
-            record = turn_into_resource(object, options)         
+            record = turn_into_resource(object, options)
             results.add_result(JSONAPI::ResourceOperationResult.new(:ok, record))
           end
 
@@ -187,6 +190,34 @@ module JSONAPI
             options[:resource].to_s.constantize.new(record, context)
           else
             @request.resource_klass.new(record, context)
+          end
+        end
+
+        # Get JSONAPI::Resource for source object
+        # @option options [JSONAPI::Resource] resource: it tells which resource
+        #   class to be used rather than use an infered one (default behaviour)
+        # @return [JSONAPI::Resource]
+        #
+        # @api private
+        def turn_source_into_resource(source, options)
+          if source.kind_of? JSONAPI::Resource
+            source
+          else            
+            @request.source_klass.new(source, context)
+          end
+        end
+
+        # Get relationship type of source object
+        # @option options [Symbol] relationship: it tells which relationship
+        #   to be used rather than use an infered one (default behaviour)
+        # @return [Symbol]
+        #
+        # @api private
+        def get_source_relationship(options)
+          if options[:relationship].present?
+            options[:relationship].to_sym
+          else
+            params[:relationship].to_sym || @request.resource_klass._type
           end
         end
 
