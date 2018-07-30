@@ -60,10 +60,11 @@ def TestApp.draw_app_routes
   TestApp.routes.draw do
     jsonapi_resources :users do
       jsonapi_links :profile
-      jsonapi_resources :posts, shallow: true
+      jsonapi_related_resources :posts
     end
 
     jsonapi_resource :profile
+    jsonapi_resources :posts
 
     patch :update_with_error_on_base, to: 'posts#update_with_error_on_base'
 
