@@ -82,17 +82,15 @@ module JSONAPI
         # Build the full response document.
         #
         # @param object [ActiveRecord::Base, ActiveRecord::Relation, Hash, Array<Hash>]
-        #   Object to be formatted into JSON
-        #   e.g.: User.first, User.all, { data: { id: 1, first_name: 'Tiago' } },
-        #   [{ data: { id: 1, first_name: 'Tiago' } }]
+        #   Object to be formatted into JSON.
         #
-        # @option options [JSONAPI::Resource] resource: it tells the builder which resource
-        #   class to be used rather than use an infered one (default behaviour)
+        # @option options [JSONAPI::Resource] :resource which resource class to be used
+        #   rather than using the default one (inferred)
         #
-        # @option options [ActiveRecord::Base, JSONAPI::Resource] source: it tells the builder that this response is from a related resource
-        #   and the result should be interpreted as a related resources response
+        # @option options [ActiveRecord::Base, JSONAPI::Resource] :source source of related resource,
+        #   the result should be interpreted as a related resources response
         #
-        # @option options [String, Symbol] relationship: it tells that the builder which relationship the data is from
+        # @option options [String, Symbol] :relationship which relationship the data is from
         #
         # @option options [Integer] count: if it's rendering a collection of resources, the default
         #   gem's counting method can be bypassed by the use of this options. It's shows then the total
@@ -114,12 +112,31 @@ module JSONAPI
           @_response_document = create_response_document(results)
         end
 
-        # TODO: add YARD documentation
+        # Build the result operation object for collection actions.
+        #
+        # @param object [ActiveRecord::Relation, Array<Hash>]
+        #   Object to be formatted into JSON.
+        #
+        # @option options [JSONAPI::Resource] :resource which resource class to be used
+        #   rather than using the default one (inferred)
+        #
+        # @option options [ActiveRecord::Base, JSONAPI::Resource] :source source of related resource,
+        #   the result should be interpreted as a related resources response
+        #
+        # @option options [String, Symbol] :relationship which relationship the data is from
+        #
+        # @option options [Integer] count: if it's rendering a collection of resources, the default
+        #   gem's counting method can be bypassed by the use of this options. It's shows then the total
+        #   records resulting from that request and also calculates the pagination.
+        #
+        # @return [JSONAPI::ResourcesOperationResult, JSONAPI::RelatedResourcesOperationResult]
+        #
+        # @api private
         def build_collection_result(object, options)
           records        = build_collection(object, options)
           result_options = result_options(object, options)
 
-          if params[:source].present? && params[:relationship].present?
+          if options[:source].present? && related_resource_operation?
             source_resource   = turn_source_into_resource(options[:source])
             relationship_type = get_source_relationship(options)
             JSONAPI::RelatedResourcesOperationResult.new(:ok,
@@ -131,6 +148,15 @@ module JSONAPI
           else
             JSONAPI::ResourcesOperationResult.new(:ok, records, result_options)
           end
+        end
+
+        # Is this a request for related resources?
+        #
+        # @return [Boolean]
+        #
+        # @api private
+        def related_resource_operation?
+          params[:source].present? && params[:relationship].present?
         end
 
         # Apply a proper action setup for custom requests/actions.
@@ -211,17 +237,15 @@ module JSONAPI
         end
 
         # Get relationship type of source object
+        #
         # @option options [Symbol] relationship: it tells which relationship
         #   to be used rather than use an infered one (default behaviour)
+        #
         # @return [Symbol]
         #
         # @api private
         def get_source_relationship(options)
-          if options[:relationship].present?
-            options[:relationship].to_sym
-          else
-            params[:relationship].to_sym || @request.resource_klass._type
-          end
+          options[:relationship]&.to_sym || @request.resource_klass._type
         end
 
         # Apply some result options like pagination params and record count to collection responses.
