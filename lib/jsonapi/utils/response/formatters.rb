@@ -105,26 +105,32 @@ module JSONAPI
           results = JSONAPI::OperationResults.new
 
           if object.respond_to?(:to_ary)
-            records = build_collection(object, options)
-
-            if params[:source].present? && params[:relationship].present?
-              source_resource = turn_source_into_resource(options[:source], options)
-              relationship_type = get_source_relationship(options)
-
-              results.add_result(JSONAPI::RelatedResourcesOperationResult.new(:ok,
-                                                          source_resource,
-                                                          relationship_type,
-                                                          records,
-                                                          result_options(object, options)))
-            else
-              results.add_result(JSONAPI::ResourcesOperationResult.new(:ok, records, result_options(object, options)))
-            end
+            results.add_result(build_collection_result(object, options))
           else
             record = turn_into_resource(object, options)
             results.add_result(JSONAPI::ResourceOperationResult.new(:ok, record))
           end
 
           @_response_document = create_response_document(results)
+        end
+
+        # TODO: add YARD documentation
+        def build_collection_result(object, options)
+          records        = build_collection(object, options)
+          result_options = result_options(object, options)
+
+          if params[:source].present? && params[:relationship].present?
+            source_resource   = turn_source_into_resource(options[:source])
+            relationship_type = get_source_relationship(options)
+            JSONAPI::RelatedResourcesOperationResult.new(:ok,
+              source_resource,
+              relationship_type,
+              records,
+              result_options
+            )
+          else
+            JSONAPI::ResourcesOperationResult.new(:ok, records, result_options)
+          end
         end
 
         # Apply a proper action setup for custom requests/actions.
@@ -156,10 +162,9 @@ module JSONAPI
         #   Objects to be instantiated as JSONAPI::Resource ones.
         #   e.g.: User.all, [{ data: { id: 1, first_name: 'Tiago' } }]
         #
-        # @option options [JSONAPI::Resource] resource: it tells the buider which resource
-        #   class to be used rather than use an infered one (default behaviour)
+        # @option options [JSONAPI::Resource] :resource it resource class to be used rather than default one (infered)
         #
-        # @option options [Integer] count: if it's rendering a collection of resources, the default
+        # @option options [Integer] :count if it's rendering a collection of resources, the default
         #   gem's counting method can be bypassed by the use of this options. It's shows then the total
         #   records resulting from that request and also calculates the pagination.
         #
@@ -194,17 +199,15 @@ module JSONAPI
         end
 
         # Get JSONAPI::Resource for source object
-        # @option options [JSONAPI::Resource] resource: it tells which resource
-        #   class to be used rather than use an infered one (default behaviour)
+        #
+        # @param record [ActiveRecord::Base, JSONAPI::Resource]
+        #
         # @return [JSONAPI::Resource]
         #
         # @api private
-        def turn_source_into_resource(source, options)
-          if source.kind_of? JSONAPI::Resource
-            source
-          else            
-            @request.source_klass.new(source, context)
-          end
+        def turn_source_into_resource(record)
+          return record if record.kind_of?(JSONAPI::Resource)
+          @request.source_klass.new(record, context)
         end
 
         # Get relationship type of source object
