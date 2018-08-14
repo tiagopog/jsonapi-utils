@@ -77,7 +77,7 @@ describe JSONAPI::Utils::Support::Pagination do
     end
   end
 
-  describe '#count_pages_for' do
+  describe '#page_count_for' do
     shared_examples_for 'counting pages' do
       it 'returns the correct page count' do
         allow(subject).to receive(:page_params).and_return(page_params)

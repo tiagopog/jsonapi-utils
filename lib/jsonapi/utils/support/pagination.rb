@@ -62,16 +62,21 @@ module JSONAPI
         #
         # @api private
         def paginator
-          @paginator ||= paginator_klass.new(page_params)
+          @paginator ||= begin
+            paginator_klass = "#{resource_paginator_name}_paginator".classify.constantize
+            paginator_klass.new(page_params)
+          end
         end
 
-        # Return the paginator class to be used in the response's pagination.
+        # Return the name of the resource's paginator.
+        # Points to default paginator unless paginator explicitly set on resource.
         #
-        # @return [Paginator]
+        # @return [Symbol]
+        #   e.g.: :paged or :offset
         #
         # @api private
-        def paginator_klass
-          "#{JSONAPI.configuration.default_paginator}_paginator".classify.constantize
+        def resource_paginator_name
+          @resource_paginator_name ||= @request.resource_klass._paginator
         end
 
         # Check whether pagination should be applied to the response.
@@ -80,8 +85,7 @@ module JSONAPI
         #
         # @api private
         def apply_pagination?(options)
-          JSONAPI.configuration.default_paginator != :none &&
-            (options[:paginate].nil? || options[:paginate])
+          resource_paginator_name != :none && options[:paginate] != false
         end
 
         # Creates an instance of ActionController::Parameters for page params.
@@ -121,7 +125,7 @@ module JSONAPI
         #
         # @api private
         def pagination_range
-          case JSONAPI.configuration.default_paginator
+          case resource_paginator_name
           when :paged
             number = page_params['number'].to_i.nonzero? || 1
             size   = page_params['size'].to_i.nonzero?   || JSONAPI.configuration.default_page_size

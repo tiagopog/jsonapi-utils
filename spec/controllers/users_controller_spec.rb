@@ -101,7 +101,7 @@ describe UsersController, type: :controller do
     context 'with "page"' do
       context 'when using "paged" paginator' do
         before(:all) do
-          JSONAPI.configuration.default_paginator = :paged
+          UserResource.paginator :paged
         end
 
         context 'at the first page' do
@@ -183,7 +183,7 @@ describe UsersController, type: :controller do
 
       context 'when using "offset" paginator' do
         before(:all) do
-          JSONAPI.configuration.default_paginator = :offset
+          UserResource.paginator :offset
         end
 
         context 'at the first page' do
@@ -246,9 +246,9 @@ describe UsersController, type: :controller do
         end
       end
 
-      context 'when using custom global paginator' do
+      context 'when using custom paginator' do
         before(:all) do
-          JSONAPI.configuration.default_paginator = :custom_offset
+          UserResource.paginator :custom_offset
         end
 
         context 'at the first page' do
@@ -308,6 +308,24 @@ describe UsersController, type: :controller do
             expect(response).to have_meta_record_count(User.count)
             expect(json.dig('meta', 'page_count')).to eq(1)
           end
+        end
+      end
+
+      context 'without pagination' do
+        before(:all) do
+          UserResource.paginator :none
+        end
+
+        it 'returns all results without pagination links' do
+          get :index, params: { page: { offset: 0, limit: 2 } }
+
+          expect(response).to have_http_status :ok
+          expect(response).to have_primary_data('users')
+          expect(data.size).to eq(User.count)
+          expect(response).to have_meta_record_count(User.count)
+
+          expect(json.dig('meta', 'page_count')).to eq(1)
+          expect(json.dig('links')).not_to be_present
         end
       end
     end
