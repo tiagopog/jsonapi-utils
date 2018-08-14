@@ -164,4 +164,39 @@ describe JSONAPI::Utils::Support::Pagination do
       expect(subject.send(:distinct_count_sql, records)).to eq('DISTINCT foos.id')
     end
   end
+
+  describe '#apply_pagination?' do
+    shared_examples_for 'checking pagination' do
+      it 'returns whether to apply pagination' do
+        allow(subject).to receive(:resource_paginator_name).and_return(paginator)
+        expect(subject.send(:apply_pagination?, options)).to eq(apply)
+      end
+    end
+
+    context 'with paged paginator' do
+      let(:paginator) { :paged }
+      let(:apply) { true }
+      it_behaves_like 'checking pagination'
+    end
+
+    context 'without paginator' do
+      let(:paginator) { :none }
+      let(:apply) { false }
+      it_behaves_like 'checking pagination'
+    end
+
+    context 'when options[:paginate] is false' do
+      let(:paginator) { :paged }
+      let(:options) { { paginate: false } }
+      let(:apply) { false }
+      it_behaves_like 'checking pagination'
+    end
+
+    context 'when options[:paginate] is nil' do
+      let(:paginator) { :paged }
+      let(:options) { { paginate: nil } }
+      let(:apply) { true }
+      it_behaves_like 'checking pagination'
+    end
+  end
 end
