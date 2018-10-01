@@ -4,6 +4,15 @@ module JSONAPI
       module Pagination
         RecordCountError = Class.new(ArgumentError)
 
+        def include_pagination_links?
+          JSONAPI.configuration.default_paginator != :none &&
+            JSONAPI.configuration.top_level_links_include_pagination
+        end
+
+        def include_page_count?
+          JSONAPI.configuration.top_level_meta_include_page_count
+        end
+
         # Apply proper pagination to the records.
         #
         # @param records [ActiveRecord::Relation, Array] collection of records
@@ -31,6 +40,7 @@ module JSONAPI
         #
         # @return [Hash]
         #   e.g.: {"first"=>{"number"=>1, "size"=>2}, "next"=>{"number"=>2, "size"=>2}, "last"=>{"number"=>2, "size"=>2}}
+        #
         #
         # @api public
         def pagination_params(records, options)
