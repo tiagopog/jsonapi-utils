@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rails', ENV['RAILS_VERSION'] || '~> 5.1'
   spec.add_development_dependency 'sqlite3'
   spec.add_development_dependency 'rspec-rails', '~> 3.1'
-  spec.add_development_dependency 'factory_bot', '~> 4.11', '>= 4.11.1'
+  spec.add_development_dependency 'factory_bot', '~> 4.11.1', '>= 4.8.2'
   spec.add_development_dependency 'smart_rspec', '~> 0.1.6'
   spec.add_development_dependency 'pry', '~> 0.10.3'
   spec.add_development_dependency 'pry-byebug'
