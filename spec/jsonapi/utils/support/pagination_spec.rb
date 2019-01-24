@@ -6,7 +6,7 @@ describe JSONAPI::Utils::Support::Pagination do
   end
 
   before(:all) do
-    FactoryGirl.create_list(:user, 2)
+    FactoryBot.create_list(:user, 2)
   end
 
   let(:options) { {} }

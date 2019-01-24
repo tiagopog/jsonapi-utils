@@ -56,7 +56,7 @@ describe RecordCountTestController, type: :controller do
 
   before(:all) do
     TestApp.draw_record_count_test_routes
-    FactoryGirl.create_list(:user, 3, :with_posts)
+    FactoryBot.create_list(:user, 3, :with_posts)
   end
 
   describe 'explicit count' do

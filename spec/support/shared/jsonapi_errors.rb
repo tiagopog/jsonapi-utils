@@ -14,19 +14,13 @@ shared_examples_for 'JSON API invalid request' do
     context 'with "fields"' do
       context 'when resource does not exist' do
         it 'renders a 400 response' do
-          get :index, params: { fields: { foo: 'bar' } }
-          expect(response).to have_http_status :bad_request
-          expect(error['title']).to eq('Invalid resource')
-          expect(error['code']).to eq('101')
+          expect { get :index, params: { fields: { foo: 'bar' } } }.to raise_error(JSONAPI::Exceptions::InvalidResource)
         end
       end
 
       context 'when field does not exist' do
         it 'renders a 400 response' do
-          get :index, params: { fields: { users: 'bar' } }
-          expect(response).to have_http_status :bad_request
-          expect(error['title']).to eq('Invalid field')
-          expect(error['code']).to eq('104')
+          expect { get :index, params: { fields: { users: 'bar' } } }.to raise_error(JSONAPI::Exceptions::InvalidField)
         end
       end
     end
@@ -161,10 +155,7 @@ shared_examples_for 'JSON API invalid request' do
     context 'with "sort"' do
       context 'when sort criteria is invalid' do
         it 'renders a 400 response' do
-          get :index, params: { sort: 'foo' }
-          expect(response).to have_http_status :bad_request
-          expect(error['title']).to eq('Invalid sort criteria')
-          expect(error['code']).to eq('114')
+          expect { get :index, params: { sort: 'foo' } }.to raise_error(JSONAPI::Exceptions::InvalidSortCriteria)
         end
       end
     end
