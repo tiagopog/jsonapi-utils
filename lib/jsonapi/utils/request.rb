@@ -6,6 +6,11 @@ module JSONAPI::Utils
     def jsonapi_request_handling
       setup_request
       check_request
+    rescue JSONAPI::Exceptions::InvalidResource,
+           JSONAPI::Exceptions::InvalidField,
+           JSONAPI::Exceptions::InvalidInclude,
+           JSONAPI::Exceptions::InvalidSortCriteria => err
+      jsonapi_render_errors(json: err)
     end
 
     # Instantiate the request object.
