@@ -263,6 +263,8 @@ module JSONAPI
         # @api private
         def result_options(records, options)
           {}.tap do |data|
+	          data[:meta] = options.fetch(:meta, {})
+
             if JSONAPI.configuration.default_paginator != :none &&
               JSONAPI.configuration.top_level_links_include_pagination
               data[:pagination_params] = pagination_params(records, options)
