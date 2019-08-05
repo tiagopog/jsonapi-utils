@@ -263,7 +263,7 @@ module JSONAPI
         # @api private
         def result_options(records, options)
           {}.tap do |data|
-            if JSONAPI.configuration.default_paginator != :none &&
+            if apply_pagination?(options) &&
               JSONAPI.configuration.top_level_links_include_pagination
               data[:pagination_params] = pagination_params(records, options)
             end
@@ -273,7 +273,7 @@ module JSONAPI
             end
 
             if JSONAPI.configuration.top_level_meta_include_page_count
-              data[:page_count] = page_count_for(data[:record_count])
+              data[:page_count] = apply_pagination?(options) ? page_count_for(data[:record_count]) : 1
             end
           end
         end

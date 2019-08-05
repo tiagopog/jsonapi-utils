@@ -14,7 +14,7 @@ class PostsController < BaseController
     jsonapi_render json: @user.posts, options: { count: 100 }
   end
 
-  # GET /users/:user_id//index_with_hash
+  # GET /users/:user_id/index_with_hash
   def index_with_hash
     @posts = { data: [
       { id: 1, title: 'Lorem Ipsum', body: 'Body 4' },

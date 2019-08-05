@@ -79,9 +79,9 @@ describe PostsController, type: :controller do
         end
       end
 
-      context 'when using custom global paginator' do
+      context 'when using custom paginator' do
         before(:all) do
-          JSONAPI.configuration.default_paginator = :custom_offset
+          PostResource.paginator :custom_offset
         end
 
         let(:params) { { user_id: parent_id, page: { offset: offset, limit: limit } } }
