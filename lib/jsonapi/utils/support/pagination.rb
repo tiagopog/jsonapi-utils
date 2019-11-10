@@ -2,6 +2,8 @@ module JSONAPI
   module Utils
     module Support
       module Pagination
+        autoload :RecordCounter, 'jsonapi/utils/support/pagination/record_counter'
+
         RecordCountError = Class.new(ArgumentError)
 
         # Apply proper pagination to the records.
@@ -150,11 +152,8 @@ module JSONAPI
         def count_records(records, options)
           return options[:count].to_i if options[:count].is_a?(Numeric)
 
-          case records
-          when ActiveRecord::Relation then count_records_from_database(records, options)
-          when Array                  then records.length
-          else raise RecordCountError, "Can't count records with the given options"
-          end
+          records = apply_filter(records, options) if params[:filter].present?
+          RecordCounter.count( records, params, options )
         end
 
         # Count pages in order to build a proper pagination and to fill up the "page_count" response's member.
@@ -170,44 +169,8 @@ module JSONAPI
           return 0 if record_count.to_i < 1
 
           size = (page_params['size'] || page_params['limit']).to_i
-          size = JSONAPI.configuration.default_page_size unless size.nonzero?
+          size = JSONAPI.configuration.default_page_size if size.zero?
           (record_count.to_f / size).ceil
-        end
-
-        # Count records from the datatase applying the given request filters
-        # and skipping things like eager loading, grouping and sorting.
-        #
-        # @param records [ActiveRecord::Relation, Array] collection of records
-        #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
-        #
-        # @param options [Hash] JU's options
-        #   e.g.: { resource: V2::UserResource, count: 100 }
-        #
-        # @return [Integer]
-        #   e.g.: 42
-        #
-        # @api private
-        def count_records_from_database(records, options)
-          records = apply_filter(records, options) if params[:filter].present?
-          count   = -> (records, except:) do
-            records.except(*except).count(distinct_count_sql(records))
-          end
-          count.(records, except: %i(includes group order))
-        rescue ActiveRecord::StatementInvalid
-          count.(records, except: %i(group order))
-        end
-
-        # Build the SQL distinct count with some reflection on the "records" object.
-        #
-        # @param records [ActiveRecord::Relation] collection of records
-        #   e.g.: User.all
-        #
-        # @return [String]
-        #   e.g.: "DISTINCT users.id"
-        #
-        # @api private
-        def distinct_count_sql(records)
-          "DISTINCT #{records.table_name}.#{records.primary_key}"
         end
       end
     end

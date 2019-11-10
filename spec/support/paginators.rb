@@ -5,3 +5,32 @@ class CustomOffsetPaginator < OffsetPaginator
     offset..offset + limit - 1
   end
 end
+
+
+class BogusCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCounter
+  counts "junk"
+end
+
+class StringCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCounter
+  counts "string"
+
+  def count
+    @records.length
+  end
+end
+
+class HashParamCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCounter
+  counts "Hash"
+
+  def count
+    @params
+  end
+end
+
+class HashOptionsCounter < JSONAPI::Utils::Support::Pagination::RecordCounter::BaseCounter
+  counts "Hash"
+
+  def count
+    @options
+  end
+end
