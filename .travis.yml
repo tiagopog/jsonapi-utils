@@ -11,3 +11,6 @@ rvm:
   - 2.6
   - 2.7
 script: bundle exec rspec spec
+
+before_install:
+  - gem install bundler
