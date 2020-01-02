@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'jsonapi-resources', '0.9.8'
 
-  spec.add_development_dependency 'bundler', '~> 1.10'
+  spec.add_development_dependency 'bundler', '~> 1.10', '< 2.2'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rails', ENV['RAILS_VERSION'] || '~> 5.2.4'
   spec.add_development_dependency 'sqlite3', '~> 1.4'
