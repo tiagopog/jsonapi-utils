@@ -1,6 +1,4 @@
 language: ruby
-sudo: false
-bundler_args: --without development
 env:
   matrix:
     - "RAILS_VERSION=5.2"
