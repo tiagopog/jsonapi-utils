@@ -172,7 +172,7 @@ describe PostsController, type: :controller do
         expect(subject).to have_http_status :ok
         expect(subject).to have_primary_data('posts')
         expect(subject).to have_data_attributes(fields)
-        expect(subject).to have_relationships(relationships)
+        expect(json).to_not have_key('relationships')
         expect(data.dig('attributes', 'title')).to eq('Lorem ipsum')
       end
     end
