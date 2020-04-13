@@ -29,7 +29,6 @@ end
 # Feature Tests
 ##
 
-
 describe PageCountTestController, type: :controller do
   include_context 'JSON API headers'
 
