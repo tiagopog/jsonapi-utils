@@ -120,8 +120,8 @@ module JSONAPI
         # @option options [JSONAPI::Resource] :resource which resource class to be used
         #   rather than using the default one (inferred)
         #
-        # @option options [ActiveRecord::Base, JSONAPI::Resource] :source source of related resource,
-        #   the result should be interpreted as a related resources response
+        # @option options [ActiveRecord::Base, JSONAPI::Resource] :source parent model/resource
+        #   of the related resource
         #
         # @option options [String, Symbol] :relationship which relationship the data is from
         #
@@ -136,15 +136,10 @@ module JSONAPI
           records        = build_collection(object, options)
           result_options = result_options(object, options)
 
-          if options[:source].present? && related_resource_operation?
+          if related_resource_operation?(options)
             source_resource   = turn_source_into_resource(options[:source])
             relationship_type = get_source_relationship(options)
-            JSONAPI::RelatedResourcesOperationResult.new(:ok,
-              source_resource,
-              relationship_type,
-              records,
-              result_options
-            )
+            JSONAPI::RelatedResourcesOperationResult.new(:ok, source_resource, relationship_type, records, result_options)
           else
             JSONAPI::ResourcesOperationResult.new(:ok, records, result_options)
           end
@@ -152,11 +147,24 @@ module JSONAPI
 
         # Is this a request for related resources?
         #
+        # In order to answer that it needs to check for some {options}
+        # controller params like {params[:source]} and {params[:relationship]}.
+        #
+        # @option options [Boolean] :related when true, jsonapi-utils infers the parent and
+        #   related resources from controller's {params} values.
+        #
+        # @option options [ActiveRecord::Base, JSONAPI::Resource] :source parent model/resource
+        #   of the related resource
+        #
+        # @option options [String, Symbol] :relationship which relationship the data is from
+        #
         # @return [Boolean]
         #
         # @api private
-        def related_resource_operation?
-          params[:source].present? && params[:relationship].present?
+        def related_resource_operation?(options)
+          (options[:related] || options[:source].present?) &&
+            params[:source].present? &&
+            params[:relationship].present?
         end
 
         # Apply a proper action setup for custom requests/actions.
@@ -263,8 +271,7 @@ module JSONAPI
         # @api private
         def result_options(records, options)
           {}.tap do |data|
-            if JSONAPI.configuration.default_paginator != :none &&
-              JSONAPI.configuration.top_level_links_include_pagination
+            if include_pagination_links?
               data[:pagination_params] = pagination_params(records, options)
             end
 
@@ -272,7 +279,7 @@ module JSONAPI
               data[:record_count] = record_count_for(records, options)
             end
 
-            if JSONAPI.configuration.top_level_meta_include_page_count
+            if include_page_count?
               data[:page_count] = page_count_for(data[:record_count])
             end
           end

@@ -4,20 +4,40 @@ module JSONAPI
       module Pagination
         RecordCountError = Class.new(ArgumentError)
 
+        # Check whether pagination links should be included.
+        #
+        # @api public
+        # @return [Boolean]
+        def include_pagination_links?
+          JSONAPI.configuration.default_paginator != :none &&
+            JSONAPI.configuration.top_level_links_include_pagination
+        end
+
+        # Check whether pagination's page count should be included
+        # on the "meta" key.
+        #
+        # @api public
+        # @return [Boolean]
+        def include_page_count?
+          JSONAPI.configuration.top_level_meta_include_page_count
+        end
+
         # Apply proper pagination to the records.
         #
         # @param records [ActiveRecord::Relation, Array] collection of records
         #   e.g.: User.all or [{ id: 1, name: 'Tiago' }, { id: 2, name: 'Doug' }]
         #
-        # @param options [Hash] JU's options
+        # @param options [Hash] JSONAPI::Utils' options
         #   e.g.: { resource: V2::UserResource, count: 100 }
         #
         # @return [ActiveRecord::Relation, Array]
         #
         # @api public
         def apply_pagination(records, options = {})
-          return records unless apply_pagination?(options)
-          records.is_a?(Array) ? records[paginate_with(:range)] : paginate_with(:paginator).apply(records, nil)
+          if !apply_pagination?(options) then records
+          elsif records.is_a?(Array)     then records[paginate_with(:range)]
+          else paginate_with(:paginator).apply(records, nil)
+          end
         end
 
         # Mount pagination params for JSONAPI::ResourcesOperationResult.
@@ -32,9 +52,10 @@ module JSONAPI
         # @return [Hash]
         #   e.g.: {"first"=>{"number"=>1, "size"=>2}, "next"=>{"number"=>2, "size"=>2}, "last"=>{"number"=>2, "size"=>2}}
         #
+        #
         # @api public
         def pagination_params(records, options)
-          return {} unless JSONAPI.configuration.top_level_links_include_pagination
+          return {} unless include_pagination_links?
           paginator.links_page_params(record_count: record_count_for(records, options))
         end
 

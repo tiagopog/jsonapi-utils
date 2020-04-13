@@ -19,10 +19,10 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_runtime_dependency 'jsonapi-resources', '0.9.8'
+  spec.add_runtime_dependency 'jsonapi-resources', '0.9.10'
 
   spec.add_development_dependency 'bundler', '~> 2.0'
-  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'rake', '~> 12.3.3'
   spec.add_development_dependency 'rails', ENV['RAILS_VERSION'] || '~> 5.2.4'
   spec.add_development_dependency 'sqlite3', '~> 1.4'
   spec.add_development_dependency 'rspec-rails', '~> 3.9.0'
