@@ -1,10 +1,14 @@
 language: ruby
-sudo: false
 env:
-  - 'RAILS_VERSION=5.1.2'
+  matrix:
+    - "RAILS_VERSION=5.2"
+    - "RAILS_VERSION=6.0"
 rvm:
-  - 2.3.3
-matrix:
-before_install: gem install bundler -v 1.13.6
+  - 2.4
+  - 2.5
+  - 2.6
+  - 2.7
 script: bundle exec rspec spec
 
+before_install:
+  - gem install bundler
