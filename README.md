@@ -225,12 +225,12 @@ class CustomPaginator < JSONAPI::Paginator
   end
 ```
 
-And then it can be either set at the resource class level (e.g. UserResource.paginator :custom_paginator) or via config initializer:
+And then it can be either set at the resource class level (e.g. UserResource.paginator :custom) or via config initializer:
 
 ```ruby
 # config/initializers/jsonapi_resources.rb
 JSONAPI.configure do |config|
-  config.default_paginator = :custom_paginator
+  config.default_paginator = :custom
 end
 ```
 
