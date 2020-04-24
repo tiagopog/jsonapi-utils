@@ -1,21 +1,9 @@
-require 'factory_girl'
+require 'factory_bot'
+require_relative './models'
 
-FactoryGirl.define do
-  factory :category, class: Category do
-    sequence(:title) { |n| "Title for Category #{n}" }
-  end
+# require 'byebug'; byebug
 
-  factory :post, class: Post do
-    association :author, factory: :user
-    category
-
-    sequence(:id) { |n| n }
-    sequence(:title) { |n| "Title for Post #{n}" }
-    sequence(:body) { |n| "Body for Post #{n}" }
-    content_type :article
-    hidden_field 'It\'s a hidden field!'
-  end
-
+FactoryBot.define do
   factory :user, class: User do
     sequence(:id) { |n| n }
     sequence(:first_name) { |n| "User##{n}" }
@@ -24,7 +12,7 @@ FactoryGirl.define do
     after(:create) { |user| create(:profile, user: user) }
 
     trait :with_posts do
-      transient { post_count 3 }
+      transient { post_count { 3 } }
       after(:create) do |user, e|
         create_list(:post, e.post_count, author: user)
       end
@@ -36,5 +24,20 @@ FactoryGirl.define do
     sequence(:id)       { |n| n }
     sequence(:nickname) { |n| "Nickname##{n}" }
     sequence(:location) { |n| "Location##{n}" }
+  end
+
+  factory :post, class: Post do
+    association :author, factory: :user
+    category
+
+    sequence(:id) { |n| n }
+    sequence(:title) { |n| "Title for Post #{n}" }
+    sequence(:body) { |n| "Body for Post #{n}" }
+    content_type { :article }
+    hidden_field { 'It\'s a hidden field!' }
+  end
+
+  factory :category, class: Category do
+    sequence(:title) { |n| "Title for Category #{n}" }
   end
 end

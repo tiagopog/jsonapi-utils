@@ -4,7 +4,7 @@ describe PostsController, type: :controller do
   include_context 'JSON API headers'
 
   before(:all) do
-    @post = FactoryGirl.create_list(:post, 3).first
+    @post = FactoryBot.create_list(:post, 3).first
   end
 
   before(:each) do

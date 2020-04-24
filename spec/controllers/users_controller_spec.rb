@@ -4,7 +4,7 @@ describe UsersController, type: :controller do
   include_context 'JSON API headers'
 
   before(:all) do
-    @user = FactoryGirl.create_list(:user, 3, :with_posts).first
+    @user = FactoryBot.create_list(:user, 3, :with_posts).first
   end
 
   before(:each) do
