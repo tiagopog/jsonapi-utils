@@ -15,7 +15,7 @@ module JSONAPI
         # @option options [JSONAPI::Resource] resource: it tells the formatter which resource
         #   class to be used rather than use an infered one (default behaviour)
         #
-        # @option options [JSONAPI::Resource] source_resource: it tells the formatter that this response is from a related resource
+        # @option options [JSONAPI::Resource] source: it tells the formatter that this response is from a related resource
         #   and the result should be interpreted as a related resources response
         #
         # @option options [String, Symbol] relationship_type: it tells that the formatter which relationship the data is from
@@ -32,7 +32,7 @@ module JSONAPI
         # @api public
         def jsonapi_format(object, options = {})
           if object.is_a?(Hash)
-            hash    = object.with_indifferent_access
+            hash = object.with_indifferent_access
             object = hash_to_active_record(hash[:data], options[:model])
           end
           fix_custom_request_options(object)
@@ -133,13 +133,20 @@ module JSONAPI
         #
         # @api private
         def build_collection_result(object, options)
-          records        = build_collection(object, options)
+          records = build_collection(object, options)
           result_options = result_options(object, options)
 
           if related_resource_operation?(options)
-            source_resource   = turn_source_into_resource(options[:source])
+            source_resource = turn_source_into_resource(options[:source])
             relationship_type = get_source_relationship(options)
-            JSONAPI::RelatedResourcesOperationResult.new(:ok, source_resource, relationship_type, records, result_options)
+
+            JSONAPI::RelatedResourcesOperationResult.new(
+              :ok,
+              source_resource,
+              relationship_type,
+              records,
+              result_options
+            )
           else
             JSONAPI::ResourcesOperationResult.new(:ok, records, result_options)
           end
