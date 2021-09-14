@@ -9,6 +9,11 @@ class PostResource < JSONAPI::Resource
   has_one :category
 end
 
+class AuthorResource < JSONAPI::Resource
+  model_name 'Person'
+  has_many :posts
+end
+
 module V2
   class PostResource < ::PostResource; end
 end
