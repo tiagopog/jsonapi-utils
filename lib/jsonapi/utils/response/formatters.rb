@@ -134,6 +134,12 @@ module JSONAPI
         # @api private
         def build_collection_result(object, options)
           records = build_collection(object, options)
+
+          unless options.key?(:count)
+            limit = page_params['size'].to_i.nonzero? || JSONAPI.configuration.default_page_size
+            options[:count] = records.size if records.size < limit
+          end
+
           result_options = result_options(object, options)
 
           if related_resource_operation?(options)
